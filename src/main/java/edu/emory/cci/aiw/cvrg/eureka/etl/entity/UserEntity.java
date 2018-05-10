@@ -65,8 +65,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 @Entity
 @Table(name = "users")
-@Inheritance(strategy = InheritanceType.JOINED)
-public class UserEntity implements org.eurekaclinical.standardapis.entity.UserEntity<RoleEntity>, UserEntityVisitable {
+public class UserEntity implements org.eurekaclinical.standardapis.entity.UserEntity<RoleEntity> {
 
 	/**
 	 * The user's unique identifier.
@@ -145,11 +144,6 @@ public class UserEntity implements org.eurekaclinical.standardapis.entity.UserEn
 		return ToStringBuilder.reflectionToString(this);
 	}
         
-	@Override
-	public void accept(UserEntityVisitor userEntityVisitor) {
-		userEntityVisitor.visit(this);
-	}        
-
 	@Override
 	public void addRole(RoleEntity role) {
 		this.roles.add(role);
