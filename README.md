@@ -1,4 +1,4 @@
-# Eureka! Protempa ETL
+# Eureka! Clinical Protempa Service
 [Georgia Clinical and Translational Science Alliance (Georgia CTSA)](http://www.georgiactsa.org), [Emory University](http://www.emory.edu), Atlanta, GA
 
 ## What does it do?
