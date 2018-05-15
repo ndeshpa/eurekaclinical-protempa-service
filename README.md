@@ -4,17 +4,10 @@
 ## What does it do?
 It provides backend services for managing phenotypes, cohorts and running phenotyping jobs.
 
-## Version 3.0 development series
+## Version 1.0 development series
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service)
 
-Version 3 will refactor the `eureka-services` and `eureka-protempa-etl` modules to migrate from a layer architecture to a microservice architecture `eurekaclinical-analytics-service` and `eurekaclinical-protempa-service`. It also will improve performance.
-
-## Version history
-### Version 2.5.2
-As compared with version 1, we refactored and renamed some of the REST APIs.
-
-### Version 1.9
-The initial version of the Eureka backend is implemented as a layer architecture, in which the webapp makes all REST calls to `eureka-services`, and `eureka-services` forwards some calls to `eureka-protempa-etl`.
+This service is a refactoring of the eureka-protempa-etl module of the eureka project. It replaces the eureka-protempa-etl module. The current functionality is the same as in the last release of the eureka project.
 
 ## Build requirements
 * [Oracle Java JDK 8](http://www.oracle.com/technetwork/java/javase/overview/index.html)
