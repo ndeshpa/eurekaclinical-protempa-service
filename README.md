@@ -24,7 +24,7 @@ This service is a refactoring of the eureka-protempa-etl module of the eureka pr
   * The [cas-server](https://github.com/eurekaclinical/cas) war
   
 ## REST APIs
-Are all accessed via the `eureka-services` module and are otherwise internal to Eureka! Clinical Analytics.
+Are all accessed via the `eureka-analytics-service` module and are otherwise internal to Eureka! Clinical Analytics.
   
 ## Building it
 See the parent project's [README.md](https://github.com/eurekaclinical/eureka/blob/master/README.md).
