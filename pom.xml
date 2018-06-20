@@ -39,15 +39,15 @@
     </properties>
 	
     <scm>
-        <developerConnection>scm:git:https://github.com/eurekaclinical/eureka.git</developerConnection>
-        <connection>scm:git:https://github.com/eurekaclinical/eureka.git</connection>
-        <url>https://github.com/eurekaclinical/eureka.git</url>
+        <developerConnection>scm:git:https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</developerConnection>
+        <connection>scm:git:https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</connection>
+        <url>https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</url>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/eurekaclinical/eureka/issues</url>
+        <url>https://github.com/eurekaclinical/eurekaclinical-protempa-service/issues</url>
     </issueManagement>
 	
     <licenses>
