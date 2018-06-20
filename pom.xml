@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>3-Alpha-2</version>
+        <version>3</version>
     </parent>
 	
     <properties>
@@ -25,9 +25,11 @@
         <tomcat.httpsPort>8443</tomcat.httpsPort>        
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <commons-codec-version>1.4</commons-codec-version>
-        <eurekaclinical-ontology-version>2.0</eurekaclinical-ontology-version>
+        <eurekaclinical-ontology-version>2.0.2</eurekaclinical-ontology-version>
         <aiw-i2b2-etl-version>3.0</aiw-i2b2-etl-version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
+        <cas-mock-version>2.1</cas-mock-version>
+        <tomcat.httpsPort>8443</tomcat.httpsPort>
     </properties>
 	
     <scm>
@@ -188,11 +190,6 @@
     <profiles>
         <profile>
             <id>tomcat</id>
-            <properties>
-                <cas-mock-version>2.1-Beta-1</cas-mock-version>
-                <tomcat.httpsPort>8443</tomcat.httpsPort>
-            </properties>
-
             <build>
                 <plugins>
                     <plugin>
