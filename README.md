@@ -6,6 +6,9 @@ It provides backend services for managing phenotypes, cohorts and running phenot
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service)
 
+## Version 1.0.1
+The initial release inadvertently included pre-release versions of various dependencies. This release corrects that. No behavior changes are anticipated.
+
 ## Version 1.0
 This service is a refactoring of the eureka-protempa-etl module of the eureka project. It replaces the eureka-protempa-etl module. The current functionality is the same as in the last release of the eureka project.
 

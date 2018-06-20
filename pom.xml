@@ -35,6 +35,7 @@
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <cas-mock-version>2.1</cas-mock-version>
         <poi-version>3.9</poi-version>
+        <javautil-version>4.0</javautil-version>
         <tomcat.httpsPort>8443</tomcat.httpsPort>
     </properties>
 	
@@ -446,42 +447,42 @@
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>aiw-i2b2-etl</artifactId>
-            <version>3.0</version>
+            <version>${aiw-i2b2-etl-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>aiw-neo4j-etl</artifactId>
-            <version>3.0</version>
+            <version>${aiw-neo4j-etl-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-bconfigs-ini4j-ini</artifactId>
-            <version>4.0</version>
+            <version>${protempa-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-tsb-umls</artifactId>
-            <version>4.0</version>
+            <version>${protempa-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-dsb-relationaldb</artifactId>
-            <version>4.0</version>
+            <version>${protempa-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-dsb-file</artifactId>
-            <version>4.0</version>
+            <version>${protempa-version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>3.9</version>
+            <version>${poi-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>javautil</artifactId>
-            <version>4.0</version>
+            <version>${javautil-version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -505,17 +506,17 @@
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>eureka-client</artifactId>
-            <version>3.0</version>
+            <version>${eureka-client-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>eurekaclinical-patient-set-client</artifactId>
-            <version>1.0</version>
+            <version>${eurekaclinical-patient-set-client-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>eurekaclinical-protempa-client</artifactId>
-            <version>1.0-Alpha-1</version>
+            <version>${eurekaclinical-protempa-client-version}</version>
         </dependency>
     </dependencies>
 </project>
