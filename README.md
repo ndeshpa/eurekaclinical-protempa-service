@@ -6,6 +6,9 @@ It provides backend services for managing phenotypes, cohorts and running phenot
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service)
 
+## Version 1.0.2
+Avoid NullPointerException when writing nulls to a delimited file.
+
 ## Version 1.0.1
 The initial release inadvertently included pre-release versions of various dependencies. This release corrects that. No behavior changes are anticipated.
 
