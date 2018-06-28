@@ -10,6 +10,7 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 * Add tabular destination setting that controls quoting columns.
 * Allow writing the LocalUniqueId id and numericalId fields to tabular files.
 * Honor start and finish formatters that are specified for tabular writers.
+* Fix writing of inequality number values to tabular files.
 * Allow writing just the inequality operator of an inequality number value to tabular files.
 * Allow writing just numbers or just nominals to tabular files.
 
