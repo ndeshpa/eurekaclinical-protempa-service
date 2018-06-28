@@ -31,12 +31,13 @@
         <eureka-client-version>3.1</eureka-client-version>
         <aiw-i2b2-etl-version>3.0.1</aiw-i2b2-etl-version>
         <aiw-neo4j-etl-version>3.0</aiw-neo4j-etl-version>
-        <protempa-version>4.0.1</protempa-version>
+        <protempa-version>4.1</protempa-version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <cas-mock-version>2.1</cas-mock-version>
         <poi-version>3.9</poi-version>
-        <javautil-version>4.0.1</javautil-version>
+        <javautil-version>4.1</javautil-version>
         <tomcat.httpsPort>8443</tomcat.httpsPort>
+        <datastore-version>2.0.1</datastore-version>
     </properties>
 	
     <scm>
@@ -517,6 +518,11 @@
             <groupId>org.eurekaclinical</groupId>
             <artifactId>eurekaclinical-protempa-client</artifactId>
             <version>${eurekaclinical-protempa-client-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eurekaclinical</groupId>
+            <artifactId>datastore</artifactId>
+            <version>${datastore-version}</version>
         </dependency>
     </dependencies>
 </project>
