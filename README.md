@@ -7,7 +7,8 @@ It provides backend services for managing phenotypes, cohorts and running phenot
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service)
 
 ## Version 1.1
-Add tabular destination setting that controls quoting columns.
+* Add tabular destination setting that controls quoting columns.
+* Allow writing the LocalUniqueId id and numericalId fields to tabular files.
 
 ## Version 1.0.2
 Avoid NullPointerException when writing nulls to a delimited file.
