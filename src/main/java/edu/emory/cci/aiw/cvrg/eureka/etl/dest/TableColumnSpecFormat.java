@@ -197,6 +197,18 @@ public class TableColumnSpecFormat extends Format {
                             propertyName = null;
                             outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
                             break;
+                        case "inequalityValue":
+                            propertyName = null;
+                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                            break;
+                        case "numberValue":
+                            propertyName = null;
+                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, true, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                            break;
+                        case "nominalValue":
+                            propertyName = null;
+                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                            break;
                         default:
                             Map<String, String> propertyHeadings = new HashMap<>();
                             propertyHeadings.put(propertyName, this.columnName);
