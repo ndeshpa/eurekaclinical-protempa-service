@@ -31,7 +31,7 @@
         <eureka-client-version>3.1</eureka-client-version>
         <aiw-i2b2-etl-version>3.0.1</aiw-i2b2-etl-version>
         <aiw-neo4j-etl-version>3.0</aiw-neo4j-etl-version>
-        <protempa-version>4.2.1</protempa-version>
+        <protempa-version>4.3.2</protempa-version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <cas-mock-version>2.1</cas-mock-version>
         <poi-version>3.9</poi-version>
