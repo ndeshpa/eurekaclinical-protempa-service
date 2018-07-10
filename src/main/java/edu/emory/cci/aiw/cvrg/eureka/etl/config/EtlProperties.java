@@ -58,112 +58,116 @@ import org.eurekaclinical.standardapis.props.CasJerseyEurekaClinicalProperties;
  */
 @Singleton
 public class EtlProperties extends CasJerseyEurekaClinicalProperties {
-	
-	public EtlProperties() {
-		super("/etc/eureka");
-	}
-	
-	/**
-	 * Gets the default list of system propositions for the application.
-	 *
-	 * @return The default list of system propositions.
-	 */
-	public List<String> getDefaultSystemPropositions() {
-		return this.getStringListValue("eureka.services.defaultprops",
-				new ArrayList<>());
-	}
-	
-	/**
-	 * Gets the size of the thread pool created to run Protempa tasks.
-	 *
-	 * @return The size of the thread pool.
-	 */
-	public int getTaskThreadPoolSize() {
-		return this.getIntValue("eureka.etl.threadpool.size", 4);
-	}
-	
-	public File getSourceConfigDirectory() throws IOException {
-		File file = new File(getConfigDir(), "sourceconfig");
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-	
-	public File getDestinationConfigDirectory() throws IOException {
-		File file = new File(getConfigDir(), "destconfig");
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-	
-	public File getTempUploadedDirectory() throws IOException {
-		File file = new File(getConfigDir(), "etluploadedtemp");
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-	
-	public File tempUploadedDirectory(String sourceId, String fileTypeId) throws IOException {
-		File file = new File(new File(getTempUploadedDirectory(), 
-				ToConfigFile.fromSourceConfigId(sourceId)), fileTypeId);
-		Files.createDirectories(file.toPath());
-		return file;
-	}
 
-	public File getUploadedDirectory() throws IOException {
-		File file = new File(getConfigDir(), "etluploaded");
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-	
-	public File uploadedDirectory(String sourceId, String fileTypeId) throws IOException {
-		File file = new File(new File(getUploadedDirectory(), 
-				ToConfigFile.fromSourceConfigId(sourceId)), fileTypeId);
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-	
-	public File destinationConfigFile(String destId) throws IOException {
-		return new File(getDestinationConfigDirectory(),
-				ToConfigFile.fromDestId(destId));
-	}
-	
-	public File getOutputDirectory() throws IOException {
-		File file = new File(getConfigDir(), "etloutput");
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-	
-	public File outputDirectory(String destId, String fileTypeId) throws IOException {
-		File file = new File(new File(getOutputDirectory(), 
-				ToConfigFile.fromDestId(destId)), fileTypeId);
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-	
-	public File outputFileDirectory(String destId) throws IOException {
-		File file = new File(new File(getOutputDirectory(), 
-				ToConfigFile.fromDestId(destId)), "outputfile");
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-	
-	public File outputTempDirectory(String destId) throws IOException {
-		File file = new File(new File(getOutputDirectory(), 
-				ToConfigFile.fromDestId(destId)), "outputtemp");
-		Files.createDirectories(file.toPath());
-		return file;
-	}
-
-	@Override
-	public String getProxyCallbackServer() {
-		return this.getValue("eureka.etl.callbackserver");
-	}
-
-    public int getSearchLimit() {
-        return this.getIntValue("eureka.jstree.searchlimit",200);
+    public EtlProperties() {
+        super("/etc/eureka");
     }
 
-	@Override
-	public String getUrl() {
-		return this.getValue("eureka.etl.url");
-	}
-	
+    /**
+     * Gets the default list of system propositions for the application.
+     *
+     * @return The default list of system propositions.
+     */
+    public List<String> getDefaultSystemPropositions() {
+        return this.getStringListValue("eureka.services.defaultprops",
+                new ArrayList<>());
+    }
+
+    /**
+     * Gets the size of the thread pool created to run Protempa tasks.
+     *
+     * @return The size of the thread pool.
+     */
+    public int getTaskThreadPoolSize() {
+        return this.getIntValue("eureka.etl.threadpool.size", 4);
+    }
+    
+    public String getDatabaseDirectory() {
+        return getValue("eurekaclinical.protempaservice.database.directory");
+    }
+
+    public File getSourceConfigDirectory() throws IOException {
+        File file = new File(getConfigDir(), "sourceconfig");
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    public File getDestinationConfigDirectory() throws IOException {
+        File file = new File(getConfigDir(), "destconfig");
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    public File getTempUploadedDirectory() throws IOException {
+        File file = new File(getConfigDir(), "etluploadedtemp");
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    public File tempUploadedDirectory(String sourceId, String fileTypeId) throws IOException {
+        File file = new File(new File(getTempUploadedDirectory(),
+                ToConfigFile.fromSourceConfigId(sourceId)), fileTypeId);
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    public File getUploadedDirectory() throws IOException {
+        File file = new File(getConfigDir(), "etluploaded");
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+    
+    public File uploadedDirectory(String sourceId, String fileTypeId) throws IOException {
+        File file = new File(new File(getUploadedDirectory(),
+                ToConfigFile.fromSourceConfigId(sourceId)), fileTypeId);
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    public File destinationConfigFile(String destId) throws IOException {
+        return new File(getDestinationConfigDirectory(),
+                ToConfigFile.fromDestId(destId));
+    }
+
+    public File getOutputDirectory() throws IOException {
+        File file = new File(getConfigDir(), "etloutput");
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    public File outputDirectory(String destId, String fileTypeId) throws IOException {
+        File file = new File(new File(getOutputDirectory(),
+                ToConfigFile.fromDestId(destId)), fileTypeId);
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    public File outputFileDirectory(String destId) throws IOException {
+        File file = new File(new File(getOutputDirectory(),
+                ToConfigFile.fromDestId(destId)), "outputfile");
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    public File outputTempDirectory(String destId) throws IOException {
+        File file = new File(new File(getOutputDirectory(),
+                ToConfigFile.fromDestId(destId)), "outputtemp");
+        Files.createDirectories(file.toPath());
+        return file;
+    }
+
+    @Override
+    public String getProxyCallbackServer() {
+        return this.getValue("eureka.etl.callbackserver");
+    }
+
+    public int getSearchLimit() {
+        return this.getIntValue("eureka.jstree.searchlimit", 200);
+    }
+    
+    @Override
+    public String getUrl() {
+        return this.getValue("eureka.etl.url");
+    }
+
 }
