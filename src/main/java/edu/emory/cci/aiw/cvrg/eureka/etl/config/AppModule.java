@@ -43,6 +43,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.config;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.servlet.SessionScoped;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
@@ -67,6 +68,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 import org.eurekaclinical.standardapis.dao.UserDao;
 import org.eurekaclinical.standardapis.entity.RoleEntity;
 import org.eurekaclinical.standardapis.entity.UserEntity;
@@ -75,8 +77,9 @@ import org.eurekaclinical.standardapis.entity.UserEntity;
  * @author hrathod
  */
 public class AppModule extends AbstractModule {
-	
-	AppModule() {
+	PhenotypeClientProvider phenotypeClientProvider;
+	AppModule(PhenotypeClientProvider inPhenotypeClientProvider) {
+            this.phenotypeClientProvider = inPhenotypeClientProvider;
 	}
 	
 	@Override
@@ -94,5 +97,7 @@ public class AppModule extends AbstractModule {
 		bind(EurekaDeidConfigDao.class).to(JpaEurekaDeidConfigDao.class);
 		bind(LinkDao.class).to(JpaLinkDao.class);
 		bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
+                
+                bind(EurekaClinicalPhenotypeClient.class).toProvider(this.phenotypeClientProvider).in(SessionScoped.class);
 	}
 }

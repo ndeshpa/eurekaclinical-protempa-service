@@ -85,10 +85,18 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.Task;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.eureka.client.comm.JobSpec.Side;
+import org.eurekaclinical.eureka.client.comm.Phenotype;
+import org.eurekaclinical.eureka.client.comm.PhenotypeVisitor;
+import org.eurekaclinical.eureka.client.comm.exception.PhenotypeHandlingException;
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
+import org.protempa.PropositionDefinition;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.BackendSpecNotFoundException;
@@ -115,14 +123,17 @@ public class JobResource {
 	private final EtlProperties etlProperties;
 	private final Provider<EntityManager> entityManagerProvider;
 	private final Provider<Task> taskProvider;
-
+        private final EurekaClinicalPhenotypeClient phenotypeClient;
+        
 	@Inject
 	public JobResource(JobDao inJobDao, TaskManager inTaskManager,
 			AuthorizedUserDao inEtlUserDao, DestinationDao inDestinationDao,
 			EtlProperties inEtlProperties,
 			ProtempaDestinationFactory inProtempaDestinationFactory,
 			Provider<EntityManager> inEntityManagerProvider,
-			Provider<Task> inTaskProvider) {
+			Provider<Task> inTaskProvider,
+                        EurekaClinicalPhenotypeClient inPhenotypeClient
+                        ) {
 		this.jobDao = inJobDao;
 		this.taskManager = inTaskManager;
 		this.etlUserDao = inEtlUserDao;
@@ -132,7 +143,7 @@ public class JobResource {
 		this.protempaDestinationFactory = inProtempaDestinationFactory;
 		this.entityManagerProvider = inEntityManagerProvider;
 		this.taskProvider = inTaskProvider;
-		
+                this.phenotypeClient = inPhenotypeClient;
 	}
 
 	@Transactional
@@ -205,9 +216,52 @@ public class JobResource {
 
 	//Finer grained transactions in the implementation
 	@POST
+	@Consumes({MediaType.APPLICATION_JSON})
 	public Response submit(@Context HttpServletRequest request,
-			JobRequest inJobRequest) {
-		Long jobId = doCreateJob(inJobRequest, request);
+			JobSpec jobSpec) {
+                List<PropositionDefinition> propositionList;
+                System.out.println("Protempa /jobs proposition definitions");
+
+                try{
+                    propositionList = this.phenotypeClient.getPhenotypes2Proposition();       
+                    
+                    
+                }
+                catch (ClientException ex) {
+                    throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
+		} 
+                
+                
+                
+                AuthorizedUserEntity user = this.etlUserDao.getByHttpServletRequest(request);
+		JobRequest jobRequest = new JobRequest();
+		
+                System.out.println(String.format("Sending {} proposition definitions: %d", propositionList.size()));
+                
+                for (PropositionDefinition pd : propositionList) {
+                    System.out.println(pd.getPropositionId());
+		}
+                
+
+		jobRequest.setJobSpec(jobSpec);
+                
+		jobRequest.setUserPropositions(propositionList);
+                
+                
+		List<String> conceptIds = jobSpec.getPropositionIds();
+         	List<String> propIds = new ArrayList<>(conceptIds != null ? conceptIds.size() : 0);
+		if (conceptIds != null) {
+			for (String conceptId : conceptIds) {
+				propIds.add(/*this.conversionSupport.toPropositionId(*/conceptId);
+                                System.out.println(conceptId + "===>");
+			}
+		}
+		jobRequest.setPropositionIdsToShow(propIds);
+
+            
+            
+		Long jobId = doCreateJob(jobRequest, request);
+              
 		return Response.created(URI.create("/" + jobId)).build();
 	}
 
