@@ -252,12 +252,11 @@ public class JobResource {
          	List<String> propIds = new ArrayList<>(conceptIds != null ? conceptIds.size() : 0);
 		if (conceptIds != null) {
 			for (String conceptId : conceptIds) {
-				propIds.add(/*this.conversionSupport.toPropositionId(*/conceptId);
-                                System.out.println(conceptId + "===>");
+				propIds.add(this.toPropositionId(conceptId));
+                                System.out.println(conceptId + "===>" + this.toPropositionId(conceptId));
 			}
 		}
 		jobRequest.setPropositionIdsToShow(propIds);
-
             
             
 		Long jobId = doCreateJob(jobRequest, request);
@@ -402,6 +401,20 @@ public class JobResource {
 			return result;
 		} else {
 			return null;
+		}
+	}
+        
+        public String toPropositionId(String phenotypeKey) {
+            final  String PRIMARY_PROP_ID_SUFFIX = "_PRIMARY";
+            final  String VALUE = "YES";
+            final  String VALUE_COMP = "NO";
+            final String PROP_ID_WRAPPED_SUFFIX = "_WRAPPED";
+            final String USER_KEY_PREFIX = "USER:";
+        
+		if (phenotypeKey == null || !phenotypeKey.startsWith(USER_KEY_PREFIX)) {
+			return phenotypeKey;
+		} else {
+			return phenotypeKey + PRIMARY_PROP_ID_SUFFIX;
 		}
 	}
 
