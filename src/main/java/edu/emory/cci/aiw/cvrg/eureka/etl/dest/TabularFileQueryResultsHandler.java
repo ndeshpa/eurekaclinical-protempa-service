@@ -125,13 +125,15 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
                     .distinct()
                     .collect(Collectors.toCollection(ArrayList::new));
             this.writers = new HashMap<>();
+            String nullValue = this.config.getNullValue();
             for (int i = 0, n = tableNames.size(); i < n; i++) {
                 String tableName = tableNames.get(i);
                 File file = new File(outputFileDirectory, tableName);
                 this.writers.put(tableName, new FileTabularWriter(
                         new BufferedWriter(new FileWriter(file)), 
                         this.delimiter, 
-                        this.config.isAlwaysQuoted() ? QuoteModel.ALWAYS : QuoteModel.WHEN_QUOTE_EMBEDDED));
+                        this.config.isAlwaysQuoted() ? QuoteModel.ALWAYS : QuoteModel.WHEN_QUOTE_EMBEDDED, 
+                        nullValue == null ? "" : nullValue));
             }
         } catch (IOException ex) {
             throw new QueryResultsHandlerProcessingException(ex);
