@@ -937,4 +937,11 @@
 	<changeSet author="arpost" id="1361552652236-45">
 		<dropColumn tableName="DESTINATIONS" columnName="UPDATED_AT"/>
 	</changeSet>
+        <changeSet author="arpost" id="1361552652236-46">
+            <addColumn tableName="TABULAR_FILE_DESTINATIONS">
+                <column name="ALWAYSQUOTED" type="BOOLEAN" defaultValueBoolean="false">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+        </changeSet>
 </databaseChangeLog>

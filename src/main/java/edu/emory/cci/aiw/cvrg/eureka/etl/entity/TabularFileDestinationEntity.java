@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -54,59 +53,73 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "tabular_file_destinations")
 public class TabularFileDestinationEntity extends DestinationEntity {
-	
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
-	private List<TabularFileDestinationTableColumnEntity> tableColumns;
 
-	public TabularFileDestinationEntity() {
-		this.tableColumns = new ArrayList<>();
-	}
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
+    private List<TabularFileDestinationTableColumnEntity> tableColumns;
+    
+    private boolean alwaysQuoted = false;
 
-	public List<TabularFileDestinationTableColumnEntity> getTableColumns() {
-		return new ArrayList<>(tableColumns);
-	}
+    public TabularFileDestinationEntity() {
+        this.tableColumns = new ArrayList<>();
+    }
 
-	public void setTableColumns(List<TabularFileDestinationTableColumnEntity> inTableColumns) {
-		if (inTableColumns == null) {
-			this.tableColumns = new ArrayList<>();
-		} else {
-			this.tableColumns = new ArrayList<>(inTableColumns);
-			for (TabularFileDestinationTableColumnEntity tableColumn : this.tableColumns) {
-				tableColumn.setDestination(this);
-			}
-		}
-	}
-	
-	public void addTableColumn(TabularFileDestinationTableColumnEntity inTableColumn) {
-		if (!this.tableColumns.contains(inTableColumn)) {
-			this.tableColumns.add(inTableColumn);
-			inTableColumn.setDestination(this);
-		}
-	}
-	
-	public void removeTableColumn(TabularFileDestinationTableColumnEntity inTableColumn) {
-		if (this.tableColumns.remove(inTableColumn)) {
-			inTableColumn.setDestination(null);
-		}
-	}
-	
-	public Character getDelimiter() {
-		return '\t';
-	}
-	
-	@Override
-	public boolean isGetStatisticsSupported() {
-		return false;
-	}
-	
-	@Override
-	public boolean isAllowingQueryPropositionIds() {
-		return true;
-	}
-	
-	@Override
-	public void accept(DestinationEntityVisitor visitor) {
-		visitor.visit(this);
-	}
-	
+    public List<TabularFileDestinationTableColumnEntity> getTableColumns() {
+        return new ArrayList<>(tableColumns);
+    }
+
+    public void setTableColumns(List<TabularFileDestinationTableColumnEntity> inTableColumns) {
+        if (inTableColumns == null) {
+            this.tableColumns = new ArrayList<>();
+        } else {
+            this.tableColumns = new ArrayList<>(inTableColumns);
+            for (TabularFileDestinationTableColumnEntity tableColumn : this.tableColumns) {
+                tableColumn.setDestination(this);
+            }
+        }
+    }
+
+    public void addTableColumn(TabularFileDestinationTableColumnEntity inTableColumn) {
+        if (!this.tableColumns.contains(inTableColumn)) {
+            this.tableColumns.add(inTableColumn);
+            inTableColumn.setDestination(this);
+        }
+    }
+
+    public void removeTableColumn(TabularFileDestinationTableColumnEntity inTableColumn) {
+        if (this.tableColumns.remove(inTableColumn)) {
+            inTableColumn.setDestination(null);
+        }
+    }
+
+    public Character getDelimiter() {
+        return '\t';
+    }
+    
+    public boolean isAlwaysQuoted() {
+        return alwaysQuoted;
+    }
+
+    public void setAlwaysQuoted(boolean alwaysQuoted) {
+        this.alwaysQuoted = alwaysQuoted;
+    }
+    
+    public String getNullValue() {
+        return null;
+    }
+
+    @Override
+    public boolean isGetStatisticsSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean isAllowingQueryPropositionIds() {
+        return true;
+    }
+
+    @Override
+    public void accept(DestinationEntityVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

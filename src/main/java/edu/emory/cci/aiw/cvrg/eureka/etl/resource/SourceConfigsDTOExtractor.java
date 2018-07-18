@@ -67,7 +67,6 @@ import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,11 +119,6 @@ class SourceConfigsDTOExtractor extends ConfigsDTOExtractor<SourceConfig, Source
 					algorithmSourceBackendSections.toArray(
 							new SourceConfig.Section[algorithmSourceBackendSections.size()]));
 
-			List<SourceConfig.Section> termSourceBackendSections
-					= toSectionsTSB(configuration.getTermSourceBackendSections());
-			config.setTermSourceBackends(
-					termSourceBackendSections.toArray(
-							new SourceConfig.Section[termSourceBackendSections.size()]));
 			return config;
 		} catch (ConfigurationsNotFoundException | ConfigurationsLoadException | InvalidPropertyNameException ex) {
 			LOGGER.warn("Error getting INI file for source config {}. This source config will be ignored.", configEntity.getName(), ex);
@@ -164,15 +158,6 @@ class SourceConfigsDTOExtractor extends ConfigsDTOExtractor<SourceConfig, Source
 		return result;
 	}
 	
-	private List<SourceConfig.Section> toSectionsTSB(List<BackendInstanceSpec<TermSourceBackend>> bises) throws InvalidPropertyNameException {
-		List<SourceConfig.Section> result = new ArrayList<>();
-		for (BackendInstanceSpec<? extends TermSourceBackend> bis : bises) {
-			SourceConfig.Section section = newSection(bis);
-			result.add(section);
-		}
-		return result;
-	}
-
 	private SourceConfig.Section newSection(BackendInstanceSpec<? extends Backend> bis) throws InvalidPropertyNameException {
 		SourceConfig.Section section = new SourceConfig.Section();
 		section.setId(bis.getBackendSpec().getId());

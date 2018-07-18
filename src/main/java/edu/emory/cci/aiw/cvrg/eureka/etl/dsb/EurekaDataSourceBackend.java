@@ -73,7 +73,6 @@ import org.protempa.backend.dsb.relationaldb.Operator;
 import org.protempa.backend.dsb.relationaldb.PropertySpec;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.RelationalDbDataSourceBackend;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 import org.protempa.backend.dsb.relationaldb.mappings.ResourceMappingsFactory;
 import org.protempa.dest.QueryResultsHandler;
@@ -272,11 +271,6 @@ public final class EurekaDataSourceBackend extends RelationalDbDataSourceBackend
 			populateDatabase();
 		}
 		return super.readPropositions(keyIds, propIds, filters, queryResultsHandler);
-	}
-
-	@Override
-	protected StagingSpec[] stagedSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
-		return null;
 	}
 
 	@Override

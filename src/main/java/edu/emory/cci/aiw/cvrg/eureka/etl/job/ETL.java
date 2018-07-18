@@ -54,7 +54,6 @@ import org.protempa.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEventEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
@@ -64,12 +63,12 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.resource.Destinations;
 import edu.emory.cci.aiw.cvrg.eureka.etl.resource.EtlDestinationToDestinationEntityVisitor;
+import java.io.File;
 import java.io.IOException;
 import javax.inject.Inject;
 import org.eurekaclinical.eureka.client.comm.JobStatus;
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import org.protempa.ProtempaEvent;
-import org.protempa.ProtempaEventListener;
 import org.protempa.backend.Configuration;
 import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.InvalidPropertyValueException;
@@ -90,123 +89,151 @@ import org.protempa.query.QueryMode;
  */
 public class ETL {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ETL.class);
-	private final EtlProperties etlProperties;
-	private final DestinationDao destinationDao;
-	private final ProtempaDestinationFactory protempaDestFactory;
-	private final EtlGroupDao groupDao;
-	private final EtlDestinationToDestinationEntityVisitor destToDestEntityVisitor;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ETL.class);
+    private static final String DATABASE_DIR = System.getProperty("eurekaclinical.protempaservice.database.directory");
+    private final EtlProperties etlProperties;
+    private final DestinationDao destinationDao;
+    private final ProtempaDestinationFactory protempaDestFactory;
+    private final EtlGroupDao groupDao;
+    private final EtlDestinationToDestinationEntityVisitor destToDestEntityVisitor;
 
-	@Inject
-	public ETL(EtlProperties inEtlProperties, DestinationDao inDestinationDao, 
-			EtlGroupDao inGroupDao, EtlDestinationToDestinationEntityVisitor inDestToDestEntityVisitor,
-			ProtempaDestinationFactory inProtempaDestFactory) {
-		this.etlProperties = inEtlProperties;
-		this.destinationDao = inDestinationDao;
-		this.protempaDestFactory = inProtempaDestFactory;
-		this.groupDao = inGroupDao;
-		this.destToDestEntityVisitor = inDestToDestEntityVisitor;
-	}
+    @Inject
+    public ETL(EtlProperties inEtlProperties, DestinationDao inDestinationDao,
+            EtlGroupDao inGroupDao, EtlDestinationToDestinationEntityVisitor inDestToDestEntityVisitor,
+            ProtempaDestinationFactory inProtempaDestFactory) {
+        this.etlProperties = inEtlProperties;
+        this.destinationDao = inDestinationDao;
+        this.protempaDestFactory = inProtempaDestFactory;
+        this.groupDao = inGroupDao;
+        this.destToDestEntityVisitor = inDestToDestEntityVisitor;
+    }
 
-	void run(JobEntity job, PropositionDefinition[] inPropositionDefinitions,
-			String[] inPropIdsToShow, Filter filter, boolean updateData,
-			Configuration prompts) throws EtlException {
-		assert inPropositionDefinitions != null :
-				"inPropositionDefinitions cannot be null";
-		assert job != null : "job cannot be null";
-		try (Protempa protempa = getNewProtempa(job, prompts)) {
-			LOGGER.debug("Validating the data source backend data for job {}", job.getId());
-			logValidationEvents(job, protempa.validateDataSourceBackendData(), null);
+    void run(JobEntity job, PropositionDefinition[] inPropositionDefinitions,
+            String[] inPropIdsToShow, Filter filter, boolean updateData,
+            Configuration prompts) throws EtlException {
+        assert inPropositionDefinitions != null :
+                "inPropositionDefinitions cannot be null";
+        assert job != null : "job cannot be null";
+        String databaseDirectory = DATABASE_DIR;
+        if (databaseDirectory == null) {
+            databaseDirectory = this.etlProperties.getDatabaseDirectory();
+        }
+        try (Protempa protempa = getNewProtempa(job, prompts)) {
+            LOGGER.debug("Validating the data source backend data for job {}", job.getId());
+            logValidationEvents(job, protempa.validateDataSourceBackendData(), null);
 
-			EtlDestination eurekaDestination;
-			org.protempa.dest.Destination protempaDestination;
-			eurekaDestination
-					= new Destinations(this.etlProperties, job.getUser(),
-							this.destinationDao, this.groupDao, this.destToDestEntityVisitor)
-							.getOne(job.getDestination().getName());
-			protempaDestination
-					= this.protempaDestFactory.getInstance(eurekaDestination.getId(), updateData);
+            EtlDestination eurekaDestination;
+            org.protempa.dest.Destination protempaDestination;
+            eurekaDestination
+                    = new Destinations(this.etlProperties, job.getUser(),
+                            this.destinationDao, this.groupDao, this.destToDestEntityVisitor)
+                            .getOne(job.getDestination().getName());
 
-			LOGGER.debug("Constructing Protempa query for job {}", job.getId());
-			DefaultQueryBuilder q = new DefaultQueryBuilder();
-			q.setPropositionDefinitions(inPropositionDefinitions);
-			if (!eurekaDestination.isAllowingQueryPropositionIds()) {
-				LOGGER.debug("Querying the concepts specified by the destination for job {}", job.getId());
-				q.setPropositionIds(protempa.getSupportedPropositionIds(protempaDestination));
-			} else {
-				q.setPropositionIds(inPropIdsToShow);
-			}
-			q.setName(job.getName());
-			q.setUsername(job.getUser().getUsername());
-			q.setFilters(filter);
-			q.setQueryMode(updateData ? QueryMode.UPDATE : QueryMode.REPLACE);
+            File databaseFile;
+            if (databaseDirectory != null) {
+                databaseFile = new File(databaseDirectory, eurekaDestination.getName());
+                createDatabaseDirectory(databaseFile.getParent());
+            } else {
+                databaseFile = null;
+            }
 
-			Query query = protempa.buildQuery(q);
-			protempa.addEventListener(new ProtempaEventListener() {
-				@Override
-				public void eventFired(ProtempaEvent protempaEvent) {
-					synchronized (job) {
-						JobEventEntity protempaEvt = new JobEventEntity();
-						protempaEvt.setJob(job);
-						protempaEvt.setTimeStamp(protempaEvent.getTimestamp());
-						protempaEvt.setStatus(JobStatus.STARTED);
-						protempaEvt.setMessage(protempaEvent.getType() + " " + protempaEvent.getDescription());
-					}
-				}
-			});
-			LOGGER.debug("Executing Protempa query {}", q);
-			protempa.execute(query, protempaDestination);
-		} catch (DataSourceFailedDataValidationException ex) {
-			logValidationEvents(job, ex.getValidationEvents(), ex);
-			throw new EtlException("ETL failed for job " + job.getId(), ex);
-		} catch (Exception ex) {
-			throw new EtlException("ETL failed for job " + job.getId(), ex);
-		}
-	}
+            protempaDestination
+                    = this.protempaDestFactory.getInstance(eurekaDestination.getId(), updateData);
 
-	private void logValidationEvents(JobEntity job, DataValidationEvent[] events, DataSourceFailedDataValidationException ex) {
-		for (DataValidationEvent event : events) {
-			AbstractFileInfo fileInfo;
-			JobStatus jobEventType;
-			if (event.isFatal()) {
-				fileInfo = new FileError();
-				jobEventType = JobStatus.ERROR;
-			} else {
-				fileInfo = new FileWarning();
-				jobEventType = JobStatus.WARNING;
-			}
-			fileInfo.setLineNumber(event.getLine());
-			fileInfo.setText(event.getMessage());
-			fileInfo.setType(event.getType());
-			fileInfo.setURI(event.getURI());
-			JobEventEntity validationJobEvent = new JobEventEntity();
-			validationJobEvent.setJob(job);
-			validationJobEvent.setTimeStamp(event.getTimestamp());
-			validationJobEvent.setStatus(jobEventType);
-			validationJobEvent.setMessage(fileInfo.toUserMessage());
-			validationJobEvent.setExceptionStackTrace(collectThrowableMessages(ex));
-		}
-	}
+            LOGGER.debug("Constructing Protempa query for job {}", job.getId());
+            DefaultQueryBuilder q = new DefaultQueryBuilder();
+            q.setPropositionDefinitions(inPropositionDefinitions);
+            if (!eurekaDestination.isAllowingQueryPropositionIds()) {
+                LOGGER.debug("Querying the concepts specified by the destination for job {}", job.getId());
+                q.setPropositionIds(protempa.getSupportedPropositionIds(protempaDestination));
+            } else {
+                q.setPropositionIds(inPropIdsToShow);
+            }
+            q.setName(job.getName());
+            q.setUsername(job.getUser().getUsername());
+            q.setFilters(filter);
+            q.setQueryMode(updateData ? QueryMode.UPDATE : QueryMode.REPLACE);
+            if (databaseFile != null) {
+                q.setDatabasePath(databaseFile.getPath());
+            }
 
-	private Protempa getNewProtempa(JobEntity job, Configuration prompts) throws
-			NewProtempaException {
-		try {
-			Configurations configurations = new EurekaProtempaConfigurations(this.etlProperties);
-			Configuration configuration = configurations.load(job.getSourceConfigId());
-			configuration.merge(prompts);
-			SourceFactory sf = new SourceFactory(configuration);
-			return Protempa.newInstance(sf);
-		} catch (IOException | ConfigurationsLoadException | ProtempaStartupException | ConfigurationsNotFoundException | InvalidPropertyNameException | InvalidPropertyValueException ex) {
-			throw new NewProtempaException("Error creating Protempa for sourceconfig " + job.getSourceConfigId() + " for job " + job.getId(), ex);
-		}
-	}
+            Query query = protempa.buildQuery(q);
+            protempa.addEventListener((ProtempaEvent protempaEvent) -> {
+                synchronized (job) {
+                    JobEventEntity protempaEvt = new JobEventEntity();
+                    protempaEvt.setJob(job);
+                    protempaEvt.setTimeStamp(protempaEvent.getTimestamp());
+                    protempaEvt.setStatus(JobStatus.STARTED);
+                    protempaEvt.setMessage(protempaEvent.getType() + " " + protempaEvent.getDescription());
+                }
+            });
+            LOGGER.debug("Executing Protempa query {}", q);
+            protempa.execute(query, protempaDestination);
+        } catch (DataSourceFailedDataValidationException ex) {
+            logValidationEvents(job, ex.getValidationEvents(), ex);
+            throw new EtlException("ETL failed for job " + job.getId(), ex);
+        } catch (Exception ex) {
+            throw new EtlException("ETL failed for job " + job.getId(), ex);
+        }
+    }
 
-	private static String collectThrowableMessages(Throwable throwable) {
-		String msg = throwable.getMessage();
-		Throwable cause = throwable.getCause();
-		if (cause != null) {
-			msg += ": " + cause.getMessage();
-		}
-		return msg;
-	}
+    private void createDatabaseDirectory(String databaseDirectory) throws EtlException {
+        File databaseDirectoryFile = new File(databaseDirectory);
+        if (!databaseDirectoryFile.exists()) {
+            try {
+                if (!databaseDirectoryFile.mkdirs()) {
+                    throw new EtlException("Database directory " + databaseDirectory + " was not created");
+                }
+                LOGGER.info("Created Protempa database directory {}", databaseDirectory);
+            } catch (SecurityException ex) {
+                throw new EtlException("Database directory " + databaseDirectory + " was not created", ex);
+            }
+        }
+    }
+
+    private void logValidationEvents(JobEntity job, DataValidationEvent[] events, DataSourceFailedDataValidationException ex) {
+        for (DataValidationEvent event : events) {
+            AbstractFileInfo fileInfo;
+            JobStatus jobEventType;
+            if (event.isFatal()) {
+                fileInfo = new FileError();
+                jobEventType = JobStatus.ERROR;
+            } else {
+                fileInfo = new FileWarning();
+                jobEventType = JobStatus.WARNING;
+            }
+            fileInfo.setLineNumber(event.getLine());
+            fileInfo.setText(event.getMessage());
+            fileInfo.setType(event.getType());
+            fileInfo.setURI(event.getURI());
+            JobEventEntity validationJobEvent = new JobEventEntity();
+            validationJobEvent.setJob(job);
+            validationJobEvent.setTimeStamp(event.getTimestamp());
+            validationJobEvent.setStatus(jobEventType);
+            validationJobEvent.setMessage(fileInfo.toUserMessage());
+            validationJobEvent.setExceptionStackTrace(collectThrowableMessages(ex));
+        }
+    }
+
+    private Protempa getNewProtempa(JobEntity job, Configuration prompts) throws
+            NewProtempaException {
+        try {
+            Configurations configurations = new EurekaProtempaConfigurations(this.etlProperties);
+            Configuration configuration = configurations.load(job.getSourceConfigId());
+            configuration.merge(prompts);
+            SourceFactory sf = new SourceFactory(configuration);
+            return Protempa.newInstance(sf);
+        } catch (IOException | ConfigurationsLoadException | ProtempaStartupException | ConfigurationsNotFoundException | InvalidPropertyNameException | InvalidPropertyValueException ex) {
+            throw new NewProtempaException("Error creating Protempa for sourceconfig " + job.getSourceConfigId() + " for job " + job.getId(), ex);
+        }
+    }
+
+    private static String collectThrowableMessages(Throwable throwable) {
+        String msg = throwable.getMessage();
+        Throwable cause = throwable.getCause();
+        if (cause != null) {
+            msg += ": " + cause.getMessage();
+        }
+        return msg;
+    }
 }
