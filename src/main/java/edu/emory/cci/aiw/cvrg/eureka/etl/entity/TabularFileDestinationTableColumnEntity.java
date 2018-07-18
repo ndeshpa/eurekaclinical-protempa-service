@@ -73,7 +73,6 @@ public class TabularFileDestinationTableColumnEntity {
 	@Column(nullable = false)
 	private Long rank;
 	
-	@Column(nullable = false)
 	private String path;
 	
 	@ManyToOne

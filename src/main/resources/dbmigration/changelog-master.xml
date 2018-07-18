@@ -924,7 +924,6 @@
 				<constraints nullable="false"/>
 			</column>
 			<column name="PATH" type="VARCHAR(255)">
-				<constraints nullable="false"/>
 			</column>
 			<column name="FORMAT" type="VARCHAR(255)"/>
 		</createTable>
