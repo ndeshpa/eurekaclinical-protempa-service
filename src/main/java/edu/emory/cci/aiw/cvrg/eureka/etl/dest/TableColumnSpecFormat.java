@@ -89,8 +89,8 @@ public class TableColumnSpecFormat extends Format {
     @Override
     public Object parseObject(String source, ParsePosition pos) {
         try {
-            Object result = doParse(source.substring(pos.getIndex()));
-            pos.setIndex(source.length());
+            Object result = doParse(source != null ? source.substring(pos.getIndex()) : null);
+            pos.setIndex(source != null ? source.length() : 0);
             return result;
         } catch (IOException ex) {
             pos.setErrorIndex(0);
