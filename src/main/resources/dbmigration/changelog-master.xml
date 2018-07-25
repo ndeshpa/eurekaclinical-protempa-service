@@ -945,8 +945,6 @@
         </addColumn>
     </changeSet>
     <changeSet author="nitadeshpande" id="1361552652236-47">
-        <dropNotNullConstraint tableName="TABULAR_FILE_DESTINATIONS"
-            columnDataType="VARCHAR(255)"
-            columnName="PATH"/>
+        <dropNotNullConstraint tableName="TF_DEST_TABLECOLUMNS" columnDataType="VARCHAR(255)" columnName="PATH"/>
     </changeSet>
 </databaseChangeLog>
