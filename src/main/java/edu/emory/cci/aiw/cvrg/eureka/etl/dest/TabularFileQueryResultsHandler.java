@@ -201,7 +201,10 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     }
 
     @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+    public void handleQueryResult(String keyId, List<Proposition> propositions, 
+            Map<Proposition, Set<Proposition>> forwardDerivations, 
+            Map<Proposition, Set<Proposition>> backwardDerivations, 
+            Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Data for keyId {}: {}", new Object[]{keyId, propositions});
         }

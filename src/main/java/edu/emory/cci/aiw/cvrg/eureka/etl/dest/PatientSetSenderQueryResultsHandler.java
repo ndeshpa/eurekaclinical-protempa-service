@@ -46,6 +46,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.eurekaclinical.patientset.client.PatientSetJsonWriter;
 import org.protempa.PropositionDefinition;
 import org.protempa.dest.QueryResultsHandlerCloseException;
@@ -92,7 +93,11 @@ public class PatientSetSenderQueryResultsHandler extends AbstractFileQueryResult
 	}
 
 	@Override
-	public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+	public void handleQueryResult(String keyId, 
+                List<Proposition> propositions, 
+                Map<Proposition, Set<Proposition>> forwardDerivations, 
+                Map<Proposition, Set<Proposition>> backwardDerivations, 
+                Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
 		try {
 			this.jsonGenerator.writePatient(this.patientIdExtractor.extract(keyId, propositions));
 		} catch (IOException ex) {
