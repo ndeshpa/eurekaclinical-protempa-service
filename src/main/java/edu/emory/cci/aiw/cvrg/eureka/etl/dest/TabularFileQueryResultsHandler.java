@@ -66,6 +66,7 @@ import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
+import org.protempa.dest.table.ConstantColumnSpec;
 import org.protempa.dest.table.FileTabularWriter;
 import org.protempa.dest.table.QuoteModel;
 import org.protempa.dest.table.TableColumnSpec;
@@ -130,9 +131,9 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
                 String tableName = tableNames.get(i);
                 File file = new File(outputFileDirectory, tableName);
                 this.writers.put(tableName, new FileTabularWriter(
-                        new BufferedWriter(new FileWriter(file)), 
-                        this.delimiter, 
-                        this.config.isAlwaysQuoted() ? QuoteModel.ALWAYS : QuoteModel.WHEN_QUOTE_EMBEDDED, 
+                        new BufferedWriter(new FileWriter(file)),
+                        this.delimiter,
+                        this.config.isAlwaysQuoted() ? QuoteModel.ALWAYS : QuoteModel.WHEN_QUOTE_EMBEDDED,
                         nullValue == null ? "" : nullValue));
             }
         } catch (IOException ex) {
@@ -201,9 +202,9 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     }
 
     @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions, 
-            Map<Proposition, Set<Proposition>> forwardDerivations, 
-            Map<Proposition, Set<Proposition>> backwardDerivations, 
+    public void handleQueryResult(String keyId, List<Proposition> propositions,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Data for keyId {}: {}", new Object[]{keyId, propositions});
@@ -259,9 +260,16 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         }
     }
 
-    private static TableColumnSpecWrapper toTableColumnSpec(TabularFileDestinationTableColumnEntity tableColumn, TableColumnSpecFormat linksFormat) throws QueryResultsHandlerProcessingException {
+    private static TableColumnSpecWrapper toTableColumnSpec(
+            TabularFileDestinationTableColumnEntity tableColumn,
+            TableColumnSpecFormat linksFormat) throws QueryResultsHandlerProcessingException {
         try {
-            return (TableColumnSpecWrapper) linksFormat.parseObject(tableColumn.getPath());
+            String path = tableColumn.getPath();
+            if (path != null) {
+                return (TableColumnSpecWrapper) linksFormat.parseObject(path);
+            } else {
+                return new TableColumnSpecWrapper(new ConstantColumnSpec(tableColumn.getColumnName(), null));
+            }
         } catch (ParseException ex) {
             throw new QueryResultsHandlerProcessingException(ex);
         }

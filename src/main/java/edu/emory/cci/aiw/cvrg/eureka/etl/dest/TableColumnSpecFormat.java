@@ -60,17 +60,17 @@ import org.protempa.dest.table.Reference;
  *
  * @author Andrew Post
  */
-public class TableColumnSpecFormat extends Format {
+class TableColumnSpecFormat extends Format {
 
     private static final long serialVersionUID = 1L;
     private final String columnName;
     private final Format positionFormat;
 
-    public TableColumnSpecFormat(String columnName) {
+    TableColumnSpecFormat(String columnName) {
         this(columnName, null);
     }
 
-    public TableColumnSpecFormat(String columnName, Format positionFormat) {
+    TableColumnSpecFormat(String columnName, Format positionFormat) {
         this.columnName = columnName;
         this.positionFormat = positionFormat;
     }
@@ -87,9 +87,9 @@ public class TableColumnSpecFormat extends Format {
     }
 
     @Override
-    public Object parseObject(String source, ParsePosition pos) {
+    public TableColumnSpecWrapper parseObject(String source, ParsePosition pos) {
         try {
-            Object result = doParse(source != null ? source.substring(pos.getIndex()) : null);
+            TableColumnSpecWrapper result = doParse(source != null ? source.substring(pos.getIndex()) : null);
             pos.setIndex(source != null ? source.length() : 0);
             return result;
         } catch (IOException ex) {
@@ -99,129 +99,124 @@ public class TableColumnSpecFormat extends Format {
     }
 
     private TableColumnSpecWrapper doParse(String links) throws IOException {
-        if (links != null) {
-            if (links.startsWith("[")) {
-                CSVParser referenceNameParser = new CSVParser(',');
-                String tokens = "[ ]>.$";
-                char[] tokensArr = tokens.toCharArray();
-                StringTokenizer st = new StringTokenizer(links, tokens, true);
-                String lastToken = null;
-                String propId = null;
-                String propType = null;
-                String referenceNames = null;
-                String propertyName = null;
-                boolean inPropSpec = false;
-                int index = 0;
-                List<Link> linksList = new ArrayList<>();
-                String firstPropId = null;
-                OUTER:
-                while (st.hasMoreTokens()) {
-                    String nextToken = st.nextToken();
-                    for (char token : tokensArr) {
-                        if (nextToken.charAt(0) == token) {
-                            lastToken = nextToken;
-                            if (token == ']') {
-                                inPropSpec = false;
-                                //do something with propId
-                                if (referenceNames != null) {
-                                    String[] parseLine = referenceNameParser.parseLine(referenceNames);
-                                    if (parseLine.length < 1 || parseLine.length > 2) {
-                                        String msg = MessageFormat.format("Invalid reference: expected referenceName[,backReferenceName] but was {1}", new Object[]{referenceNames});
-                                        throw new IOException(msg);
-                                    }
-                                    linksList.add(new Reference(new String[]{parseLine[0]}, new String[]{propId}));
-                                    referenceNames = null;
+        if (links.startsWith("[")) {
+            CSVParser referenceNameParser = new CSVParser(',');
+            String tokens = "[ ]>.$";
+            char[] tokensArr = tokens.toCharArray();
+            StringTokenizer st = new StringTokenizer(links, tokens, true);
+            String lastToken = null;
+            String propId = null;
+            String propType = null;
+            String referenceNames = null;
+            String propertyName = null;
+            boolean inPropSpec = false;
+            int index = 0;
+            List<Link> linksList = new ArrayList<>();
+            String firstPropId = null;
+            OUTER:
+            while (st.hasMoreTokens()) {
+                String nextToken = st.nextToken();
+                for (char token : tokensArr) {
+                    if (nextToken.charAt(0) == token) {
+                        lastToken = nextToken;
+                        if (token == ']') {
+                            inPropSpec = false;
+                            //do something with propId
+                            if (referenceNames != null) {
+                                String[] parseLine = referenceNameParser.parseLine(referenceNames);
+                                if (parseLine.length < 1 || parseLine.length > 2) {
+                                    String msg = MessageFormat.format("Invalid reference: expected referenceName[,backReferenceName] but was {1}", new Object[]{referenceNames});
+                                    throw new IOException(msg);
                                 }
-                                propId = null;
-                                propType = null;
+                                linksList.add(new Reference(new String[]{parseLine[0]}, new String[]{propId}));
+                                referenceNames = null;
                             }
-                            continue OUTER;
+                            propId = null;
+                            propType = null;
                         }
+                        continue OUTER;
                     }
-                    switch (lastToken) {
-                        case "[":
-                            inPropSpec = true;
-                            propId = nextToken;
-                            if (firstPropId == null) {
-                                firstPropId = propId;
-                            }
-                            break;
-                        case " ":
-                            if (inPropSpec) {
-                                if (propType == null) {
-                                    propType = nextToken;
-                                } else {
-                                    index = Integer.parseInt(nextToken);
-                                }
-                            }
-                            break;
-                        case ">":
-                            referenceNames = nextToken;
-                            break;
-                        case ".":
-                            propertyName = nextToken;
-                            break;
-                        case "$":
-                            if ("value".equals(propertyName)) {
-                                //print a value
+                }
+                switch (lastToken) {
+                    case "[":
+                        inPropSpec = true;
+                        propId = nextToken;
+                        if (firstPropId == null) {
+                            firstPropId = propId;
+                        }
+                        break;
+                    case " ":
+                        if (inPropSpec) {
+                            if (propType == null) {
+                                propType = nextToken;
                             } else {
-                                //print a property value
+                                index = Integer.parseInt(nextToken);
                             }
-                    }
+                        }
+                        break;
+                    case ">":
+                        referenceNames = nextToken;
+                        break;
+                    case ".":
+                        propertyName = nextToken;
+                        break;
+                    case "$":
+                        if ("value".equals(propertyName)) {
+                            //print a value
+                        } else {
+                            //print a property value
+                        }
                 }
-                OutputConfig outputConfig = null;
-                if (propertyName != null) {
-                    switch (propertyName) {
-                        case "value":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, true, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        case "position":
-                        case "start":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, false, false, false, true, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        case "finish":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        case "uniqueId":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        case "localUniqueId":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        case "numericalId":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        case "inequalityValue":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        case "numberValue":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, true, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        case "nominalValue":
-                            propertyName = null;
-                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
-                            break;
-                        default:
-                            Map<String, String> propertyHeadings = new HashMap<>();
-                            propertyHeadings.put(propertyName, this.columnName);
-                            outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, propertyHeadings, this.positionFormat);
-                    }
-                }
-                return new TableColumnSpecWrapper(firstPropId, new PropositionColumnSpec(this.columnName, propertyName != null ? new String[]{propertyName} : null, outputConfig, null, linksList.toArray(new Link[linksList.size()]), 1));
-            } else {
-                return new TableColumnSpecWrapper(null, new ConstantColumnSpec(this.columnName, links));
             }
-        } else {
-            return null;
+            OutputConfig outputConfig = null;
+            if (propertyName != null) {
+                switch (propertyName) {
+                    case "value":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, true, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    case "position":
+                    case "start":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, false, false, false, true, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    case "finish":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    case "uniqueId":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    case "localUniqueId":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    case "numericalId":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    case "inequalityValue":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    case "numberValue":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, true, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    case "nominalValue":
+                        propertyName = null;
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        break;
+                    default:
+                        Map<String, String> propertyHeadings = new HashMap<>();
+                        propertyHeadings.put(propertyName, this.columnName);
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, propertyHeadings, this.positionFormat);
+                }
+            }
+            return new TableColumnSpecWrapper(firstPropId, new PropositionColumnSpec(this.columnName, propertyName != null ? new String[]{propertyName} : null, outputConfig, null, linksList.toArray(new Link[linksList.size()]), 1));
         }
+        return new TableColumnSpecWrapper(new ConstantColumnSpec(this.columnName, links));
     }
 
 }
