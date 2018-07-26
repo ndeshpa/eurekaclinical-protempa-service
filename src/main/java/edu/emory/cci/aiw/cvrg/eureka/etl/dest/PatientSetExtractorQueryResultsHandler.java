@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eurekaclinical.patientset.client.PatientSetJsonWriter;
-import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
@@ -83,7 +83,7 @@ public class PatientSetExtractorQueryResultsHandler extends AbstractFileQueryRes
     }
 
     @Override
-    public void start(OutputStream outputFileOutputStream, Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
+    public void start(OutputStream outputFileOutputStream, PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
         try {
             this.jsonGenerator = new PatientSetJsonWriter(outputFileOutputStream, this.queryId, this.username);
         } catch (IOException ex) {

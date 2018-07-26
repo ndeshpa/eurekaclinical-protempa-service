@@ -46,8 +46,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
-import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
@@ -77,7 +76,7 @@ public abstract class AbstractFileQueryResultsHandler extends AbstractQueryResul
      * @throws QueryResultsHandlerProcessingException if an error occurred.
      */
     @Override
-    public final void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
+    public final void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
         try {
             File outputFile = new File(this.etlProperties.outputFileDirectory(this.name), this.fileName);
             this.outputFileOutputStream = new FileOutputStream(outputFile);
@@ -116,7 +115,7 @@ public abstract class AbstractFileQueryResultsHandler extends AbstractQueryResul
      * @param cache
      * @throws QueryResultsHandlerProcessingException 
      */
-    protected abstract void start(OutputStream outputStream, Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException;
+    protected abstract void start(OutputStream outputStream, PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException;
 
     /**
      * Called by {@link #close()} to give subclasses an opportunity to clean up

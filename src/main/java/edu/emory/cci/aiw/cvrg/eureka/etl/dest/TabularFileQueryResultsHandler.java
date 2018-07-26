@@ -62,6 +62,8 @@ import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
+import org.protempa.QueryException;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
@@ -117,7 +119,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     }
 
     @Override
-    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
+    public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
         try {
             File outputFileDirectory = this.etlProperties.outputFileDirectory(this.config.getName());
             List<String> tableNames = this.config.getTableColumns()
@@ -141,13 +143,8 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         }
 
         List<TabularFileDestinationTableColumnEntity> tableColumns = this.config.getTableColumns();
-        Collections.sort(tableColumns, new Comparator<TabularFileDestinationTableColumnEntity>() {
-            @Override
-            public int compare(TabularFileDestinationTableColumnEntity o1, TabularFileDestinationTableColumnEntity o2) {
-                return o1.getRank().compareTo(o2.getRank());
-            }
-
-        });
+        Collections.sort(tableColumns,
+                (TabularFileDestinationTableColumnEntity o1, TabularFileDestinationTableColumnEntity o2) -> o1.getRank().compareTo(o2.getRank()));
         this.tableColumnSpecs = new HashMap<>();
         for (TabularFileDestinationTableColumnEntity tableColumn : tableColumns) {
             String format = tableColumn.getFormat();
@@ -155,14 +152,12 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
             TableColumnSpecWrapper tableColumnSpecWrapper = toTableColumnSpec(tableColumn, linksFormat);
             String pid = tableColumnSpecWrapper.getPropId();
             if (pid != null) {
-                Set<String> propIds;
                 try {
-                    propIds = this.knowledgeSource.collectPropIdDescendantsUsingInverseIsA(pid);
-                } catch (KnowledgeSourceReadException ex) {
+                    for (String propId : cache.collectPropIdDescendantsUsingInverseIsA(pid)) {
+                        org.arp.javautil.collections.Collections.putSet(this.rowPropositionIdMap, tableColumn.getTableName(), propId);
+                    }
+                } catch (QueryException ex) {
                     throw new QueryResultsHandlerProcessingException(ex);
-                }
-                for (String propId : propIds) {
-                    org.arp.javautil.collections.Collections.putSet(this.rowPropositionIdMap, tableColumn.getTableName(), propId);
                 }
             }
             org.arp.javautil.collections.Collections.putList(this.tableColumnSpecs, tableColumn.getTableName(), tableColumnSpecWrapper.getTableColumnSpec());

@@ -73,20 +73,20 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
  */
 public class AppTestModule extends AbstractModule {
 
-	@Override
-	protected void configure() {
-		install(new JpaPersistModule("backend-jpa-unit"));
-		bind(JobDao.class).to(JpaJobDao.class);
-		bind(JobEventDao.class).to(JpaJobEventDao.class);
-		bind(AuthorizedUserDao.class).to(JpaEtlUserDao.class);
-		bind(RoleDao.class).to(JpaRoleDao.class);
-		bind(EtlGroupDao.class).to(JpaEtlGroupDao.class);
-		bind(DestinationDao.class).to(JpaDestinationDao.class);
-		bind(DeidPerPatientParamsDao.class).to(JpaDeidPerPatientParamsDao.class);
-		bind(SourceConfigDao.class).to(JpaSourceConfigDao.class);
-		bind(EurekaDeidConfigFactory.class).to(JpaEurekaDeidConfigFactory.class);
-		bind(EurekaDeidConfigDao.class).to(JpaEurekaDeidConfigDao.class);
-		bind(LinkDao.class).to(JpaLinkDao.class);
-		bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
-	}
+    @Override
+    protected void configure() {
+        install(new JpaPersistModule("backend-jpa-unit"));
+        bind(JobDao.class).to(JpaJobDao.class);
+        bind(JobEventDao.class).to(JpaJobEventDao.class);
+        bind(AuthorizedUserDao.class).to(JpaEtlUserDao.class);
+        bind(RoleDao.class).to(JpaRoleDao.class);
+        bind(EtlGroupDao.class).to(JpaEtlGroupDao.class);
+        bind(DestinationDao.class).to(JpaDestinationDao.class);
+        bind(DeidPerPatientParamsDao.class).to(JpaDeidPerPatientParamsDao.class);
+        bind(SourceConfigDao.class).to(JpaSourceConfigDao.class);
+        bind(EurekaDeidConfigFactory.class).to(JpaEurekaDeidConfigFactory.class);
+        bind(EurekaDeidConfigDao.class).to(JpaEurekaDeidConfigDao.class);
+        bind(LinkDao.class).to(JpaLinkDao.class);
+        bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
+    }
 }
