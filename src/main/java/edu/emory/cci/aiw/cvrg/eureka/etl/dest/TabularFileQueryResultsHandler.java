@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.arp.javautil.arrays.Arrays;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
@@ -85,13 +86,13 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     private static final Logger LOGGER = LoggerFactory.getLogger(TabularFileQueryResultsHandler.class);
 
     private final TabularFileDestinationEntity config;
-    private Map<String, FileTabularWriter> writers;
-    private Map<String, List<TableColumnSpec>> tableColumnSpecs;
+    private final Map<String, FileTabularWriter> writers;
+    private final Map<String, List<TableColumnSpec>> tableColumnSpecs;
     private final Map<String, Set<String>> rowPropositionIdMap;
     private final EtlProperties etlProperties;
-    private KnowledgeSource knowledgeSource;
-    private KnowledgeSourceCache ksCache;
+    private final KnowledgeSource knowledgeSource;
     private final char delimiter;
+    private KnowledgeSourceCache ksCache;
 
     TabularFileQueryResultsHandler(Query query, TabularFileDestinationEntity inTabularFileDestinationEntity, EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
@@ -104,7 +105,9 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         } else {
             this.delimiter = '\t';
         }
+        this.writers = new HashMap<>();
         this.rowPropositionIdMap = new HashMap<>();
+        this.tableColumnSpecs = new HashMap<>();
     }
 
     @Override
@@ -113,74 +116,9 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
     @Override
     public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
-        try {
-            File outputFileDirectory = this.etlProperties.outputFileDirectory(this.config.getName());
-            List<String> tableNames = this.config.getTableColumns()
-                    .stream()
-                    .map(TabularFileDestinationTableColumnEntity::getTableName)
-                    .distinct()
-                    .collect(Collectors.toCollection(ArrayList::new));
-            this.writers = new HashMap<>();
-            String nullValue = this.config.getNullValue();
-            for (int i = 0, n = tableNames.size(); i < n; i++) {
-                String tableName = tableNames.get(i);
-                File file = new File(outputFileDirectory, tableName);
-                this.writers.put(tableName, new FileTabularWriter(
-                        new BufferedWriter(new FileWriter(file)),
-                        this.delimiter,
-                        this.config.isAlwaysQuoted() ? QuoteModel.ALWAYS : QuoteModel.WHEN_QUOTE_EMBEDDED,
-                        nullValue == null ? "" : nullValue));
-            }
-        } catch (IOException ex) {
-            throw new QueryResultsHandlerProcessingException(ex);
-        }
-
-        List<TabularFileDestinationTableColumnEntity> tableColumns = this.config.getTableColumns();
-        Collections.sort(tableColumns,
-                (TabularFileDestinationTableColumnEntity o1, TabularFileDestinationTableColumnEntity o2) -> o1.getRank().compareTo(o2.getRank()));
-        this.tableColumnSpecs = new HashMap<>();
-        for (TabularFileDestinationTableColumnEntity tableColumn : tableColumns) {
-            String format = tableColumn.getFormat();
-            TableColumnSpecFormat linksFormat = new TableColumnSpecFormat(tableColumn.getColumnName(), format != null ? new SimpleDateFormat(format) : null);
-            TableColumnSpecWrapper tableColumnSpecWrapper = toTableColumnSpec(tableColumn, linksFormat);
-            String pid = tableColumnSpecWrapper.getPropId();
-            if (pid != null) {
-                try {
-                    for (String propId : cache.collectPropIdDescendantsUsingInverseIsA(pid)) {
-                        org.arp.javautil.collections.Collections.putSet(this.rowPropositionIdMap, tableColumn.getTableName(), propId);
-                    }
-                } catch (QueryException ex) {
-                    throw new QueryResultsHandlerProcessingException(ex);
-                }
-            }
-            org.arp.javautil.collections.Collections.putList(this.tableColumnSpecs, tableColumn.getTableName(), tableColumnSpecWrapper.getTableColumnSpec());
-        }
-
-        LOGGER.debug("Row concepts: {}", this.rowPropositionIdMap);
-
-        for (Map.Entry<String, List<TableColumnSpec>> me : this.tableColumnSpecs.entrySet()) {
-            List<String> columnNames = new ArrayList<>();
-            for (TableColumnSpec columnSpec : me.getValue()) {
-                String[] colNames;
-                try {
-                    colNames = columnSpec.columnNames(this.knowledgeSource);
-                } catch (KnowledgeSourceReadException ex) {
-                    throw new AssertionError("Should never happen");
-                }
-                for (String colName : colNames) {
-                    columnNames.add(colName);
-                }
-            }
-            FileTabularWriter writer = this.writers.get(me.getKey());
-            try {
-                for (String columnName : columnNames) {
-                    writer.writeString(columnName);
-                }
-                writer.newRow();
-            } catch (TabularWriterException ex) {
-                throw new QueryResultsHandlerProcessingException(ex);
-            }
-        }
+        createWriters();
+        mapColumnSpecsToColumnNames(cache);
+        writeHeaders();
 
         try {
             this.ksCache = new KnowledgeSourceCacheFactory().getInstance(this.knowledgeSource, cache, true);
@@ -229,6 +167,13 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     @Override
     public void close() throws QueryResultsHandlerCloseException {
         QueryResultsHandlerCloseException exception = null;
+        exception = closeWriters(exception);
+        if (exception != null) {
+            throw exception;
+        }
+    }
+
+    private QueryResultsHandlerCloseException closeWriters(QueryResultsHandlerCloseException exception) {
         if (this.writers != null) {
             for (FileTabularWriter writer : this.writers.values()) {
                 try {
@@ -240,11 +185,84 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
                         exception = new QueryResultsHandlerCloseException(ex);
                     }
                 }
-                this.writers = null;
+            }
+            this.writers.clear();
+        }
+        return exception;
+    }
+    
+    private void writeHeaders() throws AssertionError, QueryResultsHandlerProcessingException {
+        for (Map.Entry<String, List<TableColumnSpec>> me : this.tableColumnSpecs.entrySet()) {
+            List<String> columnNames = new ArrayList<>();
+            for (TableColumnSpec columnSpec : me.getValue()) {
+                try {
+                    Arrays.addAll(columnNames, columnSpec.columnNames(this.knowledgeSource));
+                } catch (KnowledgeSourceReadException ex) {
+                    throw new AssertionError("Should never happen");
+                }
+                break; //only get the first one.
+            }
+            FileTabularWriter writer = this.writers.get(me.getKey());
+            try {
+                for (String columnName : columnNames) {
+                    writer.writeString(columnName);
+                }
+                writer.newRow();
+            } catch (TabularWriterException ex) {
+                throw new QueryResultsHandlerProcessingException(ex);
             }
         }
-        if (exception != null) {
-            throw exception;
+    }
+
+    private void mapColumnSpecsToColumnNames(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
+        List<TabularFileDestinationTableColumnEntity> tableColumns = this.config.getTableColumns();
+        Collections.sort(tableColumns, (TabularFileDestinationTableColumnEntity o1, TabularFileDestinationTableColumnEntity o2) -> {
+            int rowRankCompare = o1.getRowRank().compareTo(o2.getRowRank());
+            if (rowRankCompare != 0) {
+                return rowRankCompare;
+            } else {
+                return o1.getRank().compareTo(o2.getRowRank());
+            }
+        });
+        for (TabularFileDestinationTableColumnEntity tableColumn : tableColumns) {
+            String format = tableColumn.getFormat();
+            TableColumnSpecFormat linksFormat = new TableColumnSpecFormat(tableColumn.getColumnName(), format != null ? new SimpleDateFormat(format) : null);
+            TableColumnSpecWrapper tableColumnSpecWrapper = toTableColumnSpec(tableColumn, linksFormat);
+            String pid = tableColumnSpecWrapper.getPropId();
+            if (pid != null) {
+                try {
+                    for (String propId : cache.collectPropIdDescendantsUsingInverseIsA(pid)) {
+                        org.arp.javautil.collections.Collections.putSet(this.rowPropositionIdMap, tableColumn.getTableName(), propId);
+                    }
+                } catch (QueryException ex) {
+                    throw new QueryResultsHandlerProcessingException(ex);
+                }
+            }
+            org.arp.javautil.collections.Collections.putList(this.tableColumnSpecs, tableColumn.getTableName(), tableColumnSpecWrapper.getTableColumnSpec());
+        }
+        LOGGER.debug("Row concepts: {}", this.rowPropositionIdMap);
+    }
+
+    private void createWriters() throws QueryResultsHandlerProcessingException {
+        try {
+            File outputFileDirectory = this.etlProperties.outputFileDirectory(this.config.getName());
+            List<String> tableNames = this.config.getTableColumns()
+                    .stream()
+                    .map(TabularFileDestinationTableColumnEntity::getTableName)
+                    .distinct()
+                    .collect(Collectors.toCollection(ArrayList::new));
+            String nullValue = this.config.getNullValue();
+            for (int i = 0, n = tableNames.size(); i < n; i++) {
+                String tableName = tableNames.get(i);
+                File file = new File(outputFileDirectory, tableName);
+                this.writers.put(tableName, new FileTabularWriter(
+                        new BufferedWriter(new FileWriter(file)),
+                        this.delimiter,
+                        this.config.isAlwaysQuoted() ? QuoteModel.ALWAYS : QuoteModel.WHEN_QUOTE_EMBEDDED,
+                        nullValue == null ? "" : nullValue));
+            }
+        } catch (IOException ex) {
+            throw new QueryResultsHandlerProcessingException(ex);
         }
     }
 
