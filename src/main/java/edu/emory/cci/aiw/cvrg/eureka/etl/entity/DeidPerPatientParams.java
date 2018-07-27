@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.io.UnsupportedEncodingException;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -58,99 +57,99 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "DEID_PER_PATIENT_PARAMS")
 public class DeidPerPatientParams {
-	
-	@Id
-	@SequenceGenerator(name = "DEID_PER_PT_PARAMS_SEQ_GEN", sequenceName = "DEID_PER_PT_PARAMS_SEQ",
-			allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,
-			generator = "DEID_PER_PT_PARAMS_SEQ_GEN")
-	private Long id;
-	
-	@Column(nullable = false)
-	private String keyId;
-	
-	@Column(name = "DTOFFSET")
-	private Integer offset;
-	
-	private String cipherKey;
-	
-	private String salt;
-	
-	@ManyToOne
-	@JoinColumn(name="DESTINATIONS_ID")
-	private DestinationEntity destination;
 
-	public DeidPerPatientParams() {
-	}
+    @Id
+    @SequenceGenerator(name = "DEID_PER_PT_PARAMS_SEQ_GEN", sequenceName = "DEID_PER_PT_PARAMS_SEQ",
+            allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "DEID_PER_PT_PARAMS_SEQ_GEN")
+    private Long id;
 
-	public DeidPerPatientParams(DestinationEntity destination, String keyId, int offset) {
-		this.destination = destination;
-		this.keyId = keyId;
-		this.offset = offset;
-	}
-	
-	public Long getId() {
-		return id;
-	}
+    @Column(nullable = false)
+    private String keyId;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Column(name = "DTOFFSET")
+    private Integer offset;
 
-	public DestinationEntity getDestination() {
-		return destination;
-	}
+    private String cipherKey;
 
-	public void setDestination(DestinationEntity destination) {
-		this.destination = destination;
-	}
+    private String salt;
 
-	public String getKeyId() {
-		return keyId;
-	}
+    @ManyToOne
+    @JoinColumn(name = "DESTINATIONS_ID")
+    private DestinationEntity destination;
 
-	public void setKeyId(String keyId) {
-		this.keyId = keyId;
-	}
+    public DeidPerPatientParams() {
+    }
 
-	public Integer getOffset() {
-		return offset;
-	}
+    public DeidPerPatientParams(DestinationEntity destination, String keyId, int offset) {
+        this.destination = destination;
+        this.keyId = keyId;
+        this.offset = offset;
+    }
 
-	public void setOffset(Integer offset) {
-		this.offset = offset;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getCipherKey() {
-		return cipherKey;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setCipherKey(String cipherKey) {
-		this.cipherKey = cipherKey;
-	}
-	
-	public void setSalt(byte[] salt) {
-		if (salt != null) {
-			try {
-				this.salt = new String(salt, "UTF-8");
-			} catch (UnsupportedEncodingException ex) {
-				throw new AssertionError("UTF-8 character set not supported");
-			}
-		} else {
-			this.salt = null;
-		}
-	}
-	
-	public byte[] getSalt() {
-		if (this.salt == null) {
-			return null;
-		} else {
-			try {
-				return this.salt.getBytes("UTF-8");
-			} catch (UnsupportedEncodingException ex) {
-				throw new AssertionError("UTF-8 character set not supported");
-			}
-		}
-	}
-	
+    public DestinationEntity getDestination() {
+        return destination;
+    }
+
+    public void setDestination(DestinationEntity destination) {
+        this.destination = destination;
+    }
+
+    public String getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
+
+    public Integer getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Integer offset) {
+        this.offset = offset;
+    }
+
+    public String getCipherKey() {
+        return cipherKey;
+    }
+
+    public void setCipherKey(String cipherKey) {
+        this.cipherKey = cipherKey;
+    }
+
+    public void setSalt(byte[] salt) {
+        if (salt != null) {
+            try {
+                this.salt = new String(salt, "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                throw new AssertionError("UTF-8 character set not supported");
+            }
+        } else {
+            this.salt = null;
+        }
+    }
+
+    public byte[] getSalt() {
+        if (this.salt == null) {
+            return null;
+        } else {
+            try {
+                return this.salt.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                throw new AssertionError("UTF-8 character set not supported");
+            }
+        }
+    }
+
 }

@@ -41,7 +41,6 @@ import org.protempa.dest.deid.DeidConfig;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 /**
  *
  * @author Andrew Post

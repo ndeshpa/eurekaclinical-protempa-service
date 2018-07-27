@@ -952,4 +952,15 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="nitadeshpande" id="1361552652236-48">
+        <createTable tableName="TF_DEST_ID_POOL_IDS">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="TF_DEST_ID_POOL_ID_PK"/>
+            </column>
+            <column name="TFDESTTABLECOLUMNS_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="TFDESTTABLECOLUMNS_ID" baseTableName="TF_DEST_ID_POOL_IDS" constraintName="FK_TF_DEST_TC_POOL" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="TF_DEST_TABLECOLUMNS" referencesUniqueColumn="false"/>
+    </changeSet>
 </databaseChangeLog>
