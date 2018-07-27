@@ -102,7 +102,7 @@ import org.protempa.dest.StatisticsException;
 import org.protempa.proposition.interval.Interval;
 
 @Path("/protected/jobs")
-@RolesAllowed({"researcher"})
+@RolesAllowed({ "researcher" })
 @Consumes(MediaType.APPLICATION_JSON)
 public class JobResource {
 
@@ -117,11 +117,9 @@ public class JobResource {
 	private final Provider<Task> taskProvider;
 
 	@Inject
-	public JobResource(JobDao inJobDao, TaskManager inTaskManager,
-			AuthorizedUserDao inEtlUserDao, DestinationDao inDestinationDao,
-			EtlProperties inEtlProperties,
-			ProtempaDestinationFactory inProtempaDestinationFactory,
-			Provider<EntityManager> inEntityManagerProvider,
+	public JobResource(JobDao inJobDao, TaskManager inTaskManager, AuthorizedUserDao inEtlUserDao,
+			DestinationDao inDestinationDao, EtlProperties inEtlProperties,
+			ProtempaDestinationFactory inProtempaDestinationFactory, Provider<EntityManager> inEntityManagerProvider,
 			Provider<Task> inTaskProvider) {
 		this.jobDao = inJobDao;
 		this.taskManager = inTaskManager;
@@ -132,16 +130,15 @@ public class JobResource {
 		this.protempaDestinationFactory = inProtempaDestinationFactory;
 		this.entityManagerProvider = inEntityManagerProvider;
 		this.taskProvider = inTaskProvider;
-		
+
 	}
 
 	@Transactional
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Job> getAll(@Context HttpServletRequest request,
-			@QueryParam("order") String order) {
-		JobFilter jobFilter = new JobFilter(null,
-				this.authenticationSupport.getUser(request).getId(), null, null, null, null);
+	public List<Job> getAll(@Context HttpServletRequest request, @QueryParam("order") String order) {
+		JobFilter jobFilter = new JobFilter(null, this.authenticationSupport.getUser(request).getId(), null, null, null,
+				null);
 		List<Job> jobs = new ArrayList<>();
 		List<JobEntity> jobEntities;
 		if (order == null) {
@@ -149,7 +146,33 @@ public class JobResource {
 		} else if (order.equals("desc")) {
 			jobEntities = this.jobDao.getWithFilterDesc(jobFilter);
 		} else {
-			throw new HttpStatusException(Response.Status.PRECONDITION_FAILED, "Invalid value for the order parameter: " + order);
+			throw new HttpStatusException(Response.Status.PRECONDITION_FAILED,
+					"Invalid value for the order parameter: " + order);
+		}
+		for (JobEntity jobEntity : jobEntities) {
+			jobs.add(jobEntity.toJob());
+		}
+		return jobs;
+	}
+
+	@Transactional
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/all")
+	@RolesAllowed({ "admin" })
+	public List<Job> getAllJobs(@Context HttpServletRequest request, @QueryParam("order") String order) {
+		// JobFilter jobFilter = new JobFilter(null,
+		// this.authenticationSupport.getUser(request).getId(), null, null, null, null);
+		List<Job> jobs = new ArrayList<>();
+		List<JobEntity> jobEntities;
+		if (order == null) {
+			jobEntities = this.jobDao.getAll(); 
+		} // else if (order.equals("desc")) {
+			// jobEntities = this.jobDao.getWithFilterDesc(jobFilter);
+			// }
+		else {
+			throw new HttpStatusException(Response.Status.PRECONDITION_FAILED,
+					"Invalid value for the order parameter: " + order);
 		}
 		for (JobEntity jobEntity : jobEntities) {
 			jobs.add(jobEntity.toJob());
@@ -161,8 +184,7 @@ public class JobResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{jobId}")
-	public Job getJob(@Context HttpServletRequest request,
-			@PathParam("jobId") Long inJobId) {
+	public Job getJob(@Context HttpServletRequest request, @PathParam("jobId") Long inJobId) {
 		return getJobEntity(request, inJobId).toJob();
 	}
 
@@ -182,8 +204,9 @@ public class JobResource {
 				org.protempa.dest.Statistics statistics = dest.getStatistics();
 				if (statistics != null) {
 					result.setNumberOfKeys(statistics.getNumberOfKeys());
-					result.setCounts(statistics.getCounts(inPropId != null ? new String[]{inPropId} : null));
-					result.setChildrenToParents(statistics.getChildrenToParents(inPropId != null ? new String[]{inPropId} : null));
+					result.setCounts(statistics.getCounts(inPropId != null ? new String[] { inPropId } : null));
+					result.setChildrenToParents(
+							statistics.getChildrenToParents(inPropId != null ? new String[] { inPropId } : null));
 				}
 				return result;
 			} catch (DestinationInitException | StatisticsException ex) {
@@ -203,10 +226,9 @@ public class JobResource {
 		return getJobStats(request, inJobId, null);
 	}
 
-	//Finer grained transactions in the implementation
+	// Finer grained transactions in the implementation
 	@POST
-	public Response submit(@Context HttpServletRequest request,
-			JobRequest inJobRequest) {
+	public Response submit(@Context HttpServletRequest request, JobRequest inJobRequest) {
 		Long jobId = doCreateJob(inJobRequest, request);
 		return Response.created(URI.create("/" + jobId)).build();
 	}
@@ -214,7 +236,7 @@ public class JobResource {
 	@Transactional
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"admin"})
+	@RolesAllowed({ "admin" })
 	@Path("/status")
 	public List<Job> getJobStatus(@QueryParam("filter") JobFilter inFilter) {
 		List<Job> jobs = new ArrayList<>();
@@ -231,8 +253,8 @@ public class JobResource {
 	public List<Job> getLatestJob(@Context HttpServletRequest request) {
 		List<Job> jobs = new ArrayList<>();
 		List<JobEntity> jobEntities;
-		JobFilter jobFilter = new JobFilter(null,
-				this.authenticationSupport.getUser(request).getId(), null, null, null, true);
+		JobFilter jobFilter = new JobFilter(null, this.authenticationSupport.getUser(request).getId(), null, null, null,
+				true);
 		jobEntities = this.jobDao.getLatestWithFilter(jobFilter);
 		for (JobEntity jobEntity : jobEntities) {
 			jobs.add(jobEntity.toJob());
@@ -241,13 +263,14 @@ public class JobResource {
 	}
 
 	private JobEntity getJobEntity(HttpServletRequest request, Long inJobId) {
-		JobFilter jobFilter = new JobFilter(inJobId,
-				this.authenticationSupport.getUser(request).getId(), null, null, null, null);
+		JobFilter jobFilter = new JobFilter(inJobId, this.authenticationSupport.getUser(request).getId(), null, null,
+				null, null);
 		List<JobEntity> jobEntities = this.jobDao.getWithFilter(jobFilter);
 		if (jobEntities.isEmpty()) {
 			throw new HttpStatusException(Status.NOT_FOUND);
 		} else if (jobEntities.size() > 1) {
-			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, jobEntities.size() + " jobs returned for job id " + inJobId);
+			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
+					jobEntities.size() + " jobs returned for job id " + inJobId);
 		} else {
 			return jobEntities.get(0);
 		}
@@ -256,16 +279,12 @@ public class JobResource {
 	private Long doCreateJob(JobRequest inJobRequest, HttpServletRequest request) {
 		JobSpec jobSpec = inJobRequest.getJobSpec();
 		Configuration prompts = toConfiguration(jobSpec.getPrompts());
-		JobEntity jobEntity
-				= newJobEntity(jobSpec,
-						this.authenticationSupport.getUser(request));
+		JobEntity jobEntity = newJobEntity(jobSpec, this.authenticationSupport.getUser(request));
 		DateTimeFilter dateTimeFilter;
 		String dateRangePhenotypeKey = jobSpec.getDateRangePhenotypeKey();
 		if (dateRangePhenotypeKey != null) {
-			dateTimeFilter = new DateTimeFilter(
-					new String[]{dateRangePhenotypeKey},
-					jobSpec.getEarliestDate(), AbsoluteTimeGranularity.DAY,
-					jobSpec.getLatestDate(), AbsoluteTimeGranularity.DAY,
+			dateTimeFilter = new DateTimeFilter(new String[] { dateRangePhenotypeKey }, jobSpec.getEarliestDate(),
+					AbsoluteTimeGranularity.DAY, jobSpec.getLatestDate(), AbsoluteTimeGranularity.DAY,
 					toProtempaSide(jobSpec.getEarliestDateSide()), toProtempaSide(jobSpec.getLatestDateSide()));
 		} else {
 			dateTimeFilter = null;
@@ -280,15 +299,15 @@ public class JobResource {
 		this.taskManager.queueTask(task);
 		return jobEntity.getId();
 	}
-	
+
 	private static Interval.Side toProtempaSide(Side side) {
 		switch (side) {
-			case START:
-				return Interval.Side.START;
-			case FINISH:
-				return Interval.Side.FINISH;
-			default:
-				throw new AssertionError("Unexpected side " + side);
+		case START:
+			return Interval.Side.START;
+		case FINISH:
+			return Interval.Side.FINISH;
+		default:
+			throw new AssertionError("Unexpected side " + side);
 		}
 	}
 
@@ -305,8 +324,7 @@ public class JobResource {
 		}
 		EntityTransaction transaction = this.entityManagerProvider.get().getTransaction();
 		transaction.begin();
-		DestinationEntity destination
-				= this.destinationDao.getCurrentByName(destinationId);
+		DestinationEntity destination = this.destinationDao.getCurrentByName(destinationId);
 		if (destination == null) {
 			transaction.rollback();
 			throw new HttpStatusException(Status.BAD_REQUEST, "Invalid destination " + job.getDestinationId());
@@ -334,13 +352,15 @@ public class JobResource {
 			for (int i = 0; i < dsbSections.length; i++) {
 				SourceConfig.Section section = dsbSections[i];
 				try {
-					BackendInstanceSpec<DataSourceBackend> bis = configurations.newDataSourceBackendSection(section.getId());
+					BackendInstanceSpec<DataSourceBackend> bis = configurations
+							.newDataSourceBackendSection(section.getId());
 					SourceConfigOption[] options = section.getOptions();
 					for (SourceConfigOption option : options) {
 						bis.setProperty(option.getName(), option.getValue());
 					}
 					sections.add(bis);
-				} catch (BackendSpecNotFoundException | BackendProviderSpecLoaderException | InvalidPropertyNameException | InvalidPropertyValueException ex) {
+				} catch (BackendSpecNotFoundException | BackendProviderSpecLoaderException
+						| InvalidPropertyNameException | InvalidPropertyValueException ex) {
 					throw new HttpStatusException(Status.BAD_REQUEST, ex);
 				}
 			}
