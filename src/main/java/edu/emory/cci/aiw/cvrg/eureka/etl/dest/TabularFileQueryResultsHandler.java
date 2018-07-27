@@ -49,9 +49,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +59,6 @@ import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
 import org.protempa.PropositionDefinitionCache;
 import org.protempa.QueryException;
 import org.protempa.dest.AbstractQueryResultsHandler;
@@ -87,8 +84,6 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TabularFileQueryResultsHandler.class);
 
-    private final String queryId;
-    private final String username;
     private final TabularFileDestinationEntity config;
     private Map<String, FileTabularWriter> writers;
     private Map<String, List<TableColumnSpec>> tableColumnSpecs;
@@ -101,8 +96,6 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     TabularFileQueryResultsHandler(Query query, TabularFileDestinationEntity inTabularFileDestinationEntity, EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
         this.etlProperties = inEtlProperties;
-        this.queryId = query.getName();
-        this.username = query.getUsername();
         this.config = inTabularFileDestinationEntity;
         this.knowledgeSource = inKnowledgeSource;
         Character delim = inTabularFileDestinationEntity.getDelimiter();
