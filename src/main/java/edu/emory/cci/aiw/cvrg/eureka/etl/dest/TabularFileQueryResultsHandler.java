@@ -87,7 +87,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
     private final TabularFileDestinationEntity config;
     private final Map<String, FileTabularWriter> writers;
-    private final Map<String, Set<String>> rowPropositionIdMap;
+    private final Map<String, Map<Long, Set<String>>> rowPropositionIdMap;
     private final EtlProperties etlProperties;
     private final KnowledgeSource knowledgeSource;
     private final char delimiter;
@@ -139,10 +139,11 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         for (Map.Entry<String, Map<Long, List<TableColumnSpec>>> me : this.rowRankToColumn.entrySet()) {
             String tableName = me.getKey();
             Map<Long, List<TableColumnSpec>> columnSpecGroups = me.getValue();
-            for (List<TableColumnSpec> columnSpecs : columnSpecGroups.values()) {
+            for (Map.Entry<Long, List<TableColumnSpec>> me2 : columnSpecGroups.entrySet()) {
+                List<TableColumnSpec> columnSpecs = me2.getValue();
                 int n = columnSpecs.size();
                 FileTabularWriter writer = this.writers.get(tableName);
-                Set<String> rowPropIds = this.rowPropositionIdMap.get(tableName);
+                Set<String> rowPropIds = this.rowPropositionIdMap.get(tableName).get(me2.getKey());
                 if (rowPropIds != null) {
                     for (Proposition prop : propositions) {
                         if (rowPropIds.contains(prop.getId())) {
@@ -241,8 +242,14 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
                 TableColumnSpecWrapper tableColumnSpecWrapper = toTableColumnSpec(tableColumn, linksFormat);
                 String pid = tableColumnSpecWrapper.getPropId();
                 if (pid != null) {
+                    Long rowRank = tableColumn.getRowRank();
+                    Map<Long, Set<String>> get = this.rowPropositionIdMap.get(tableName);
+                    if (get == null) {
+                        get = new HashMap<>();
+                        this.rowPropositionIdMap.put(tableName, get);
+                    }
                     for (String propId : cache.collectPropIdDescendantsUsingInverseIsA(pid)) {
-                        org.arp.javautil.collections.Collections.putSet(this.rowPropositionIdMap, tableName, propId);
+                        org.arp.javautil.collections.Collections.putSet(get, rowRank, propId);
                     }
                 }
                 org.arp.javautil.collections.Collections.putList(value, tableColumn.getRowRank(), tableColumnSpecWrapper.getTableColumnSpec());
