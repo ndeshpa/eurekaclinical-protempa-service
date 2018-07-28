@@ -51,6 +51,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -143,18 +144,21 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
                 List<TableColumnSpec> columnSpecs = me2.getValue();
                 int n = columnSpecs.size();
                 FileTabularWriter writer = this.writers.get(tableName);
-                Set<String> rowPropIds = this.rowPropositionIdMap.get(tableName).get(me2.getKey());
-                if (rowPropIds != null) {
-                    for (Proposition prop : propositions) {
-                        if (rowPropIds.contains(prop.getId())) {
-                            try {
-                                for (int i = 0; i < n; i++) {
-                                    TableColumnSpec columnSpec = columnSpecs.get(i);
-                                    columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, writer);
+                Map<Long, Set<String>> get = this.rowPropositionIdMap.get(tableName);
+                if (get != null) {
+                    Set<String> rowPropIds = get.get(me2.getKey());
+                    if (rowPropIds != null) {
+                        for (Proposition prop : propositions) {
+                            if (rowPropIds.contains(prop.getId())) {
+                                try {
+                                    for (int i = 0; i < n; i++) {
+                                        TableColumnSpec columnSpec = columnSpecs.get(i);
+                                        columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, writer);
+                                    }
+                                    writer.newRow();
+                                } catch (TabularWriterException ex) {
+                                    throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
                                 }
-                                writer.newRow();
-                            } catch (TabularWriterException ex) {
-                                throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
                             }
                         }
                     }
@@ -198,11 +202,14 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     private void writeHeaders() throws AssertionError, QueryResultsHandlerProcessingException {
         for (Map.Entry<String, Map<Long, List<TableColumnSpec>>> me : this.rowRankToColumn.entrySet()) {
             List<String> columnNames = new ArrayList<>();
-            for (TableColumnSpec columnSpec : me.getValue().get(1L)) {
-                try {
-                    Arrays.addAll(columnNames, columnSpec.columnNames(this.knowledgeSource));
-                } catch (KnowledgeSourceReadException ex) {
-                    throw new AssertionError("Should never happen");
+            Iterator<List<TableColumnSpec>> iterator = me.getValue().values().iterator();
+            if (iterator.hasNext()) {
+                for (TableColumnSpec columnSpec : iterator.next()) {
+                    try {
+                        Arrays.addAll(columnNames, columnSpec.columnNames(this.knowledgeSource));
+                    } catch (KnowledgeSourceReadException ex) {
+                        throw new AssertionError("Should never happen");
+                    }
                 }
             }
             FileTabularWriter writer = this.writers.get(me.getKey());
