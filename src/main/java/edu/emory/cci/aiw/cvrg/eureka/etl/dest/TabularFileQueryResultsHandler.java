@@ -75,6 +75,7 @@ import org.protempa.dest.table.TabularWriterException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
+import org.protempa.query.QueryMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +95,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     private final char delimiter;
     private KnowledgeSourceCache ksCache;
     private Map<String, Map<Long, List<TableColumnSpec>>> rowRankToColumn;
+    private final Query query;
 
     TabularFileQueryResultsHandler(Query query, TabularFileDestinationEntity inTabularFileDestinationEntity, EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
@@ -109,6 +111,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         this.writers = new HashMap<>();
         this.rowPropositionIdMap = new HashMap<>();
         this.rowRankToColumn = new HashMap<>();
+        this.query = query;
     }
 
     @Override
@@ -278,11 +281,17 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
                     .distinct()
                     .collect(Collectors.toCollection(ArrayList::new));
             String nullValue = this.config.getNullValue();
+            boolean doAppend = this.query.getQueryMode() != QueryMode.REPLACE;
+            if (!doAppend) {
+                for (File f : outputFileDirectory.listFiles()) {
+                    f.delete();
+                }
+            }
             for (int i = 0, n = tableNames.size(); i < n; i++) {
                 String tableName = tableNames.get(i);
                 File file = new File(outputFileDirectory, tableName);
                 this.writers.put(tableName, new FileTabularWriter(
-                        new BufferedWriter(new FileWriter(file)),
+                        new BufferedWriter(new FileWriter(file, doAppend)),
                         this.delimiter,
                         this.config.isAlwaysQuoted() ? QuoteModel.ALWAYS : QuoteModel.WHEN_QUOTE_EMBEDDED,
                         nullValue == null ? "" : nullValue));
