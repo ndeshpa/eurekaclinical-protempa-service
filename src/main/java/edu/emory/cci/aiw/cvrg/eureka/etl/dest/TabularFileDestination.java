@@ -49,28 +49,26 @@ import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerInitException;
 import org.protempa.query.Query;
-import org.protempa.query.QueryMode;
 
 /**
- *
+ * Protempa destination for writing data to tabular files.
+ * 
  * @author Andrew Post
  */
 public class TabularFileDestination extends AbstractDestination {
-	private final TabularFileDestinationEntity tabularFileDestinationEntity;
-	private final EtlProperties etlProperties;
 
-	TabularFileDestination(EtlProperties inEtlProperties, TabularFileDestinationEntity inTabularFileDestinationEntity) {
-		assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
-		this.tabularFileDestinationEntity = inTabularFileDestinationEntity;
-		this.etlProperties = inEtlProperties;
-	}
+    private final TabularFileDestinationEntity tabularFileDestinationEntity;
+    private final EtlProperties etlProperties;
 
-	@Override
-	public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
-		if (query.getQueryMode() == QueryMode.UPDATE) {
-			throw new QueryResultsHandlerInitException("Update mode not supported");
-		}
-		return new TabularFileQueryResultsHandler(query, this.tabularFileDestinationEntity, this.etlProperties, knowledgeSource);
-	}
-	
+    TabularFileDestination(EtlProperties inEtlProperties, TabularFileDestinationEntity inTabularFileDestinationEntity) {
+        assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
+        this.tabularFileDestinationEntity = inTabularFileDestinationEntity;
+        this.etlProperties = inEtlProperties;
+    }
+
+    @Override
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
+        return new TabularFileQueryResultsHandler(query, this.tabularFileDestinationEntity, this.etlProperties, knowledgeSource);
+    }
+
 }
