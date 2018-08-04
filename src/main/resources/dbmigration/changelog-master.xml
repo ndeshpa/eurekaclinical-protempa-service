@@ -1015,7 +1015,7 @@
         </insert>
         <insert tableName="JOB_MODES">
             <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
-            <column name="NAME" value="UKNOWN"/>
+            <column name="NAME" value="UNKNOWN"/>
             <column name="DESCRIPTION" value="Unknown job mode"/>
             <column name="RANK" valueNumeric="-1"/>
             <column name="DEFAULT" valueBoolean="false"/>

@@ -84,6 +84,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.Task;
 import java.io.IOException;
 import javax.persistence.EntityManager;
@@ -318,13 +319,25 @@ public class JobResource {
         JobEntity jobEntity = new JobEntity();
         String sourceConfigId = jobSpec.getSourceConfigId();
         if (sourceConfigId == null) {
-            throw new HttpStatusException(Status.BAD_REQUEST, "Sourceconfig must be specified");
+            throw new HttpStatusException(Status.BAD_REQUEST, "sourceconfig must be specified");
         }
         jobEntity.setSourceConfigId(sourceConfigId);
         String destinationId = jobSpec.getDestinationId();
         if (destinationId == null) {
-            throw new HttpStatusException(Status.BAD_REQUEST, "Destination must be specified");
+            throw new HttpStatusException(Status.BAD_REQUEST, "destination is required");
         }
+        Long jobMode = jobSpec.getJobMode();
+        if (jobMode == null) {
+            throw new HttpStatusException(Status.BAD_REQUEST, "jobMode is required");
+        }
+        
+        JobModeEntity jobModeEntity = this.jobModeDao.retrieve(jobSpec.getJobMode());
+        if (jobModeEntity == null) {
+            throw new HttpStatusException(Status.BAD_REQUEST, "unknown jobMode " + jobMode);
+        } else if (jobModeEntity.getName().equals("UNKNOWN")) {
+            throw new HttpStatusException(Status.BAD_REQUEST, "jobMode UNKNOWN is only for jobs that predate job modes and cannot be set on new jobs");
+        }
+        
         EntityTransaction transaction = this.entityManagerProvider.get().getTransaction();
         transaction.begin();
         DestinationEntity destination = this.destinationDao.getCurrentByName(destinationId);
@@ -336,7 +349,7 @@ public class JobResource {
         jobEntity.setCreated(new Date());
         jobEntity.setUser(etlUser);
         jobEntity.setName(jobSpec.getName());
-        jobEntity.setJobMode(this.jobModeDao.retrieve(jobSpec.getJobMode()));
+        jobEntity.setJobMode(jobModeEntity);
         
         this.jobDao.create(jobEntity);
         transaction.commit();
