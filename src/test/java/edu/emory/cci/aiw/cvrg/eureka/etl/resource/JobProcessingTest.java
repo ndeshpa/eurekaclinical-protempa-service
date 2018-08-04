@@ -91,7 +91,7 @@ public class JobProcessingTest extends AbstractEtlResourceTest {
         JobSpec jobSpec = new JobSpec();
         jobSpec.setSourceConfigId(Constants.SOURCECONFIG_NAME);
         jobSpec.setDestinationId(Constants.DESTINATION_NAME);
-        jobSpec.setJobMode(jobMode);
+        jobSpec.setJobMode(jobMode.getId());
         SourceConfig prompts = new SourceConfig();
         prompts.setId(Constants.SOURCECONFIG_NAME);
         Section section = new Section();

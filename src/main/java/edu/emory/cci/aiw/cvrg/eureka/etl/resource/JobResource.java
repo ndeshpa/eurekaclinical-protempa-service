@@ -336,7 +336,7 @@ public class JobResource {
         jobEntity.setCreated(new Date());
         jobEntity.setUser(etlUser);
         jobEntity.setName(jobSpec.getName());
-        jobEntity.setJobMode(this.jobModeDao.retrieve(jobSpec.getJobMode().getId()));
+        jobEntity.setJobMode(this.jobModeDao.retrieve(jobSpec.getJobMode()));
         
         this.jobDao.create(jobEntity);
         transaction.commit();
