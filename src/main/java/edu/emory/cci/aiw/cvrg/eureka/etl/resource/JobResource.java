@@ -81,6 +81,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.Task;
@@ -100,275 +101,289 @@ import org.protempa.dest.Destination;
 import org.protempa.dest.DestinationInitException;
 import org.protempa.dest.StatisticsException;
 import org.protempa.proposition.interval.Interval;
+import org.protempa.query.QueryMode;
 
 @Path("/protected/jobs")
-@RolesAllowed({ "researcher" })
+@RolesAllowed({"researcher"})
 @Consumes(MediaType.APPLICATION_JSON)
 public class JobResource {
 
-	private final JobDao jobDao;
-	private final AuthorizedUserDao etlUserDao;
-	private final TaskManager taskManager;
-	private final AuthorizedUserSupport authenticationSupport;
-	private final DestinationDao destinationDao;
-	private final ProtempaDestinationFactory protempaDestinationFactory;
-	private final EtlProperties etlProperties;
-	private final Provider<EntityManager> entityManagerProvider;
-	private final Provider<Task> taskProvider;
+    private final JobDao jobDao;
+    private final AuthorizedUserDao etlUserDao;
+    private final TaskManager taskManager;
+    private final AuthorizedUserSupport authenticationSupport;
+    private final DestinationDao destinationDao;
+    private final ProtempaDestinationFactory protempaDestinationFactory;
+    private final EtlProperties etlProperties;
+    private final Provider<EntityManager> entityManagerProvider;
+    private final Provider<Task> taskProvider;
+    private final JobModeDao jobModeDao;
 
-	@Inject
-	public JobResource(JobDao inJobDao, TaskManager inTaskManager, AuthorizedUserDao inEtlUserDao,
-			DestinationDao inDestinationDao, EtlProperties inEtlProperties,
-			ProtempaDestinationFactory inProtempaDestinationFactory, Provider<EntityManager> inEntityManagerProvider,
-			Provider<Task> inTaskProvider) {
-		this.jobDao = inJobDao;
-		this.taskManager = inTaskManager;
-		this.etlUserDao = inEtlUserDao;
-		this.authenticationSupport = new AuthorizedUserSupport(this.etlUserDao);
-		this.destinationDao = inDestinationDao;
-		this.etlProperties = inEtlProperties;
-		this.protempaDestinationFactory = inProtempaDestinationFactory;
-		this.entityManagerProvider = inEntityManagerProvider;
-		this.taskProvider = inTaskProvider;
+    @Inject
+    public JobResource(JobDao inJobDao, TaskManager inTaskManager, AuthorizedUserDao inEtlUserDao,
+            DestinationDao inDestinationDao, EtlProperties inEtlProperties,
+            ProtempaDestinationFactory inProtempaDestinationFactory, Provider<EntityManager> inEntityManagerProvider,
+            Provider<Task> inTaskProvider, JobModeDao inJobModeDao) {
+        this.jobDao = inJobDao;
+        this.taskManager = inTaskManager;
+        this.etlUserDao = inEtlUserDao;
+        this.authenticationSupport = new AuthorizedUserSupport(this.etlUserDao);
+        this.destinationDao = inDestinationDao;
+        this.etlProperties = inEtlProperties;
+        this.protempaDestinationFactory = inProtempaDestinationFactory;
+        this.entityManagerProvider = inEntityManagerProvider;
+        this.taskProvider = inTaskProvider;
+        this.jobModeDao = inJobModeDao;
+    }
 
-	}
+    @Transactional
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Job> getAll(@Context HttpServletRequest request, @QueryParam("order") String order) {
+        JobFilter jobFilter = new JobFilter(null, this.authenticationSupport.getUser(request).getId(), null, null, null,
+                null);
+        List<Job> jobs = new ArrayList<>();
+        List<JobEntity> jobEntities;
+        if (order == null) {
+            jobEntities = this.jobDao.getWithFilter(jobFilter);
+        } else if (order.equals("desc")) {
+            jobEntities = this.jobDao.getWithFilterDesc(jobFilter);
+        } else {
+            throw new HttpStatusException(Response.Status.PRECONDITION_FAILED,
+                    "Invalid value for the order parameter: " + order);
+        }
+        for (JobEntity jobEntity : jobEntities) {
+            jobs.add(jobEntity.toJob());
+        }
+        return jobs;
+    }
 
-	@Transactional
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<Job> getAll(@Context HttpServletRequest request, @QueryParam("order") String order) {
-		JobFilter jobFilter = new JobFilter(null, this.authenticationSupport.getUser(request).getId(), null, null, null,
-				null);
-		List<Job> jobs = new ArrayList<>();
-		List<JobEntity> jobEntities;
-		if (order == null) {
-			jobEntities = this.jobDao.getWithFilter(jobFilter);
-		} else if (order.equals("desc")) {
-			jobEntities = this.jobDao.getWithFilterDesc(jobFilter);
-		} else {
-			throw new HttpStatusException(Response.Status.PRECONDITION_FAILED,
-					"Invalid value for the order parameter: " + order);
-		}
-		for (JobEntity jobEntity : jobEntities) {
-			jobs.add(jobEntity.toJob());
-		}
-		return jobs;
-	}
+    @Transactional
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/all")
+    @RolesAllowed({"admin"})
+    public List<Job> getAllJobs(@Context HttpServletRequest request, @QueryParam("order") String order) {
+        // JobFilter jobFilter = new JobFilter(null,
+        // this.authenticationSupport.getUser(request).getId(), null, null, null, null);
+        List<Job> jobs = new ArrayList<>();
+        List<JobEntity> jobEntities;
+        if (order == null) {
+            jobEntities = this.jobDao.getAll();
+        } // else if (order.equals("desc")) {
+        // jobEntities = this.jobDao.getWithFilterDesc(jobFilter);
+        // }
+        else {
+            throw new HttpStatusException(Response.Status.PRECONDITION_FAILED,
+                    "Invalid value for the order parameter: " + order);
+        }
+        for (JobEntity jobEntity : jobEntities) {
+            jobs.add(jobEntity.toJob());
+        }
+        return jobs;
+    }
 
-	@Transactional
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/all")
-	@RolesAllowed({ "admin" })
-	public List<Job> getAllJobs(@Context HttpServletRequest request, @QueryParam("order") String order) {
-		// JobFilter jobFilter = new JobFilter(null,
-		// this.authenticationSupport.getUser(request).getId(), null, null, null, null);
-		List<Job> jobs = new ArrayList<>();
-		List<JobEntity> jobEntities;
-		if (order == null) {
-			jobEntities = this.jobDao.getAll(); 
-		} // else if (order.equals("desc")) {
-			// jobEntities = this.jobDao.getWithFilterDesc(jobFilter);
-			// }
-		else {
-			throw new HttpStatusException(Response.Status.PRECONDITION_FAILED,
-					"Invalid value for the order parameter: " + order);
-		}
-		for (JobEntity jobEntity : jobEntities) {
-			jobs.add(jobEntity.toJob());
-		}
-		return jobs;
-	}
+    @Transactional
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{jobId}")
+    public Job getJob(@Context HttpServletRequest request, @PathParam("jobId") Long inJobId) {
+        return getJobEntity(request, inJobId).toJob();
+    }
 
-	@Transactional
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{jobId}")
-	public Job getJob(@Context HttpServletRequest request, @PathParam("jobId") Long inJobId) {
-		return getJobEntity(request, inJobId).toJob();
-	}
+    @Transactional
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{jobId}/stats/{propId}")
+    public org.eurekaclinical.eureka.client.comm.Statistics getJobStats(@Context HttpServletRequest request,
+            @PathParam("jobId") Long inJobId, @PathParam("propId") String inPropId) {
+        Job job = getJob(request, inJobId);
+        String destinationId = job.getDestinationId();
+        DestinationEntity destEntity = this.destinationDao.getCurrentByName(destinationId);
+        if (destEntity != null) {
+            try {
+                Destination dest = this.protempaDestinationFactory.getInstance(destEntity, QueryMode.REPLACE);
+                Statistics result = new Statistics();
+                org.protempa.dest.Statistics statistics = dest.getStatistics();
+                if (statistics != null) {
+                    result.setNumberOfKeys(statistics.getNumberOfKeys());
+                    result.setCounts(statistics.getCounts(inPropId != null ? new String[]{inPropId} : null));
+                    result.setChildrenToParents(
+                            statistics.getChildrenToParents(inPropId != null ? new String[]{inPropId} : null));
+                }
+                return result;
+            } catch (DestinationInitException | StatisticsException ex) {
+                throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "Error getting stats", ex);
+            }
+        } else {
+            throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "Invalid destination id " + destinationId);
+        }
+    }
 
-	@Transactional
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{jobId}/stats/{propId}")
-	public org.eurekaclinical.eureka.client.comm.Statistics getJobStats(@Context HttpServletRequest request,
-			@PathParam("jobId") Long inJobId, @PathParam("propId") String inPropId) {
-		Job job = getJob(request, inJobId);
-		String destinationId = job.getDestinationId();
-		DestinationEntity destEntity = this.destinationDao.getCurrentByName(destinationId);
-		if (destEntity != null) {
-			try {
-				Destination dest = this.protempaDestinationFactory.getInstance(destEntity, false);
-				Statistics result = new Statistics();
-				org.protempa.dest.Statistics statistics = dest.getStatistics();
-				if (statistics != null) {
-					result.setNumberOfKeys(statistics.getNumberOfKeys());
-					result.setCounts(statistics.getCounts(inPropId != null ? new String[] { inPropId } : null));
-					result.setChildrenToParents(
-							statistics.getChildrenToParents(inPropId != null ? new String[] { inPropId } : null));
-				}
-				return result;
-			} catch (DestinationInitException | StatisticsException ex) {
-				throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "Error getting stats", ex);
-			}
-		} else {
-			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "Invalid destination id " + destinationId);
-		}
-	}
+    @Transactional
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{jobId}/stats")
+    public org.eurekaclinical.eureka.client.comm.Statistics getJobStatsRoot(@Context HttpServletRequest request,
+            @PathParam("jobId") Long inJobId) {
+        return getJobStats(request, inJobId, null);
+    }
 
-	@Transactional
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{jobId}/stats")
-	public org.eurekaclinical.eureka.client.comm.Statistics getJobStatsRoot(@Context HttpServletRequest request,
-			@PathParam("jobId") Long inJobId) {
-		return getJobStats(request, inJobId, null);
-	}
+    // Finer grained transactions in the implementation
+    @POST
+    public Response submit(@Context HttpServletRequest request, JobRequest inJobRequest) {
+        validate(inJobRequest);
+        Long jobId = doCreateJob(inJobRequest, request);
+        return Response.created(URI.create("/" + jobId)).build();
+    }
 
-	// Finer grained transactions in the implementation
-	@POST
-	public Response submit(@Context HttpServletRequest request, JobRequest inJobRequest) {
-		Long jobId = doCreateJob(inJobRequest, request);
-		return Response.created(URI.create("/" + jobId)).build();
-	}
+    @Transactional
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"admin"})
+    @Path("/status")
+    public List<Job> getJobStatus(@QueryParam("filter") JobFilter inFilter) {
+        List<Job> jobs = new ArrayList<>();
+        for (JobEntity jobEntity : this.jobDao.getWithFilter(inFilter)) {
+            jobs.add(jobEntity.toJob());
+        }
+        return jobs;
+    }
 
-	@Transactional
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({ "admin" })
-	@Path("/status")
-	public List<Job> getJobStatus(@QueryParam("filter") JobFilter inFilter) {
-		List<Job> jobs = new ArrayList<>();
-		for (JobEntity jobEntity : this.jobDao.getWithFilter(inFilter)) {
-			jobs.add(jobEntity.toJob());
-		}
-		return jobs;
-	}
+    @Transactional
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/latest")
+    public List<Job> getLatestJob(@Context HttpServletRequest request) {
+        List<Job> jobs = new ArrayList<>();
+        List<JobEntity> jobEntities;
+        JobFilter jobFilter = new JobFilter(null, this.authenticationSupport.getUser(request).getId(), null, null, null,
+                true);
+        jobEntities = this.jobDao.getLatestWithFilter(jobFilter);
+        for (JobEntity jobEntity : jobEntities) {
+            jobs.add(jobEntity.toJob());
+        }
+        return jobs;
+    }
 
-	@Transactional
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/latest")
-	public List<Job> getLatestJob(@Context HttpServletRequest request) {
-		List<Job> jobs = new ArrayList<>();
-		List<JobEntity> jobEntities;
-		JobFilter jobFilter = new JobFilter(null, this.authenticationSupport.getUser(request).getId(), null, null, null,
-				true);
-		jobEntities = this.jobDao.getLatestWithFilter(jobFilter);
-		for (JobEntity jobEntity : jobEntities) {
-			jobs.add(jobEntity.toJob());
-		}
-		return jobs;
-	}
+    private JobEntity getJobEntity(HttpServletRequest request, Long inJobId) {
+        JobFilter jobFilter = new JobFilter(inJobId, this.authenticationSupport.getUser(request).getId(), null, null,
+                null, null);
+        List<JobEntity> jobEntities = this.jobDao.getWithFilter(jobFilter);
+        if (jobEntities.isEmpty()) {
+            throw new HttpStatusException(Status.NOT_FOUND);
+        } else if (jobEntities.size() > 1) {
+            throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
+                    jobEntities.size() + " jobs returned for job id " + inJobId);
+        } else {
+            return jobEntities.get(0);
+        }
+    }
 
-	private JobEntity getJobEntity(HttpServletRequest request, Long inJobId) {
-		JobFilter jobFilter = new JobFilter(inJobId, this.authenticationSupport.getUser(request).getId(), null, null,
-				null, null);
-		List<JobEntity> jobEntities = this.jobDao.getWithFilter(jobFilter);
-		if (jobEntities.isEmpty()) {
-			throw new HttpStatusException(Status.NOT_FOUND);
-		} else if (jobEntities.size() > 1) {
-			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
-					jobEntities.size() + " jobs returned for job id " + inJobId);
-		} else {
-			return jobEntities.get(0);
-		}
-	}
+    private Long doCreateJob(JobRequest inJobRequest, HttpServletRequest request) {
+        JobSpec jobSpec = inJobRequest.getJobSpec();
+        Configuration prompts = toConfiguration(jobSpec.getPrompts());
+        JobEntity jobEntity = newJobEntity(jobSpec, this.authenticationSupport.getUser(request));
+        DateTimeFilter dateTimeFilter;
+        String dateRangePhenotypeKey = jobSpec.getDateRangePhenotypeKey();
+        if (dateRangePhenotypeKey != null) {
+            dateTimeFilter = new DateTimeFilter(new String[]{dateRangePhenotypeKey}, jobSpec.getEarliestDate(),
+                    AbsoluteTimeGranularity.DAY, jobSpec.getLatestDate(), AbsoluteTimeGranularity.DAY,
+                    toProtempaSide(jobSpec.getEarliestDateSide()), toProtempaSide(jobSpec.getLatestDateSide()));
+        } else {
+            dateTimeFilter = null;
+        }
+        Task task = this.taskProvider.get();
+        task.setJobId(jobEntity.getId());
+        task.setPropositionDefinitions(inJobRequest.getUserPropositions());
+        task.setPropositionIdsToShow(inJobRequest.getPropositionIdsToShow());
+        task.setFilter(dateTimeFilter);
+        task.setPrompts(prompts);
+        this.taskManager.queueTask(task);
+        return jobEntity.getId();
+    }
 
-	private Long doCreateJob(JobRequest inJobRequest, HttpServletRequest request) {
-		JobSpec jobSpec = inJobRequest.getJobSpec();
-		Configuration prompts = toConfiguration(jobSpec.getPrompts());
-		JobEntity jobEntity = newJobEntity(jobSpec, this.authenticationSupport.getUser(request));
-		DateTimeFilter dateTimeFilter;
-		String dateRangePhenotypeKey = jobSpec.getDateRangePhenotypeKey();
-		if (dateRangePhenotypeKey != null) {
-			dateTimeFilter = new DateTimeFilter(new String[] { dateRangePhenotypeKey }, jobSpec.getEarliestDate(),
-					AbsoluteTimeGranularity.DAY, jobSpec.getLatestDate(), AbsoluteTimeGranularity.DAY,
-					toProtempaSide(jobSpec.getEarliestDateSide()), toProtempaSide(jobSpec.getLatestDateSide()));
-		} else {
-			dateTimeFilter = null;
-		}
-		Task task = this.taskProvider.get();
-		task.setJobId(jobEntity.getId());
-		task.setPropositionDefinitions(inJobRequest.getUserPropositions());
-		task.setPropositionIdsToShow(inJobRequest.getPropositionIdsToShow());
-		task.setFilter(dateTimeFilter);
-		task.setUpdateData(jobSpec.isUpdateData());
-		task.setPrompts(prompts);
-		this.taskManager.queueTask(task);
-		return jobEntity.getId();
-	}
+    private static Interval.Side toProtempaSide(Side side) {
+        switch (side) {
+            case START:
+                return Interval.Side.START;
+            case FINISH:
+                return Interval.Side.FINISH;
+            default:
+                throw new AssertionError("Unexpected side " + side);
+        }
+    }
 
-	private static Interval.Side toProtempaSide(Side side) {
-		switch (side) {
-		case START:
-			return Interval.Side.START;
-		case FINISH:
-			return Interval.Side.FINISH;
-		default:
-			throw new AssertionError("Unexpected side " + side);
-		}
-	}
+    private JobEntity newJobEntity(JobSpec jobSpec, AuthorizedUserEntity etlUser) {
+        JobEntity jobEntity = new JobEntity();
+        String sourceConfigId = jobSpec.getSourceConfigId();
+        if (sourceConfigId == null) {
+            throw new HttpStatusException(Status.BAD_REQUEST, "Sourceconfig must be specified");
+        }
+        jobEntity.setSourceConfigId(sourceConfigId);
+        String destinationId = jobSpec.getDestinationId();
+        if (destinationId == null) {
+            throw new HttpStatusException(Status.BAD_REQUEST, "Destination must be specified");
+        }
+        EntityTransaction transaction = this.entityManagerProvider.get().getTransaction();
+        transaction.begin();
+        DestinationEntity destination = this.destinationDao.getCurrentByName(destinationId);
+        if (destination == null) {
+            transaction.rollback();
+            throw new HttpStatusException(Status.BAD_REQUEST, "Invalid destination " + jobSpec.getDestinationId());
+        }
+        jobEntity.setDestination(destination);
+        jobEntity.setCreated(new Date());
+        jobEntity.setUser(etlUser);
+        jobEntity.setName(jobSpec.getName());
+        jobEntity.setJobMode(this.jobModeDao.retrieve(jobSpec.getJobMode().getId()));
+        
+        this.jobDao.create(jobEntity);
+        transaction.commit();
+        return jobEntity;
+    }
 
-	private JobEntity newJobEntity(JobSpec job, AuthorizedUserEntity etlUser) {
-		JobEntity jobEntity = new JobEntity();
-		String sourceConfigId = job.getSourceConfigId();
-		if (sourceConfigId == null) {
-			throw new HttpStatusException(Status.BAD_REQUEST, "Sourceconfig must be specified");
-		}
-		jobEntity.setSourceConfigId(sourceConfigId);
-		String destinationId = job.getDestinationId();
-		if (destinationId == null) {
-			throw new HttpStatusException(Status.BAD_REQUEST, "Destination must be specified");
-		}
-		EntityTransaction transaction = this.entityManagerProvider.get().getTransaction();
-		transaction.begin();
-		DestinationEntity destination = this.destinationDao.getCurrentByName(destinationId);
-		if (destination == null) {
-			transaction.rollback();
-			throw new HttpStatusException(Status.BAD_REQUEST, "Invalid destination " + job.getDestinationId());
-		}
-		jobEntity.setDestination(destination);
-		jobEntity.setCreated(new Date());
-		jobEntity.setUser(etlUser);
-		jobEntity.setName(job.getName());
-		this.jobDao.create(jobEntity);
-		transaction.commit();
-		return jobEntity;
-	}
+    private Configuration toConfiguration(SourceConfig prompts) {
+        if (prompts != null) {
+            Configuration result = new Configuration();
+            SourceConfig.Section[] dsbSections = prompts.getDataSourceBackends();
+            List<BackendInstanceSpec<DataSourceBackend>> sections = new ArrayList<>();
+            EurekaProtempaConfigurations configurations;
+            try {
+                configurations = new EurekaProtempaConfigurations(this.etlProperties);
+            } catch (IOException ex) {
+                throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
+            }
+            for (int i = 0; i < dsbSections.length; i++) {
+                SourceConfig.Section section = dsbSections[i];
+                try {
+                    BackendInstanceSpec<DataSourceBackend> bis = configurations
+                            .newDataSourceBackendSection(section.getId());
+                    SourceConfigOption[] options = section.getOptions();
+                    for (SourceConfigOption option : options) {
+                        bis.setProperty(option.getName(), option.getValue());
+                    }
+                    sections.add(bis);
+                } catch (BackendSpecNotFoundException | BackendProviderSpecLoaderException
+                        | InvalidPropertyNameException | InvalidPropertyValueException ex) {
+                    throw new HttpStatusException(Status.BAD_REQUEST, ex);
+                }
+            }
+            result.setDataSourceBackendSections(sections);
+            return result;
+        } else {
+            return null;
+        }
+    }
 
-	private Configuration toConfiguration(SourceConfig prompts) {
-		if (prompts != null) {
-			Configuration result = new Configuration();
-			SourceConfig.Section[] dsbSections = prompts.getDataSourceBackends();
-			List<BackendInstanceSpec<DataSourceBackend>> sections = new ArrayList<>();
-			EurekaProtempaConfigurations configurations;
-			try {
-				configurations = new EurekaProtempaConfigurations(this.etlProperties);
-			} catch (IOException ex) {
-				throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
-			}
-			for (int i = 0; i < dsbSections.length; i++) {
-				SourceConfig.Section section = dsbSections[i];
-				try {
-					BackendInstanceSpec<DataSourceBackend> bis = configurations
-							.newDataSourceBackendSection(section.getId());
-					SourceConfigOption[] options = section.getOptions();
-					for (SourceConfigOption option : options) {
-						bis.setProperty(option.getName(), option.getValue());
-					}
-					sections.add(bis);
-				} catch (BackendSpecNotFoundException | BackendProviderSpecLoaderException
-						| InvalidPropertyNameException | InvalidPropertyValueException ex) {
-					throw new HttpStatusException(Status.BAD_REQUEST, ex);
-				}
-			}
-			result.setDataSourceBackendSections(sections);
-			return result;
-		} else {
-			return null;
-		}
-	}
+    private void validate(JobRequest inJobRequest) {
+        JobSpec jobSpec = inJobRequest.getJobSpec();
+        if (jobSpec == null) {
+            throw new HttpStatusException(Status.BAD_REQUEST, "jobSpec is a required field");
+        }
+        if (jobSpec.getJobMode() == null) {
+            throw new HttpStatusException(Status.BAD_REQUEST, "The jobSpec must have a jobMode");
+        }
+    }
 
 }

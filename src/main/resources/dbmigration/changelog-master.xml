@@ -952,16 +952,66 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="nitadeshpande" id="1361552652236-48">
-        <createTable tableName="TF_DEST_ID_POOL_IDS">
+    <changeSet author="arpost" id="1361552652236-48">
+        <createTable tableName="JOB_MODES">
             <column name="ID" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="TF_DEST_ID_POOL_ID_PK"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="JOB_MODE_ID_PK"/>
             </column>
-            <column name="TFDESTTABLECOLUMNS_ID" type="BIGINT">
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addForeignKeyConstraint baseColumnNames="TFDESTTABLECOLUMNS_ID" baseTableName="TF_DEST_ID_POOL_IDS" constraintName="FK_TF_DEST_TC_POOL" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="TF_DEST_TABLECOLUMNS" referencesUniqueColumn="false"/>
-        <createSequence sequenceName="TF_DEST_ID_POOL_IDS_SEQ"/>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="UPDATE"/>
+            <column name="DESCRIPTION" value="Update data"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPLACE"/>
+            <column name="DESCRIPTION" value="Replace all data"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPROCESS_RETRIEVE"/>
+            <column name="DESCRIPTION" value="Retrieve from working memory"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPROCESS_CREATE"/>
+            <column name="DESCRIPTION" value="Add phenotypes to working memory"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPROCESS_UPDATE"/>
+            <column name="DESCRIPTION" value="Update working memory"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPROCESS_DELETE"/>
+            <column name="DESCRIPTION" value="Delete from working memory"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="UKNOWN"/>
+            <column name="DESCRIPTION" value="Unknown job mode"/>
+        </insert>
+        <addColumn tableName="JOBS">
+            <column name="JOBMODES_ID" type="BIGINT"/>
+        </addColumn>
+        <update tableName="JOBS">
+            <column name="JOBMODES_ID" valueSequenceCurrent="JOB_MODE_SEQ"/>
+        </update>
+        <addNotNullConstraint tableName="JOBS" columnName="JOBMODES_ID"/>
+        <addForeignKeyConstraint baseColumnNames="JOBMODES_ID" 
+                                 baseTableName="JOBS" 
+                                 constraintName="FK_JOBS_JOBMODE" 
+                                 deferrable="false" initiallyDeferred="false" 
+                                 onDelete="RESTRICT" referencedColumnNames="ID" 
+                                 referencedTableName="JOB_MODES" 
+                                 referencesUniqueColumn="false"/>
     </changeSet>
 </databaseChangeLog>

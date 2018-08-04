@@ -58,8 +58,10 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.SourceConfigDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EurekaDeidConfigDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaEncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaEurekaDeidConfigDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaJobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaLinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaRoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
@@ -88,5 +90,6 @@ public class AppTestModule extends AbstractModule {
         bind(EurekaDeidConfigDao.class).to(JpaEurekaDeidConfigDao.class);
         bind(LinkDao.class).to(JpaLinkDao.class);
         bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
+        bind(JobModeDao.class).to(JpaJobModeDao.class);
     }
 }

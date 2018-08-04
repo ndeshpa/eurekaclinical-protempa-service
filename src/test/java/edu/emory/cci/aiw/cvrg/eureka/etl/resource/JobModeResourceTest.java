@@ -1,6 +1,6 @@
 /*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
  * Copyright (C) 2012 - 2013 Emory University
  * %%
@@ -39,43 +39,43 @@
  */
 package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
+import com.sun.jersey.api.client.GenericType;
+import com.sun.jersey.api.client.WebResource;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
+import javax.ws.rs.core.MediaType;
+import java.util.List;
 import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
+import org.eurekaclinical.eureka.client.comm.JobMode;
 
 /**
+ * Tests for the {@link RoleResource} class.
  *
  * @author hrathod
+ *
  */
-public class JobResourceTest extends AbstractEtlResourceTest {
+public class JobModeResourceTest extends AbstractEtlResourceTest {
 
     /**
-     * Test if all the jobs added by the Setup class are returned properly,
-     * using a null Filter.
+     * Simply call super().
+     */
+    public JobModeResourceTest() {
+        super();
+    }
+
+    /**
+     * Test that proper number of roles are returned from the resource.
      */
     @Test
-    public void testJobListWithFilter() {
-        WebResource resource = this.resource();
-        JobFilter jobFilter = new JobFilter(null, null, null, null, null, null);
-        List<Job> jobs = resource.path("/api/protected/jobs/status").queryParam("filter",
-                jobFilter.toQueryParam()).accept(
-                MediaType.APPLICATION_JSON).get(new GenericType<List<Job>>() {
-                });
-        Assert.assertEquals(1, jobs.size());
+    public final void testJobModeListSize() {
+        List<JobMode> roles = getJson("/api/protected/jobmodes", new GenericType<List<JobMode>>() {});
+        Assert.assertEquals(1, roles.size());
     }
-
+    
     @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
+    public void testJobModeName() {
+        JobMode jobMode = getJson("/api/protected/jobmodes/byname/REPLACE", JobMode.class);
+        Assert.assertEquals("REPLACE", jobMode.getName());
     }
-
 }
