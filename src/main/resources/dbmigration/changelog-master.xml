@@ -1025,7 +1025,7 @@
         <update tableName="JOBS">
             <column name="JOBMODES_ID" valueSequenceCurrent="JOB_MODE_SEQ"/>
         </update>
-        <addNotNullConstraint tableName="JOBS" columnName="JOBMODES_ID"/>
+        <addNotNullConstraint tableName="JOBS" columnName="JOBMODES_ID" columnDataType="BIGINT"/>
         <addForeignKeyConstraint baseColumnNames="JOBMODES_ID" 
                                  baseTableName="JOBS" 
                                  constraintName="FK_JOBS_JOBMODE" 
