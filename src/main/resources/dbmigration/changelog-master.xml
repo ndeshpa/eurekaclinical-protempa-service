@@ -970,6 +970,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <createSequence sequenceName="JOB_MODE_SEQ"/>
         <insert tableName="JOB_MODES">
             <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
             <column name="NAME" value="UPDATE"/>
