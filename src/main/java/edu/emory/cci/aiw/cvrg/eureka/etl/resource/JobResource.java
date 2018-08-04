@@ -64,7 +64,6 @@ import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.persist.Transactional;
-import edu.emory.cci.aiw.cvrg.eureka.etl.authentication.AuthorizedUserSupport;
 
 import org.eurekaclinical.eureka.client.comm.Job;
 import org.eurekaclinical.eureka.client.comm.JobFilter;
@@ -89,6 +88,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.job.Task;
 import java.io.IOException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import org.eurekaclinical.common.auth.AuthorizedUserSupport;
 import org.eurekaclinical.eureka.client.comm.JobSpec.Side;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 import org.protempa.backend.BackendInstanceSpec;
@@ -112,7 +112,7 @@ public class JobResource {
     private final JobDao jobDao;
     private final AuthorizedUserDao etlUserDao;
     private final TaskManager taskManager;
-    private final AuthorizedUserSupport authenticationSupport;
+    private final AuthorizedUserSupport<AuthorizedUserEntity, AuthorizedUserDao, ?> authenticationSupport;
     private final DestinationDao destinationDao;
     private final ProtempaDestinationFactory protempaDestinationFactory;
     private final EtlProperties etlProperties;
@@ -128,7 +128,7 @@ public class JobResource {
         this.jobDao = inJobDao;
         this.taskManager = inTaskManager;
         this.etlUserDao = inEtlUserDao;
-        this.authenticationSupport = new AuthorizedUserSupport(this.etlUserDao);
+        this.authenticationSupport = new AuthorizedUserSupport<>(this.etlUserDao);
         this.destinationDao = inDestinationDao;
         this.etlProperties = inEtlProperties;
         this.protempaDestinationFactory = inProtempaDestinationFactory;

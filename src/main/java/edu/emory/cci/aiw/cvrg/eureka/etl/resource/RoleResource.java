@@ -43,7 +43,6 @@ import javax.ws.rs.Path;
 import com.google.inject.persist.Transactional;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
 
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.RoleEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -60,23 +59,23 @@ import org.eurekaclinical.common.resource.AbstractRoleResource;
 @Path("/protected/roles")
 public class RoleResource extends AbstractRoleResource<AuthorizedRoleEntity, Role> {
 
-	/**
-	 * Create a RoleResource object with the given {@link RoleDao}
-	 *
-	 * @param inRoleDao The RoleDao object used to work with role objects in the
-	 *            data store.
-	 */
-	@Inject
-	public RoleResource(RoleDao inRoleDao) {
-		super(inRoleDao);
-	}
+    /**
+     * Create a RoleResource object with the given {@link RoleDao}
+     *
+     * @param inRoleDao The RoleDao object used to work with role objects in the
+     * data store.
+     */
+    @Inject
+    public RoleResource(RoleDao inRoleDao) {
+        super(inRoleDao);
+    }
 
-	@Override
-	protected Role toComm(AuthorizedRoleEntity roleEntity, HttpServletRequest request) {
-		Role role = new Role();
-		role.setId(roleEntity.getId());
-		role.setName(roleEntity.getName());
-		return role;
-	}
+    @Override
+    protected Role toComm(AuthorizedRoleEntity roleEntity, HttpServletRequest request) {
+        Role role = new Role();
+        role.setId(roleEntity.getId());
+        role.setName(roleEntity.getName());
+        return role;
+    }
 
 }
