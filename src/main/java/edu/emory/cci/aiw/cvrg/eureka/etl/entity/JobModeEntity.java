@@ -39,14 +39,11 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.io.Serializable;
-import org.eurekaclinical.eureka.client.comm.Link;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.eurekaclinical.eureka.client.comm.JobMode;
@@ -57,7 +54,7 @@ import org.eurekaclinical.eureka.client.comm.JobMode;
  */
 @Entity
 @Table(name = "job_modes")
-public class JobModeEntity {
+public class JobModeEntity implements org.eurekaclinical.standardapis.entity.Entity<Long> {
 
     @Id
     @SequenceGenerator(name = "JOB_MODE_SEQ_GENERATOR", sequenceName = "JOB_MODE_SEQ",
@@ -65,13 +62,23 @@ public class JobModeEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
             generator = "JOB_MODE_SEQ_GENERATOR")
     private Long id;
+
+    @Column(nullable = false, unique = true)
     private String name;
+
     private String description;
 
+    @Column(unique = true)
+    private int rank;
+
+    private boolean isDefault;
+
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }
@@ -92,11 +99,29 @@ public class JobModeEntity {
         this.description = description;
     }
 
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
+    public boolean isDefault() {
+        return this.isDefault;
+    }
+
+    public void setDefault(boolean isDefault) {
+        this.isDefault = isDefault;
+    }
+
     public JobMode toJobMode() {
         JobMode jobMode = new JobMode();
         jobMode.setId(this.id);
         jobMode.setName(this.name);
         jobMode.setDescription(this.description);
+        jobMode.setRank(this.rank);
+        jobMode.setDefault(this.isDefault);
         return jobMode;
     }
 

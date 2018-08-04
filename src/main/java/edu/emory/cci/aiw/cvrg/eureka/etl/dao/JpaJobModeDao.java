@@ -41,6 +41,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  */
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity_;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -60,6 +61,16 @@ public class JpaJobModeDao extends GenericDao<JobModeEntity, Long> implements Jo
     @Override
     public JobModeEntity getByName(String name) {
         return getDatabaseSupport().getUniqueByAttribute(JobModeEntity.class, JobModeEntity_.name, name);
+    }
+
+    @Override
+    public List<JobModeEntity> getAllAsc() {
+        return getListAsc(JobModeEntity_.rank);
+    }
+    
+    @Override
+    public JobModeEntity getDefault() {
+        return getUniqueByAttribute(JobModeEntity_.isDefault, true);
     }
 
 }

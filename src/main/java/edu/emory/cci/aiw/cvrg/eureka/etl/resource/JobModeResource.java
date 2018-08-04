@@ -41,76 +41,55 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.EncryptionAlgorithm;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
+import org.eurekaclinical.common.resource.AbstractNamedReadOnlyResource;
 import org.eurekaclinical.eureka.client.comm.JobMode;
-import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
 @Transactional
 @Path("/protected/jobmodes")
 @Produces(MediaType.APPLICATION_JSON)
-public class JobModeResource {
+public class JobModeResource extends AbstractNamedReadOnlyResource<JobModeEntity, JobMode> {
 
     private final JobModeDao jobModeDao;
 
     @Inject
     public JobModeResource(JobModeDao inJobModeDao) {
+        super(inJobModeDao);
         this.jobModeDao = inJobModeDao;
     }
 
     @GET
-    @Path("/{id}")
-    public JobMode get(@Context HttpServletRequest req,
-            @PathParam("id") Long inId) {
-        JobModeEntity result = this.jobModeDao.retrieve(inId);
-        if (result != null) {
-            JobMode jobMode = toComm(result);
-            return jobMode;
-        } else {
-            throw new HttpStatusException(Status.NOT_FOUND);
-        }
-    }
-
-    @GET
-    @Path("/byname/{name}")
-    public JobMode get(@Context HttpServletRequest req,
-            @PathParam("name") String inName) {
-        JobModeEntity result = this.jobModeDao.getByName(inName);
-        if (result != null) {
-            JobMode jobMode = toComm(result);
-            return jobMode;
-        } else {
-            throw new HttpStatusException(Status.NOT_FOUND);
-        }
-    }
-
-    @GET
+    @Override
     public List<JobMode> getAll(@Context HttpServletRequest req) {
         List<JobMode> result = new ArrayList<>();
-        for (JobModeEntity jobModeEntity : this.jobModeDao.getAll()) {
-            result.add(toComm(jobModeEntity));
+        for (JobModeEntity jobModeEntity : this.jobModeDao.getAllAsc()) {
+            result.add(toComm(jobModeEntity, req));
         }
         return result;
     }
     
-    private static JobMode toComm(JobModeEntity result) {
+    @Override
+    protected JobMode toComm(JobModeEntity entity, HttpServletRequest req) {
         JobMode jobMode = new JobMode();
-        jobMode.setId(result.getId());
-        jobMode.setName(result.getName());
-        jobMode.setDescription(result.getDescription());
+        jobMode.setId(entity.getId());
+        jobMode.setName(entity.getName());
+        jobMode.setDescription(entity.getDescription());
+        jobMode.setRank(entity.getRank());
+        jobMode.setDefault(entity.isDefault());
         return jobMode;
+    }
+
+    @Override
+    protected boolean isAuthorizedEntity(JobModeEntity entity, HttpServletRequest req) {
+        return true;
     }
 }

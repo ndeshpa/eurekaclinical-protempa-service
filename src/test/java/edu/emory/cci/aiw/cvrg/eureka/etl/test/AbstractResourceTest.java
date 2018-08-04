@@ -59,7 +59,6 @@ import com.sun.jersey.test.framework.JerseyTest;
 import com.sun.jersey.test.framework.WebAppDescriptor;
 import com.sun.jersey.test.framework.WebAppDescriptor.Builder;
 import javax.ws.rs.core.MediaType;
-import org.eurekaclinical.eureka.client.comm.JobMode;
 
 /**
  * Base class for all the Jersey resource related test classes.

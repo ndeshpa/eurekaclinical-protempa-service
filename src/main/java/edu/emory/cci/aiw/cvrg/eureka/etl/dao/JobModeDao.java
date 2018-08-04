@@ -41,6 +41,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  */
 
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
+import java.util.List;
 import org.eurekaclinical.standardapis.dao.DaoWithUniqueName;
 
 /**
@@ -48,4 +49,6 @@ import org.eurekaclinical.standardapis.dao.DaoWithUniqueName;
  * @author Andrew Post
  */
 public interface JobModeDao extends DaoWithUniqueName<JobModeEntity, Long> {
+    JobModeEntity getDefault();
+    List<JobModeEntity> getAllAsc();
 }
