@@ -966,7 +966,7 @@
             <column name="RANK" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="DEFAULT" type="BOOLEAN" defaultValueBoolean="false">
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -976,49 +976,49 @@
             <column name="NAME" value="UPDATE"/>
             <column name="DESCRIPTION" value="Update data"/>
             <column name="RANK" valueNumeric="1"/>
-            <column name="DEFAULT" valueBoolean="true"/>
+            <column name="ISDEFAULT" valueBoolean="true"/>
         </insert>
         <insert tableName="JOB_MODES">
             <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
             <column name="NAME" value="REPLACE"/>
             <column name="DESCRIPTION" value="Replace all data"/>
             <column name="RANK" valueNumeric="2"/>
-            <column name="DEFAULT" valueBoolean="false"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
         </insert>
         <insert tableName="JOB_MODES">
             <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
             <column name="NAME" value="REPROCESS_RETRIEVE"/>
             <column name="DESCRIPTION" value="Retrieve from working memory"/>
             <column name="RANK" valueNumeric="3"/>
-            <column name="DEFAULT" valueBoolean="false"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
         </insert>
         <insert tableName="JOB_MODES">
             <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
             <column name="NAME" value="REPROCESS_CREATE"/>
             <column name="DESCRIPTION" value="Add phenotypes to working memory"/>
             <column name="RANK" valueNumeric="4"/>
-            <column name="DEFAULT" valueBoolean="false"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
         </insert>
         <insert tableName="JOB_MODES">
             <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
             <column name="NAME" value="REPROCESS_UPDATE"/>
             <column name="DESCRIPTION" value="Update working memory"/>
             <column name="RANK" valueNumeric="5"/>
-            <column name="DEFAULT" valueBoolean="false"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
         </insert>
         <insert tableName="JOB_MODES">
             <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
             <column name="NAME" value="REPROCESS_DELETE"/>
             <column name="DESCRIPTION" value="Delete from working memory"/>
             <column name="RANK" valueNumeric="6"/>
-            <column name="DEFAULT" valueBoolean="false"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
         </insert>
         <insert tableName="JOB_MODES">
             <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
             <column name="NAME" value="UNKNOWN"/>
             <column name="DESCRIPTION" value="Unknown job mode"/>
             <column name="RANK" valueNumeric="-1"/>
-            <column name="DEFAULT" valueBoolean="false"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
         </insert>
         <addColumn tableName="JOBS">
             <column name="JOBMODES_ID" type="BIGINT"/>

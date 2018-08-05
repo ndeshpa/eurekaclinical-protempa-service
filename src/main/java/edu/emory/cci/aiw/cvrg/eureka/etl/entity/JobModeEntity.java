@@ -71,7 +71,7 @@ public class JobModeEntity implements org.eurekaclinical.standardapis.entity.Ent
     @Column(unique = true)
     private int rank;
 
-    @Column(name="default")
+    @Column(name="isdefault")
     private boolean isDefault;
 
     @Override
