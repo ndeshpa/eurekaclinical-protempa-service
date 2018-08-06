@@ -55,6 +55,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaEtlUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaJobDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaJobEventDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaSourceConfigDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaUserTemplateDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.SourceConfigDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
@@ -67,7 +68,10 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity;
+
 import org.eurekaclinical.standardapis.dao.UserDao;
+import org.eurekaclinical.standardapis.dao.UserTemplateDao;
 import org.eurekaclinical.standardapis.entity.RoleEntity;
 import org.eurekaclinical.standardapis.entity.UserEntity;
 
@@ -75,24 +79,25 @@ import org.eurekaclinical.standardapis.entity.UserEntity;
  * @author hrathod
  */
 public class AppModule extends AbstractModule {
-	
-	AppModule() {
-	}
-	
-	@Override
-	protected void configure() {
-		bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
-		bind(AuthorizedUserDao.class).to(JpaEtlUserDao.class);
-		bind(RoleDao.class).to(JpaRoleDao.class);
-		bind(JobDao.class).to(JpaJobDao.class);
-		bind(JobEventDao.class).to(JpaJobEventDao.class);
-		bind(EtlGroupDao.class).to(JpaEtlGroupDao.class);
-		bind(DestinationDao.class).to(JpaDestinationDao.class);
-		bind(DeidPerPatientParamsDao.class).to(JpaDeidPerPatientParamsDao.class);
-		bind(SourceConfigDao.class).to(JpaSourceConfigDao.class);
-		bind(EurekaDeidConfigFactory.class).to(JpaEurekaDeidConfigFactory.class);
-		bind(EurekaDeidConfigDao.class).to(JpaEurekaDeidConfigDao.class);
-		bind(LinkDao.class).to(JpaLinkDao.class);
-		bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
-	}
+    
+    AppModule() {
+    }
+    
+    @Override
+    protected void configure() {
+        bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
+        bind(AuthorizedUserDao.class).to(JpaEtlUserDao.class);
+        bind(RoleDao.class).to(JpaRoleDao.class);
+        bind(new TypeLiteral<UserTemplateDao<UserTemplateEntity>>() {}).to(JpaUserTemplateDao.class);
+        bind(JobDao.class).to(JpaJobDao.class);
+        bind(JobEventDao.class).to(JpaJobEventDao.class);
+        bind(EtlGroupDao.class).to(JpaEtlGroupDao.class);
+        bind(DestinationDao.class).to(JpaDestinationDao.class);
+        bind(DeidPerPatientParamsDao.class).to(JpaDeidPerPatientParamsDao.class);
+        bind(SourceConfigDao.class).to(JpaSourceConfigDao.class);
+        bind(EurekaDeidConfigFactory.class).to(JpaEurekaDeidConfigFactory.class);
+        bind(EurekaDeidConfigDao.class).to(JpaEurekaDeidConfigDao.class);
+        bind(LinkDao.class).to(JpaLinkDao.class);
+        bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
+    }
 }
