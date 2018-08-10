@@ -59,7 +59,6 @@ import java.util.Collections;
 import org.protempa.backend.Configuration;
 import java.util.Date;
 import javax.inject.Inject;
-import org.protempa.query.QueryMode;
 
 public class Task implements Runnable {
 
