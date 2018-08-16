@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
 
-/*-
+/*
  * #%L
  * Eureka Protempa ETL
  * %%
- * Copyright (C) 2012 - 2017 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,14 +39,38 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity_;
+import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import org.eurekaclinical.standardapis.dao.GenericDao;
 
 /**
  *
  * @author Andrew Post
  */
-public interface EurekaDeidConfigFactory {
+public class JpaJobModeDao extends GenericDao<JobModeEntity, Long> implements JobModeDao {
 
-    EurekaDeidConfig getInstance(DestinationEntity inDestination);
+    @Inject
+    public JpaJobModeDao(Provider<EntityManager> inManagerProvider) {
+        super(JobModeEntity.class, inManagerProvider);
+    }
+
+    @Override
+    public JobModeEntity getByName(String name) {
+        return getDatabaseSupport().getUniqueByAttribute(JobModeEntity.class, JobModeEntity_.name, name);
+    }
+
+    @Override
+    public List<JobModeEntity> getAllAsc() {
+        return getListAsc(JobModeEntity_.rank);
+    }
+    
+    @Override
+    public JobModeEntity getDefault() {
+        return getUniqueByAttribute(JobModeEntity_.isDefault, true);
+    }
 
 }

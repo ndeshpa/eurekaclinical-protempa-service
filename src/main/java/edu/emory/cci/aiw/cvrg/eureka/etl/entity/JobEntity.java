@@ -75,264 +75,276 @@ import org.eurekaclinical.eureka.client.comm.JobStatus;
 @Table(name = "jobs")
 public class JobEntity {
 
-	/**
-	 * The unique identifier for the job request.
-	 */
-	@Id
-	@SequenceGenerator(name = "JOB_SEQ_GENERATOR", sequenceName = "JOB_SEQ",
-			allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,
-			generator = "JOB_SEQ_GENERATOR")
-	private Long id;
-	/**
-	 * The initial timestamp when the job was started.
-	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date created = new Date();
-	/**
-	 * The unique identifier of the configuration to use for this job.
-	 */
-	@Column(nullable = false)
-	private String sourceConfigId;
-	/**
-	 * The unique identifier of the configuration to use for this job.
-	 */
-	@ManyToOne
-	@JoinColumn(name = "destination_id", referencedColumnName = "id", nullable = false)
-	private DestinationEntity destination;
-	/**
-	 * The unique identifier of the user submitting the job request.
-	 */
-	@ManyToOne
-	@JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-	private AuthorizedUserEntity user;
-	/**
-	 * The events generated for the job.
-	 */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
-	private List<JobEventEntity> jobEvents;
-	
-	private String name;
+    /**
+     * The unique identifier for the job request.
+     */
+    @Id
+    @SequenceGenerator(name = "JOB_SEQ_GENERATOR", sequenceName = "JOB_SEQ",
+            allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "JOB_SEQ_GENERATOR")
+    private Long id;
+    /**
+     * The initial timestamp when the job was started.
+     */
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created = new Date();
+    /**
+     * The unique identifier of the configuration to use for this job.
+     */
+    @Column(nullable = false)
+    private String sourceConfigId;
+    /**
+     * The unique identifier of the configuration to use for this job.
+     */
+    @ManyToOne
+    @JoinColumn(name = "destination_id", referencedColumnName = "id", nullable = false)
+    private DestinationEntity destination;
+    /**
+     * The unique identifier of the user submitting the job request.
+     */
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private AuthorizedUserEntity user;
+    /**
+     * The events generated for the job.
+     */
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "job")
+    private List<JobEventEntity> jobEvents;
 
-	/**
-	 * The timestamp when the job ended.
-	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date finished;
+    private String name;
+    
+    @ManyToOne
+    @JoinColumn(name = "jobmodes_id", referencedColumnName = "id", nullable = false)
+    private JobModeEntity jobMode;
 
-	public Date getFinished() {
-		return finished;
-	}
+    /**
+     * The timestamp when the job ended.
+     */
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date finished;
 
-	public void setFinished(Date finished) {
-		this.finished = finished;
-	}
+    public Date getFinished() {
+        return finished;
+    }
 
-	private static JobEventComparator JOB_EVENT_COMPARATOR = new JobEventComparator();
-	private static JobEventEntityComparator JOB_EVENT_ENTITY_COMPARATOR = new JobEventEntityComparator();
+    public void setFinished(Date finished) {
+        this.finished = finished;
+    }
 
-	public JobEntity() {
-		this.jobEvents = new ArrayList<>();
-	}
+    private static JobEventComparator JOB_EVENT_COMPARATOR = new JobEventComparator();
+    private static JobEventEntityComparator JOB_EVENT_ENTITY_COMPARATOR = new JobEventEntityComparator();
 
-	/**
-	 * Get the unique identifier for the job request.
-	 *
-	 * @return The unique identifier for the job request.
-	 */
-	public Long getId() {
-		return this.id;
-	}
+    public JobEntity() {
+        this.jobEvents = new ArrayList<>();
+    }
 
-	/**
-	 * Set the unique identifier for the job request.
-	 *
-	 * @param inId The unique identifier for the job request.
-	 */
-	public void setId(Long inId) {
-		this.id = inId;
-	}
+    /**
+     * Get the unique identifier for the job request.
+     *
+     * @return The unique identifier for the job request.
+     */
+    public Long getId() {
+        return this.id;
+    }
 
-	/**
-	 * @return the timestamp
-	 */
-	public Date getCreated() {
-		return this.created;
-	}
+    /**
+     * Set the unique identifier for the job request.
+     *
+     * @param inId The unique identifier for the job request.
+     */
+    public void setId(Long inId) {
+        this.id = inId;
+    }
 
-	/**
-	 * @param inTimestamp the timestamp to set
-	 */
-	public void setCreated(Date inTimestamp) {
-		this.created = inTimestamp;
-	}
+    /**
+     * @return the timestamp
+     */
+    public Date getCreated() {
+        return this.created;
+    }
 
-	/**
-	 * Get the unique identifier of the configuration to be used for the job
-	 * request.
-	 *
-	 * @return The unique identifier of the configuration.
-	 */
-	public String getSourceConfigId() {
-		return this.sourceConfigId;
-	}
+    /**
+     * @param inTimestamp the timestamp to set
+     */
+    public void setCreated(Date inTimestamp) {
+        this.created = inTimestamp;
+    }
 
-	/**
-	 * Set the unique identifier of the configuration to be used for the job
-	 * request.
-	 *
-	 * @param inSourceConfigId The unique identifier of the configuration.
-	 */
-	public void setSourceConfigId(String inSourceConfigId) {
-		this.sourceConfigId = inSourceConfigId;
-	}
+    /**
+     * Get the unique identifier of the configuration to be used for the job
+     * request.
+     *
+     * @return The unique identifier of the configuration.
+     */
+    public String getSourceConfigId() {
+        return this.sourceConfigId;
+    }
 
-	public DestinationEntity getDestination() {
-		return destination;
-	}
+    /**
+     * Set the unique identifier of the configuration to be used for the job
+     * request.
+     *
+     * @param inSourceConfigId The unique identifier of the configuration.
+     */
+    public void setSourceConfigId(String inSourceConfigId) {
+        this.sourceConfigId = inSourceConfigId;
+    }
 
-	public void setDestination(DestinationEntity inDestination) {
-		this.destination = inDestination;
-	}
+    public DestinationEntity getDestination() {
+        return destination;
+    }
 
-	/**
-	 * Get the unique identifier for the user who submitted the request.
-	 *
-	 * @return The unique identifier for the user.
-	 */
-	public AuthorizedUserEntity getUser() {
-		return this.user;
-	}
+    public void setDestination(DestinationEntity inDestination) {
+        this.destination = inDestination;
+    }
 
-	/**
-	 * Set the unique identifier for the user who submitted the request.
-	 *
-	 * @param inEtlUser The unique identifier for the user.
-	 */
-	public void setUser(AuthorizedUserEntity inEtlUser) {
-		this.user = inEtlUser;
-	}
+    /**
+     * Get the unique identifier for the user who submitted the request.
+     *
+     * @return The unique identifier for the user.
+     */
+    public AuthorizedUserEntity getUser() {
+        return this.user;
+    }
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * Set the unique identifier for the user who submitted the request.
+     *
+     * @param inEtlUser The unique identifier for the user.
+     */
+    public void setUser(AuthorizedUserEntity inEtlUser) {
+        this.user = inEtlUser;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	/**
-	 * @return the jobEvents
-	 */
-	@JsonManagedReference("job-event")
-	public List<JobEventEntity> getJobEvents() {
-		return new ArrayList<>(this.jobEvents);
-	}
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param inJobEvents the jobEvents to set
-	 */
-	public void setJobEvents(List<JobEventEntity> inJobEvents) {
-		if (inJobEvents == null) {
-			this.jobEvents = new ArrayList<>();
-		} else {
-			this.jobEvents = new ArrayList<>(inJobEvents);
-			for (JobEventEntity jobEvent : this.jobEvents) {
-				jobEvent.setJob(this);
-			}
-		}
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void addJobEvent(JobEventEntity jobEvent) {
-		if (!this.jobEvents.contains(jobEvent)) {
-			this.jobEvents.add(jobEvent);
-			jobEvent.setJob(this);
-		}
-	}
+    /**
+     * @return the jobEvents
+     */
+    @JsonManagedReference("job-event")
+    public List<JobEventEntity> getJobEvents() {
+        return new ArrayList<>(this.jobEvents);
+    }
 
-	public void removeJobEvent(JobEventEntity jobEvent) {
-		if (this.jobEvents.remove(jobEvent)) {
-			jobEvent.setJob(null);
-		}
-	}
+    /**
+     * @param inJobEvents the jobEvents to set
+     */
+    public void setJobEvents(List<JobEventEntity> inJobEvents) {
+        if (inJobEvents == null) {
+            this.jobEvents = new ArrayList<>();
+        } else {
+            this.jobEvents = new ArrayList<>(inJobEvents);
+            for (JobEventEntity jobEvent : this.jobEvents) {
+                jobEvent.setJob(this);
+            }
+        }
+    }
 
-	public JobStatus getCurrentStatus() {
-		JobStatus result;
-		List<JobEventEntity> jobEventsInReverseOrder = getJobEventsInReverseOrder();
-		if (jobEventsInReverseOrder.isEmpty()) {
-			result = JobStatus.STARTING;
-		} else {
-			JobEventEntity jev = jobEventsInReverseOrder.get(0);
-			if (jev != null) {
-				result = jev.getStatus();
-			} else {
-				result = JobStatus.STARTING;
-			}
-		}
-		return result;
-	}
+    public void addJobEvent(JobEventEntity jobEvent) {
+        if (!this.jobEvents.contains(jobEvent)) {
+            this.jobEvents.add(jobEvent);
+            jobEvent.setJob(this);
+        }
+    }
 
-	/**
-	 * Gets job events sorted in reverse order of occurrence. Uses the
-	 * {@link JobEventComparator} to perform sorting.
-	 *
-	 * @return a {@link List} of {@link JobEventEntity}s in reverse order of
-	 * occurrence.
-	 */
-	private List<JobEvent> jobEventsSorted() {
-		List<JobEvent> jobEvents = new ArrayList<>();
-		for (JobEventEntity jee : this.jobEvents) {
-			jobEvents.add(jee.toJobEvent());
-		}
-		Collections.sort(jobEvents, JOB_EVENT_COMPARATOR);
-		return jobEvents;
-	}
-	
-	public List<JobEventEntity> getJobEventsInOrder() {
-		List<JobEventEntity> jobEvents = new ArrayList<>(this.jobEvents);
-		Collections.sort(jobEvents, JOB_EVENT_ENTITY_COMPARATOR);
-		return jobEvents;
-	}
+    public void removeJobEvent(JobEventEntity jobEvent) {
+        if (this.jobEvents.remove(jobEvent)) {
+            jobEvent.setJob(null);
+        }
+    }
 
-	/**
-	 * Gets job events sorted in reverse order of occurrence. Uses the
-	 * {@link JobEventComparator} to perform sorting.
-	 *
-	 * @return a {@link List} of {@link JobEventEntity}s in reverse order of
-	 * occurrence.
-	 */
-	public List<JobEventEntity> getJobEventsInReverseOrder() {
-		List<JobEventEntity> jobEvents = new ArrayList<>(this.jobEvents);
-		Collections.sort(jobEvents, Collections.reverseOrder(JOB_EVENT_ENTITY_COMPARATOR));
-		return jobEvents;
-	}
+    public JobModeEntity getJobMode() {
+        return jobMode;
+    }
 
-	public Job toJob() {
-		Job job = new Job();
-		job.setDestinationId(this.destination.getName());
-		job.setSourceConfigId(this.sourceConfigId);
-		job.setStartTimestamp(this.created);
-		job.setId(this.id);
-		if (this.user != null) {
-			job.setUsername(this.user.getUsername());
-		}
-		job.setStatus(getCurrentStatus());
-		job.setJobEvents(jobEventsSorted());
-		job.setFinishTimestamp(this.finished);
-		List<LinkEntity> linkEntities = this.destination.getLinks();
-		List<Link> links = new ArrayList<>(linkEntities != null ? linkEntities.size() : 0);
-		if (linkEntities != null) {
-			for (LinkEntity le : linkEntities) {
-				links.add(le.toLink());
-			}
-		}
-		job.setLinks(links);
-		job.setGetStatisticsSupported(this.destination.isGetStatisticsSupported());
-		return job;
-	}
+    public void setJobMode(JobModeEntity jobMode) {
+        this.jobMode = jobMode;
+    }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
-	}
+    public JobStatus getCurrentStatus() {
+        JobStatus result;
+        List<JobEventEntity> jobEventsInReverseOrder = getJobEventsInReverseOrder();
+        if (jobEventsInReverseOrder.isEmpty()) {
+            result = JobStatus.STARTING;
+        } else {
+            JobEventEntity jev = jobEventsInReverseOrder.get(0);
+            if (jev != null) {
+                result = jev.getStatus();
+            } else {
+                result = JobStatus.STARTING;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gets job events sorted in reverse order of occurrence. Uses the
+     * {@link JobEventComparator} to perform sorting.
+     *
+     * @return a {@link List} of {@link JobEventEntity}s in reverse order of
+     * occurrence.
+     */
+    private List<JobEvent> jobEventsSorted() {
+        List<JobEvent> jobEvents = new ArrayList<>();
+        for (JobEventEntity jee : this.jobEvents) {
+            jobEvents.add(jee.toJobEvent());
+        }
+        Collections.sort(jobEvents, JOB_EVENT_COMPARATOR);
+        return jobEvents;
+    }
+
+    public List<JobEventEntity> getJobEventsInOrder() {
+        List<JobEventEntity> jobEvents = new ArrayList<>(this.jobEvents);
+        Collections.sort(jobEvents, JOB_EVENT_ENTITY_COMPARATOR);
+        return jobEvents;
+    }
+
+    /**
+     * Gets job events sorted in reverse order of occurrence. Uses the
+     * {@link JobEventComparator} to perform sorting.
+     *
+     * @return a {@link List} of {@link JobEventEntity}s in reverse order of
+     * occurrence.
+     */
+    public List<JobEventEntity> getJobEventsInReverseOrder() {
+        List<JobEventEntity> jobEvents = new ArrayList<>(this.jobEvents);
+        Collections.sort(jobEvents, Collections.reverseOrder(JOB_EVENT_ENTITY_COMPARATOR));
+        return jobEvents;
+    }
+
+    public Job toJob() {
+        Job job = new Job();
+        job.setDestinationId(this.destination.getName());
+        job.setSourceConfigId(this.sourceConfigId);
+        job.setStartTimestamp(this.created);
+        job.setId(this.id);
+        if (this.user != null) {
+            job.setUsername(this.user.getUsername());
+        }
+        job.setStatus(getCurrentStatus());
+        job.setJobEvents(jobEventsSorted());
+        job.setFinishTimestamp(this.finished);
+        List<LinkEntity> linkEntities = this.destination.getLinks();
+        List<Link> links = new ArrayList<>(linkEntities != null ? linkEntities.size() : 0);
+        if (linkEntities != null) {
+            for (LinkEntity le : linkEntities) {
+                links.add(le.toLink());
+            }
+        }
+        job.setLinks(links);
+        job.setGetStatisticsSupported(this.destination.isGetStatisticsSupported());
+        return job;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 }

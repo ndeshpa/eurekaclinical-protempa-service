@@ -2,9 +2,9 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
 
 /*-
  * #%L
- * Eureka Common
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2016 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,7 +39,8 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -57,92 +58,104 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "tf_dest_tablecolumns")
 public class TabularFileDestinationTableColumnEntity {
-	@Id
-	@SequenceGenerator(name = "TF_DEST_TC_SEQ_GENERATOR",
-		sequenceName = "TF_DEST_TC_SEQ", allocationSize = 1, initialValue = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,
-		generator = "TF_DEST_TC_SEQ_GENERATOR")
-	private Long id;
-	
-	@Column(nullable = false)
-	private String tableName;
-	
-	@Column(nullable = false)
-	private String columnName;
-	
-	@Column(nullable = false)
-	private Long rank;
-	
-	private String path;
-	
-	@ManyToOne
-	@JoinColumn(name="tabularfiledestinations_id", nullable = false)
-	private TabularFileDestinationEntity destination;
-	
-	private String format;
-	
-	public Long getId() {
-		return id;
-	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Id
+    @SequenceGenerator(name = "TF_DEST_TC_SEQ_GENERATOR",
+            sequenceName = "TF_DEST_TC_SEQ", allocationSize = 1, initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "TF_DEST_TC_SEQ_GENERATOR")
+    private Long id;
 
-	public String getTableName() {
-		return tableName;
-	}
+    @Column(nullable = false)
+    private String tableName;
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
+    @Column(nullable = false)
+    private String columnName;
 
-	public String getColumnName() {
-		return columnName;
-	}
+    @Column(nullable = false)
+    private Long rowRank;
 
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
+    @Column(nullable = false)
+    private Long rank;
 
-	public Long getRank() {
-		return rank;
-	}
+    private String path;
 
-	public void setRank(Long rank) {
-		this.rank = rank;
-	}
-	
-	public String getPath() {
-		return path;
-	}
+    @ManyToOne
+    @JoinColumn(name = "tabularfiledestinations_id", nullable = false)
+    private TabularFileDestinationEntity destination;
 
-	public void setPath(String path) {
-		this.path = path;
-	}
+    private String format;
 
-	public String getFormat() {
-		return format;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setFormat(String format) {
-		this.format = format;
-	}
-	
-	public void setDestination(TabularFileDestinationEntity inDestination) {
-		if (this.destination != inDestination) {
-			if (this.destination != null) {
-				this.destination.removeTableColumn(this);
-			}
-			this.destination = inDestination;
-			if (this.destination != null) {
-				this.destination.addTableColumn(this);
-			}
-		}
-	}
-	
-	public TabularFileDestinationEntity getDestination() {
-		return this.destination;
-	}
-	
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public Long getRowRank() {
+        return rowRank;
+    }
+
+    public void setRowRank(Long rowRank) {
+        this.rowRank = rowRank;
+    }
+
+    public Long getRank() {
+        return rank;
+    }
+
+    public void setRank(Long rank) {
+        this.rank = rank;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
+    public void setDestination(TabularFileDestinationEntity inDestination) {
+        if (this.destination != inDestination) {
+            if (this.destination != null) {
+                this.destination.removeTableColumn(this);
+            }
+            this.destination = inDestination;
+            if (this.destination != null) {
+                this.destination.addTableColumn(this);
+            }
+        }
+    }
+
+    public TabularFileDestinationEntity getDestination() {
+        return this.destination;
+    }
+
 }

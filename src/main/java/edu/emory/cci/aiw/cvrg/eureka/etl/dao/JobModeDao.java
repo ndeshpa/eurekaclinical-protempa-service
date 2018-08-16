@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
 
-/*-
+/*
  * #%L
  * Eureka Protempa ETL
  * %%
- * Copyright (C) 2012 - 2017 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,14 +39,16 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
+
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
+import java.util.List;
+import org.eurekaclinical.standardapis.dao.DaoWithUniqueName;
 
 /**
  *
  * @author Andrew Post
  */
-public interface EurekaDeidConfigFactory {
-
-    EurekaDeidConfig getInstance(DestinationEntity inDestination);
-
+public interface JobModeDao extends DaoWithUniqueName<JobModeEntity, Long> {
+    JobModeEntity getDefault();
+    List<JobModeEntity> getAllAsc();
 }

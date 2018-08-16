@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import org.protempa.dest.table.TableColumnSpec;
 
 /**
@@ -48,21 +47,25 @@ import org.protempa.dest.table.TableColumnSpec;
  */
 class TableColumnSpecWrapper {
 
-	private final TableColumnSpec tableColumnSpec;
-	private final String propId;
-	
-	TableColumnSpecWrapper(String propId, TableColumnSpec tableColumnSpec) {
-		assert tableColumnSpec != null : "tableColumnSpec cannot be null";
-		this.tableColumnSpec = tableColumnSpec;
-		this.propId = propId;
-	}
-	
-	String getPropId() {
-		return this.propId;
-	}
-	
-	TableColumnSpec getTableColumnSpec() {
-		return this.tableColumnSpec;
-	}
-	
+    private final TableColumnSpec tableColumnSpec;
+    private final String propId;
+    
+    TableColumnSpecWrapper(TableColumnSpec tableColumnSpec) {
+        this(null, tableColumnSpec);
+    }
+
+    TableColumnSpecWrapper(String propId, TableColumnSpec tableColumnSpec) {
+        assert tableColumnSpec != null : "tableColumnSpec cannot be null";
+        this.tableColumnSpec = tableColumnSpec;
+        this.propId = propId;
+    }
+
+    String getPropId() {
+        return this.propId;
+    }
+
+    TableColumnSpec getTableColumnSpec() {
+        return this.tableColumnSpec;
+    }
+
 }

@@ -42,6 +42,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd" logicalFilePath="changelog-master.xml">
+
     
     <property name="eureka.superuser.username" value="superuser"/>
     
@@ -419,7 +420,7 @@
             <column name="RANK" valueNumeric="2"/>
         </insert>
         <createSequence sequenceName="I2B2_IS_SEQ" startValue="3"/>
-        
+
         <createTable tableName="I2B2_DEST_REMOVE_METHODS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="I2B2_DEST_REMOVE_METHOD_PK"/>
@@ -450,7 +451,7 @@
             <column name="RANK" valueNumeric="2"/>
         </insert>
         <createSequence sequenceName="I2B2_DR_SEQ" startValue="3"/>
-        
+
         <createTable tableName="I2B2_DEST_VALUE_TYPE_CDS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="I2B2_DEST_VALUE_TYPE_CD_PK"/>
@@ -488,7 +489,7 @@
             <column name="RANK" valueNumeric="3"/>
         </insert>
         <createSequence sequenceName="I2B2_VTC_SEQ" startValue="4"/>
-        
+
         <addColumn tableName="I2B2_DESTINATIONS">
             <column name="PROVIDERFULLNAME" type="VARCHAR(255)"/>
         </addColumn>
@@ -601,7 +602,7 @@
         <addForeignKeyConstraint baseColumnNames="I2B2DESTINATIONS_ID" baseTableName="I2B2_DEST_CONCEPTSPECS" constraintName="FK_I2B2_DEST_CONCEPTSPEC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="I2B2_DESTINATIONS" referencesUniqueColumn="true"/>
         <addForeignKeyConstraint baseTableName="I2B2_DEST_CONCEPTSPECS" baseColumnNames="I2B2DESTVALUETYPECDS_ID" constraintName="FK_I2B2_CONCEPTS_VTC" referencedTableName="I2B2_DEST_VALUE_TYPE_CDS" referencedColumnNames="ID" referencesUniqueColumn="true"/>
         <createSequence sequenceName="I2B2_CS_SEQ"/>
-        
+
         <createTable tableName="I2B2_DEST_DATASPECS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="I2B2_DEST_DATASPEC_PK"/>
@@ -623,7 +624,7 @@
         <addForeignKeyConstraint baseTableName="I2B2_DEST_DATASPECS" baseColumnNames="START_ID" constraintName="FK_I2B2_DEST_DATA_START" referencedTableName="I2B2_DEST_IVAL_SIDES" referencedColumnNames="ID" referencesUniqueColumn="true"/>
         <addForeignKeyConstraint baseTableName="I2B2_DEST_DATASPECS" baseColumnNames="FINISH_ID" constraintName="FK_I2B2_DEST_DATA_FINISH" referencedTableName="I2B2_DEST_IVAL_SIDES" referencedColumnNames="ID" referencesUniqueColumn="true"/>
         <createSequence sequenceName="I2B2_DS_SEQ"/>
-        
+
         <createTable tableName="I2B2_DEST_MODIFIERSPECS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="I2B2_DEST_MODIFIERSPEC_PK"/>
@@ -642,7 +643,7 @@
         </createTable>
         <addForeignKeyConstraint baseColumnNames="I2B2DESTCONCEPTSPECS_ID" baseTableName="I2B2_DEST_MODIFIERSPECS" constraintName="FK_I2B2_DEST_MODIFIERSPEC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="I2B2_DEST_CONCEPTSPECS" referencesUniqueColumn="true"/>
         <createSequence sequenceName="I2B2_MS_SEQ"/>
-        
+
         <addUniqueConstraint tableName="I2B2_DEST_DATASPECS" columnNames="NAME, I2B2DESTINATIONS_ID"/>
         <addUniqueConstraint tableName="I2B2_DEST_CONCEPTSPECS" columnNames="PROPOSITION, PROPERTY, REFERENCE, I2B2DESTINATIONS_ID"/>
     </changeSet>
@@ -945,13 +946,95 @@
         </addColumn>
     </changeSet>
     <changeSet author="nitadeshpande" id="1361552652236-47">
-        <dropNotNullConstraint tableName="TABULAR_FILE_DESTINATIONS"
-            columnDataType="VARCHAR(255)"
-            columnName="PATH"/>
-        <addColumn tableName="TABULAR_FILE_DESTINATIONS">
+        <dropNotNullConstraint tableName="TF_DEST_TABLECOLUMNS" columnDataType="VARCHAR(255)" columnName="PATH"/>
+        <addColumn tableName="TF_DEST_TABLECOLUMNS">
             <column name="ROWRANK" type="BIGINT" defaultValueNumeric="1">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+    </changeSet>
+    <changeSet author="arpost" id="1361552652236-48">
+        <createTable tableName="JOB_MODES">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="JOB_MODE_ID_PK"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RANK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ISDEFAULT" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createSequence sequenceName="JOB_MODE_SEQ"/>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="UPDATE"/>
+            <column name="DESCRIPTION" value="Update data"/>
+            <column name="RANK" valueNumeric="1"/>
+            <column name="ISDEFAULT" valueBoolean="true"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPLACE"/>
+            <column name="DESCRIPTION" value="Replace all data"/>
+            <column name="RANK" valueNumeric="2"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPROCESS_RETRIEVE"/>
+            <column name="DESCRIPTION" value="Retrieve from working memory"/>
+            <column name="RANK" valueNumeric="3"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPROCESS_CREATE"/>
+            <column name="DESCRIPTION" value="Add phenotypes to working memory"/>
+            <column name="RANK" valueNumeric="4"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPROCESS_UPDATE"/>
+            <column name="DESCRIPTION" value="Update working memory"/>
+            <column name="RANK" valueNumeric="5"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="REPROCESS_DELETE"/>
+            <column name="DESCRIPTION" value="Delete from working memory"/>
+            <column name="RANK" valueNumeric="6"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
+        </insert>
+        <insert tableName="JOB_MODES">
+            <column name="ID" valueSequenceNext="JOB_MODE_SEQ"/>
+            <column name="NAME" value="UNKNOWN"/>
+            <column name="DESCRIPTION" value="Unknown job mode"/>
+            <column name="RANK" valueNumeric="-1"/>
+            <column name="ISDEFAULT" valueBoolean="false"/>
+        </insert>
+        <addColumn tableName="JOBS">
+            <column name="JOBMODES_ID" type="BIGINT"/>
+        </addColumn>
+        <update tableName="JOBS">
+            <column name="JOBMODES_ID" valueSequenceCurrent="JOB_MODE_SEQ"/>
+        </update>
+        <addNotNullConstraint tableName="JOBS" columnName="JOBMODES_ID" columnDataType="BIGINT"/>
+        <addForeignKeyConstraint baseColumnNames="JOBMODES_ID" 
+                                 baseTableName="JOBS" 
+                                 constraintName="FK_JOBS_JOBMODE" 
+                                 deferrable="false" initiallyDeferred="false" 
+                                 onDelete="RESTRICT" referencedColumnNames="ID" 
+                                 referencedTableName="JOB_MODES" 
+                                 referencesUniqueColumn="false"/>
+
     </changeSet>
 </databaseChangeLog>

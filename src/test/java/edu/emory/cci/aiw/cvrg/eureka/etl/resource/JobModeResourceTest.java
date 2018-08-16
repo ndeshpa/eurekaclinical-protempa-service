@@ -1,10 +1,8 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
-
-/*-
+/*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
- * Copyright (C) 2012 - 2017 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,14 +37,45 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
+package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
+
+import com.sun.jersey.api.client.GenericType;
+import com.sun.jersey.api.client.WebResource;
+import org.junit.Assert;
+import org.junit.Test;
+
+import javax.ws.rs.core.MediaType;
+import java.util.List;
+import org.eurekaclinical.eureka.client.comm.Job;
+import org.eurekaclinical.eureka.client.comm.JobMode;
 
 /**
+ * Tests for the {@link RoleResource} class.
  *
- * @author Andrew Post
+ * @author hrathod
+ *
  */
-public interface EurekaDeidConfigFactory {
+public class JobModeResourceTest extends AbstractEtlResourceTest {
 
-    EurekaDeidConfig getInstance(DestinationEntity inDestination);
+    /**
+     * Simply call super().
+     */
+    public JobModeResourceTest() {
+        super();
+    }
 
+    /**
+     * Test that proper number of roles are returned from the resource.
+     */
+    @Test
+    public final void testJobModeListSize() {
+        List<JobMode> roles = getJson("/api/protected/jobmodes", new GenericType<List<JobMode>>() {});
+        Assert.assertEquals(1, roles.size());
+    }
+    
+    @Test
+    public void testJobModeName() {
+        JobMode jobMode = getJson("/api/protected/jobmodes/byname/REPLACE", JobMode.class);
+        Assert.assertEquals("REPLACE", jobMode.getName());
+    }
 }
