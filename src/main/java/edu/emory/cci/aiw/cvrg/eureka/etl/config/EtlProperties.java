@@ -169,5 +169,9 @@ public class EtlProperties extends CasJerseyEurekaClinicalProperties {
     public String getUrl() {
         return this.getValue("eureka.etl.url");
     }
+    
+    public String getPhenotypeServiceUrl(){
+        return this.getValue("eurekaclinical.phenotype.service.url");
+    }
 
 }
