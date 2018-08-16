@@ -42,9 +42,10 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd" logicalFilePath="changelog-master.xml">
-	
+
+    
     <property name="eureka.superuser.username" value="superuser"/>
-	
+    
     <changeSet author="arpost (generated)" id="1361552652236-2">
         <createTable tableName="JOB_EVENTS">
             <column name="ID" type="BIGINT">
@@ -419,7 +420,7 @@
             <column name="RANK" valueNumeric="2"/>
         </insert>
         <createSequence sequenceName="I2B2_IS_SEQ" startValue="3"/>
-		
+
         <createTable tableName="I2B2_DEST_REMOVE_METHODS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="I2B2_DEST_REMOVE_METHOD_PK"/>
@@ -450,7 +451,7 @@
             <column name="RANK" valueNumeric="2"/>
         </insert>
         <createSequence sequenceName="I2B2_DR_SEQ" startValue="3"/>
-		
+
         <createTable tableName="I2B2_DEST_VALUE_TYPE_CDS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="I2B2_DEST_VALUE_TYPE_CD_PK"/>
@@ -488,7 +489,7 @@
             <column name="RANK" valueNumeric="3"/>
         </insert>
         <createSequence sequenceName="I2B2_VTC_SEQ" startValue="4"/>
-		
+
         <addColumn tableName="I2B2_DESTINATIONS">
             <column name="PROVIDERFULLNAME" type="VARCHAR(255)"/>
         </addColumn>
@@ -601,7 +602,7 @@
         <addForeignKeyConstraint baseColumnNames="I2B2DESTINATIONS_ID" baseTableName="I2B2_DEST_CONCEPTSPECS" constraintName="FK_I2B2_DEST_CONCEPTSPEC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="I2B2_DESTINATIONS" referencesUniqueColumn="true"/>
         <addForeignKeyConstraint baseTableName="I2B2_DEST_CONCEPTSPECS" baseColumnNames="I2B2DESTVALUETYPECDS_ID" constraintName="FK_I2B2_CONCEPTS_VTC" referencedTableName="I2B2_DEST_VALUE_TYPE_CDS" referencedColumnNames="ID" referencesUniqueColumn="true"/>
         <createSequence sequenceName="I2B2_CS_SEQ"/>
-		
+
         <createTable tableName="I2B2_DEST_DATASPECS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="I2B2_DEST_DATASPEC_PK"/>
@@ -623,7 +624,7 @@
         <addForeignKeyConstraint baseTableName="I2B2_DEST_DATASPECS" baseColumnNames="START_ID" constraintName="FK_I2B2_DEST_DATA_START" referencedTableName="I2B2_DEST_IVAL_SIDES" referencedColumnNames="ID" referencesUniqueColumn="true"/>
         <addForeignKeyConstraint baseTableName="I2B2_DEST_DATASPECS" baseColumnNames="FINISH_ID" constraintName="FK_I2B2_DEST_DATA_FINISH" referencedTableName="I2B2_DEST_IVAL_SIDES" referencedColumnNames="ID" referencesUniqueColumn="true"/>
         <createSequence sequenceName="I2B2_DS_SEQ"/>
-		
+
         <createTable tableName="I2B2_DEST_MODIFIERSPECS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="I2B2_DEST_MODIFIERSPEC_PK"/>
@@ -642,7 +643,7 @@
         </createTable>
         <addForeignKeyConstraint baseColumnNames="I2B2DESTCONCEPTSPECS_ID" baseTableName="I2B2_DEST_MODIFIERSPECS" constraintName="FK_I2B2_DEST_MODIFIERSPEC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="I2B2_DEST_CONCEPTSPECS" referencesUniqueColumn="true"/>
         <createSequence sequenceName="I2B2_MS_SEQ"/>
-		
+
         <addUniqueConstraint tableName="I2B2_DEST_DATASPECS" columnNames="NAME, I2B2DESTINATIONS_ID"/>
         <addUniqueConstraint tableName="I2B2_DEST_CONCEPTSPECS" columnNames="PROPOSITION, PROPERTY, REFERENCE, I2B2DESTINATIONS_ID"/>
     </changeSet>
@@ -1034,5 +1035,6 @@
                                  onDelete="RESTRICT" referencedColumnNames="ID" 
                                  referencedTableName="JOB_MODES" 
                                  referencesUniqueColumn="false"/>
+
     </changeSet>
 </databaseChangeLog>
