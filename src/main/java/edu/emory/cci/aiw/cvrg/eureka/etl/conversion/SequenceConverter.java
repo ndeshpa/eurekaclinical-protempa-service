@@ -66,7 +66,7 @@ final class SequenceConverter extends AbstractConverter
 	private PropositionDefinitionConverterVisitor converterVisitor;
 	private HighLevelAbstractionDefinition primary;
 	private String primaryPropId;
-	private final Map<Long, TemporalExtendedPropositionDefinition> extendedProps;
+	private final Map<String, TemporalExtendedPropositionDefinition> extendedProps;
 
 	public SequenceConverter() {
 		this.extendedProps = new HashMap<>();
@@ -147,13 +147,13 @@ final class SequenceConverter extends AbstractConverter
 	private TemporalExtendedPropositionDefinition buildExtendedProposition(
 			PhenotypeField ep) {
 		TemporalExtendedPropositionDefinition tepd =
-				this.extendedProps.get(ep.getId());
+				this.extendedProps.get(ep.getPhenotypeKey());
 		if (tepd == null) {
 			tepd = 
 					ConversionUtil.buildExtendedPropositionDefinition(
 					ep);
 
-			this.extendedProps.put(ep.getId(), tepd);
+			this.extendedProps.put(ep.getPhenotypeKey(), tepd);
 		}
 
 		return tepd;
@@ -163,10 +163,10 @@ final class SequenceConverter extends AbstractConverter
 			RelatedPhenotypeField rel) {
 		return new org.protempa.proposition.interval.Relation(
 				null, null, null, null, 
-				rel.getRelationMinCount(), 
-				unit(rel.getRelationMinUnits()),
-				rel.getRelationMaxCount(), 
-				unit(rel.getRelationMaxUnits()),
+				null, 
+				null,
+				null, 
+				null,
 				rel.getRelationMinCount(), 
 				unit(rel.getRelationMinUnits()),
 				rel.getRelationMaxCount(), 

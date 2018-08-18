@@ -39,43 +39,23 @@
  */
 package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.protempa.backend.dsb.filter.DateTimeFilter;
-import org.protempa.proposition.value.AbsoluteTimeGranularity;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.persist.Transactional;
 
-import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
-import org.eurekaclinical.protempa.client.comm.JobRequest;
-import org.eurekaclinical.eureka.client.comm.JobSpec;
-import org.eurekaclinical.eureka.client.comm.SourceConfig;
-import org.eurekaclinical.eureka.client.comm.SourceConfigOption;
-import org.eurekaclinical.eureka.client.comm.Statistics;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.config.EurekaProtempaConfigurations;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
@@ -83,32 +63,17 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.Task;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import org.eurekaclinical.common.comm.clients.ClientException;
-import org.eurekaclinical.eureka.client.comm.JobSpec.Side;
 import org.eurekaclinical.eureka.client.comm.Phenotype;
-import org.eurekaclinical.eureka.client.comm.PhenotypeVisitor;
 import org.eurekaclinical.eureka.client.comm.exception.PhenotypeHandlingException;
 import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.PropositionDefinitionCollector;
 import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.PropositionDefinitionConverterVisitor;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 import org.protempa.PropositionDefinition;
-import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.BackendProviderSpecLoaderException;
-import org.protempa.backend.BackendSpecNotFoundException;
-import org.protempa.backend.Configuration;
-import org.protempa.backend.InvalidPropertyNameException;
-import org.protempa.backend.InvalidPropertyValueException;
-import org.protempa.backend.dsb.DataSourceBackend;
-import org.protempa.dest.Destination;
-import org.protempa.dest.DestinationInitException;
-import org.protempa.dest.StatisticsException;
-import org.protempa.proposition.interval.Interval;
 
 @Path("/protected/jobs1")
 @RolesAllowed({"researcher"})
@@ -157,10 +122,7 @@ public class JobResource1 {
                 List<Phenotype> phenotypeList;
                 System.out.println("Protempa /jobs proposition definitions");
                 try{
-                    //propositionList = this.phenotypeClient.getPhenotypes2Proposition();       
                     phenotypeList = this.phenotypeClient.getUserPhenotypes(false);
-                    System.out.println(phenotypeList.size());
-
                     this.converterVisitor.setAllCustomPhenotypes(phenotypeList);
                     PropositionDefinitionCollector collector
 				= PropositionDefinitionCollector.getInstance(
@@ -176,8 +138,6 @@ public class JobResource1 {
                     Logger.getLogger(JobResource1.class.getName()).log(Level.SEVERE, null, ex);
                     throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
                 }
-               
-                
 		return propositionList;
 	}
 
