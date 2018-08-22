@@ -53,6 +53,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eurekaclinical.eureka.client.comm.Category;
 import org.eurekaclinical.eureka.client.comm.Phenotype;
+import org.eurekaclinical.eureka.client.comm.PhenotypeField;
 import org.eurekaclinical.eureka.client.comm.exception.PhenotypeHandlingException;
 import org.protempa.SequentialTemporalPatternDefinition;
 
@@ -95,9 +96,9 @@ public final class CategorizationConverter extends AbstractConverter implements
 			List<PropositionDefinition> inverseIsADefsIncludingSecondaries =
 					new ArrayList<>();
                         try {
-                            for (Phenotype e : category.getMembers()) {
+                            for (PhenotypeField e : category.getChildren()) {
 
-                                    e.accept(this.converterVisitor);
+                                    this.converterVisitor.visit(e);
                                     inverseIsADefsIncludingSecondaries.addAll(this.converterVisitor
                                             .getPropositionDefinitions());
                                     String primaryPropositionId =
