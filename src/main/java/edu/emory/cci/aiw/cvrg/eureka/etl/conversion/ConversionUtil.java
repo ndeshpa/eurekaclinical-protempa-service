@@ -45,11 +45,18 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.conversion;
 //import org.eurekaclinical.phenotype.service.entity.TimeUnit;
 //import org.eurekaclinical.phenotype.service.entity.ValueThresholdEntity;
 //import org.eurekaclinical.phenotype.service.entity.ValueThresholdGroupEntity;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eurekaclinical.eureka.client.comm.Phenotype;
 import org.eurekaclinical.eureka.client.comm.PhenotypeField;
 import org.eurekaclinical.eureka.client.comm.ValueThreshold;
 import org.eurekaclinical.eureka.client.comm.ValueThresholds;
+import org.eurekaclinical.phenotype.client.comm.FrequencyType;
+import org.eurekaclinical.phenotype.client.comm.RelationOperator;
+import org.eurekaclinical.phenotype.client.comm.ThresholdsOperator;
+import org.eurekaclinical.phenotype.client.comm.TimeUnit;
+import org.eurekaclinical.phenotype.client.comm.ValueComparator;
 import org.protempa.ContextDefinition;
 import org.protempa.ContextOffset;
 import org.protempa.proposition.interval.Interval.Side;
@@ -58,7 +65,6 @@ import org.protempa.SimpleGapFunction;
 import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
-import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -75,12 +81,63 @@ class ConversionUtil {
 	
 	private static final PhenotypeConversionSupport CONVERSION_SUPPORT =
 			new PhenotypeConversionSupport();
+        private static Map<Long, String> timeUnitMap= new HashMap<>();
+        private static Map<Long, String> relOperatorNameMap= new HashMap<>();
+        private static Map<Long, String> frequencyTypeNameMap= new HashMap<>();
+        private static Map<Long, String> thresholdOperationNameMap= new HashMap<>();
+        private static Map<Long, String> valueComparatorNameMap= new HashMap<>();
+        
+        
+
+        
+        void setTimeUnitMap(List<TimeUnit> listTimeUnit){
+            timeUnitMap.clear();
+            for(TimeUnit tu: listTimeUnit){
+                timeUnitMap.put(tu.getId(), tu.getName());
+            }
+            
+        }
+        
+        void setRelOperatorNameMap(List<RelationOperator> listRelationOperator){
+            relOperatorNameMap.clear();
+            for(RelationOperator relOp: listRelationOperator){
+                relOperatorNameMap.put(relOp.getId(), relOp.getName());
+            }
+            
+        }
+        
+        void setFrequencyTypeNameMap(List<RelationOperator> listRelationOperator){
+            frequencyTypeNameMap.clear();
+            for(RelationOperator relOp: listRelationOperator){
+                frequencyTypeNameMap.put(relOp.getId(), relOp.getName());
+            }
+            
+        }
+        
+        void setThresholdOperationNameMap(List<ThresholdsOperator> listThresholdsOperator){
+            listThresholdsOperator.clear();
+            for(ThresholdsOperator item: listThresholdsOperator){
+                thresholdOperationNameMap.put(item.getId(), item.getName());
+            }
+            
+        }
+        
+        void setvalueComparatorNameMap(List<ValueComparator> listValueComparator){
+            valueComparatorNameMap.clear();
+            for(ValueComparator item: listValueComparator){
+                valueComparatorNameMap.put(item.getId(), item.getName());
+            }
+            
+        }
+
+        
 
 //	static AbsoluteTimeUnit unit(TimeUnit unit) {
 //		return unit != null ? AbsoluteTimeUnit.nameToUnit(unit.getName())
 //				: null;
 //	}
 //        
+        
         //TODO: replace this hard-coded function with RESTFUL to phenotype/protected/timeunits
         static AbsoluteTimeUnit unit(Long unit) {
                 String unitName;
@@ -88,19 +145,9 @@ class ConversionUtil {
                     unitName = "day";
                 }
                 else{
-                    switch (unit.intValue()){
-                        case 1:
-                            unitName = "day";
-                            break;
-                        case 2:
-                            unitName = "hour";
-                            break;
-                        case 3:
-                            unitName = "minute";
-                            break;
-                        default:
-                            unitName = null;
-                    }
+                 unitName = timeUnitMap.get(unit);
+                 if (unitName ==null)
+                     uniName = "day";
                 }
 		return unitName != null ? AbsoluteTimeUnit.nameToUnit(unitName)
 				: null;
@@ -110,20 +157,7 @@ class ConversionUtil {
             if(relationOperator ==null)
                 return null;
             String opName;
-            switch (relationOperator.intValue()){
-                case 1:
-                    opName = "before";
-                    break;
-                case 2:
-                    opName = "after";
-                    break;
-                case 3:
-                    opName = "around";
-                    break;
-                default:
-                    opName = null;
-                    break;
-            }
+            opName = relOperatorNameMap.get(relationOperator);
             return opName;
         }
         //Frequency Type Name

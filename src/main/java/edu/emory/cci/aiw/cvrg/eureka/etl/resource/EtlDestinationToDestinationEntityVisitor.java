@@ -55,7 +55,6 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.NodeToNodeEntityVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
-import java.util.Date;
 import javax.inject.Inject;
 import org.eurekaclinical.eureka.client.comm.Cohort;
 import org.eurekaclinical.eureka.client.comm.Node;
