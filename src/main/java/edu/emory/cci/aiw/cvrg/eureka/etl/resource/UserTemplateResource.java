@@ -21,6 +21,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  */
 
 
+import com.google.inject.persist.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +33,9 @@ import org.eurekaclinical.common.resource.AbstractUserTemplateResource;
 import org.eurekaclinical.standardapis.dao.RoleDao;
 import org.eurekaclinical.standardapis.dao.UserTemplateDao;
 import org.eurekaclinical.protempa.client.comm.ProtempaUserTemplate;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.RoleEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity;
 
-import com.google.inject.persist.Transactional;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
 
 /**
  *
@@ -43,12 +43,12 @@ import com.google.inject.persist.Transactional;
  */
 @Path("/protected/usertemplates")
 @Transactional
-public class UserTemplateResource extends AbstractUserTemplateResource<ProtempaUserTemplate, RoleEntity, UserTemplateEntity> {
+public class UserTemplateResource extends AbstractUserTemplateResource<ProtempaUserTemplate, AuthorizedRoleEntity, UserTemplateEntity> {
 
-    private final RoleDao<RoleEntity> roleDao;
+    private final RoleDao<AuthorizedRoleEntity> roleDao;
 
     @Inject
-    public UserTemplateResource(UserTemplateDao<UserTemplateEntity> inUserDao, RoleDao<RoleEntity> inRoleDao) {
+    public UserTemplateResource(UserTemplateDao<UserTemplateEntity> inUserDao, RoleDao<AuthorizedRoleEntity> inRoleDao) {
         super(inUserDao);
         this.roleDao = inRoleDao;
     }
@@ -59,7 +59,7 @@ public class UserTemplateResource extends AbstractUserTemplateResource<ProtempaU
         template.setId(templateEntity.getId());
         template.setName(templateEntity.getName());
         List<Long> roles = new ArrayList<>();
-        for (RoleEntity roleEntity : templateEntity.getRoles()) {
+        for (AuthorizedRoleEntity roleEntity : templateEntity.getRoles()) {
             roles.add(roleEntity.getId());
         }
         template.setRoles(roles);
@@ -74,9 +74,9 @@ public class UserTemplateResource extends AbstractUserTemplateResource<ProtempaU
         UserTemplateEntity templateEntity = new UserTemplateEntity();
         templateEntity.setId(template.getId());
         templateEntity.setName(template.getName());
-        List<RoleEntity> roleEntities = this.roleDao.getAll();
+        List<AuthorizedRoleEntity> roleEntities = this.roleDao.getAll();
         for (Long roleId : template.getRoles()) {
-            for (RoleEntity roleEntity : roleEntities) {
+            for (AuthorizedRoleEntity roleEntity : roleEntities) {
                 if (roleEntity.getId().equals(roleId)) {
                     templateEntity.addRole(roleEntity);
                 }
