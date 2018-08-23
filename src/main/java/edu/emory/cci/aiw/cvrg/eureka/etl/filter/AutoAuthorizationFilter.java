@@ -11,11 +11,10 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity;
 
-
 @Singleton
-public class AutoAuthorizationFilter extends AbstractAutoAuthorizationFilter<AuthorizedRoleEntity, AuthorizedUserEntity, UserTemplateEntity>{
- 
-@Inject
+public class AutoAuthorizationFilter extends AbstractAutoAuthorizationFilter<AuthorizedRoleEntity, AuthorizedUserEntity, UserTemplateEntity> {
+
+    @Inject
     public AutoAuthorizationFilter(UserTemplateDao<UserTemplateEntity> inUserTemplateDao,
             UserDao<AuthorizedUserEntity> inUserDao) {
         super(inUserTemplateDao, inUserDao);
@@ -24,10 +23,10 @@ public class AutoAuthorizationFilter extends AbstractAutoAuthorizationFilter<Aut
     @Override
     protected AuthorizedUserEntity toUserEntity(UserTemplateEntity userTemplate, String username) {
         AuthorizedUserEntity user = new AuthorizedUserEntity();
-        user.setUsername(username); 
+        user.setUsername(username);
         user.setRoles(userTemplate.getRoles());
         return user;
 
-    } 
+    }
 
 }
