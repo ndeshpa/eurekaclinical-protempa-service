@@ -42,6 +42,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -94,10 +95,14 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     private final KnowledgeSource knowledgeSource;
     private final char delimiter;
     private KnowledgeSourceCache ksCache;
-    private Map<String, Map<Long, List<TableColumnSpec>>> rowRankToColumn;
+    private Map<String, Map<Long, List<TableColumnSpec>>> rowRankToColumnByTableName;
     private final Query query;
+    private final IdPoolDao idPoolDao;
 
-    TabularFileQueryResultsHandler(Query query, TabularFileDestinationEntity inTabularFileDestinationEntity, EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource) {
+    TabularFileQueryResultsHandler(Query query, 
+            TabularFileDestinationEntity inTabularFileDestinationEntity, 
+            EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource,
+            IdPoolDao inIdPoolDao) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
         this.etlProperties = inEtlProperties;
         this.config = inTabularFileDestinationEntity;
@@ -110,8 +115,9 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         }
         this.writers = new HashMap<>();
         this.rowPropositionIdMap = new HashMap<>();
-        this.rowRankToColumn = new HashMap<>();
+        this.rowRankToColumnByTableName = new HashMap<>();
         this.query = query;
+        this.idPoolDao = inIdPoolDao;
     }
 
     @Override
@@ -139,17 +145,17 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Data for keyId {}: {}", new Object[]{keyId, propositions});
         }
-
-        for (Map.Entry<String, Map<Long, List<TableColumnSpec>>> me : this.rowRankToColumn.entrySet()) {
-            String tableName = me.getKey();
-            Map<Long, List<TableColumnSpec>> columnSpecGroups = me.getValue();
-            for (Map.Entry<Long, List<TableColumnSpec>> me2 : columnSpecGroups.entrySet()) {
-                List<TableColumnSpec> columnSpecs = me2.getValue();
+        
+        for (Map.Entry<String, Map<Long, List<TableColumnSpec>>> tableNameToRowNumToColumnSpecs : this.rowRankToColumnByTableName.entrySet()) {
+            String tableName = tableNameToRowNumToColumnSpecs.getKey();
+            Map<Long, List<TableColumnSpec>> rowNumToColumnSpecs = tableNameToRowNumToColumnSpecs.getValue();
+            for (Map.Entry<Long, List<TableColumnSpec>> rowNumToColumnSpec : rowNumToColumnSpecs.entrySet()) {
+                List<TableColumnSpec> columnSpecs = rowNumToColumnSpec.getValue();
                 int n = columnSpecs.size();
                 FileTabularWriter writer = this.writers.get(tableName);
-                Map<Long, Set<String>> get = this.rowPropositionIdMap.get(tableName);
-                if (get != null) {
-                    Set<String> rowPropIds = get.get(me2.getKey());
+                Map<Long, Set<String>> rowPropIdValue = this.rowPropositionIdMap.get(tableName);
+                if (rowPropIdValue != null) {
+                    Set<String> rowPropIds = rowPropIdValue.get(rowNumToColumnSpec.getKey());
                     if (rowPropIds != null) {
                         for (Proposition prop : propositions) {
                             if (rowPropIds.contains(prop.getId())) {
@@ -203,7 +209,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     }
 
     private void writeHeaders() throws AssertionError, QueryResultsHandlerProcessingException {
-        for (Map.Entry<String, Map<Long, List<TableColumnSpec>>> me : this.rowRankToColumn.entrySet()) {
+        for (Map.Entry<String, Map<Long, List<TableColumnSpec>>> me : this.rowRankToColumnByTableName.entrySet()) {
             List<String> columnNames = new ArrayList<>();
             Iterator<List<TableColumnSpec>> iterator = me.getValue().values().iterator();
             if (iterator.hasNext()) {
@@ -228,45 +234,37 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     }
 
     private void mapColumnSpecsToColumnNames(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
-        List<TabularFileDestinationTableColumnEntity> tableColumns = this.config.getTableColumns();
-        Collections.sort(tableColumns, (TabularFileDestinationTableColumnEntity o1, TabularFileDestinationTableColumnEntity o2) -> {
-            int rowRankCompare = o1.getRowRank().compareTo(o2.getRowRank());
-            if (rowRankCompare != 0) {
-                return rowRankCompare;
-            } else {
-                return o1.getRank().compareTo(o2.getRowRank());
-            }
-        });
-        this.rowRankToColumn = new HashMap<>();
+        this.rowRankToColumnByTableName = new HashMap<>();
         for (TabularFileDestinationTableColumnEntity tableColumn : this.config.getTableColumns()) {
             String tableName = tableColumn.getTableName();
-            Map<Long, List<TableColumnSpec>> value = rowRankToColumn.get(tableName);
-            if (value == null) {
-                value = new HashMap<>();
-                rowRankToColumn.put(tableName, value);
+            Map<Long, List<TableColumnSpec>> rowRankToTableColumnSpecs = this.rowRankToColumnByTableName.get(tableName);
+            if (rowRankToTableColumnSpecs == null) {
+                rowRankToTableColumnSpecs = new HashMap<>();
+                this.rowRankToColumnByTableName.put(tableName, rowRankToTableColumnSpecs);
             }
             String format = tableColumn.getFormat();
             TableColumnSpecFormat linksFormat
-                    = new TableColumnSpecFormat(tableColumn.getColumnName(), format != null ? new SimpleDateFormat(format) : null);
+                    = new TableColumnSpecFormat(tableColumn.getColumnName(), 
+                            format, 
+                            this.idPoolDao != null ? this.idPoolDao.toIdPool(tableColumn.getIdPool()) : null);
             try {
                 TableColumnSpecWrapper tableColumnSpecWrapper = toTableColumnSpec(tableColumn, linksFormat);
                 String pid = tableColumnSpecWrapper.getPropId();
                 if (pid != null) {
                     Long rowRank = tableColumn.getRowRank();
-                    Map<Long, Set<String>> get = this.rowPropositionIdMap.get(tableName);
-                    if (get == null) {
-                        get = new HashMap<>();
-                        this.rowPropositionIdMap.put(tableName, get);
+                    Map<Long, Set<String>> rowToPropIds = this.rowPropositionIdMap.get(tableName);
+                    if (rowToPropIds == null) {
+                        rowToPropIds = new HashMap<>();
+                        this.rowPropositionIdMap.put(tableName, rowToPropIds);
                     }
                     for (String propId : cache.collectPropIdDescendantsUsingInverseIsA(pid)) {
-                        org.arp.javautil.collections.Collections.putSet(get, rowRank, propId);
+                        org.arp.javautil.collections.Collections.putSet(rowToPropIds, rowRank, propId);
                     }
                 }
-                org.arp.javautil.collections.Collections.putList(value, tableColumn.getRowRank(), tableColumnSpecWrapper.getTableColumnSpec());
+                org.arp.javautil.collections.Collections.putList(rowRankToTableColumnSpecs, tableColumn.getRowRank(), tableColumnSpecWrapper.getTableColumnSpec());
             } catch (QueryException | ParseException ex) {
                 throw new QueryResultsHandlerProcessingException(ex);
             }
-
         }
 
         LOGGER.debug("Row concepts: {}", this.rowPropositionIdMap);

@@ -39,7 +39,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import javax.persistence.Column;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,125 +47,69 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import org.eurekaclinical.protempa.client.comm.IdPoolId;
 
 /**
  *
  * @author Andrew Post
  */
 @Entity
-@Table(name = "tf_dest_tablecolumns")
-public class TabularFileDestinationTableColumnEntity {
-
+public class IdPoolIdEntity implements org.eurekaclinical.standardapis.entity.Entity<Long> {
     @Id
-    @SequenceGenerator(name = "TF_DEST_TC_SEQ_GENERATOR",
-            sequenceName = "TF_DEST_TC_SEQ", allocationSize = 1, initialValue = 1)
+    @SequenceGenerator(name = "ID_POOL_ID_SEQ_GENERATOR",
+            sequenceName = "ID_POOL_ID_SEQ", allocationSize = 1, initialValue = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator = "TF_DEST_TC_SEQ_GENERATOR")
+            generator = "ID_POOL_ID_SEQ_GENERATOR")
     private Long id;
-
-    @Column(nullable = false)
-    private String tableName;
-
-    @Column(nullable = false)
-    private String columnName;
-
-    @Column(nullable = false)
-    private Long rowRank;
-
-    @Column(nullable = false)
-    private Long rank;
-
-    private String path;
+    
+    private String fromId;
+    
+    private String description;
     
     @ManyToOne
-    @JoinColumn(name = "idpool_id")
+    @JoinColumn(name="idpools_id", nullable=false)
     private IdPoolEntity idPool;
     
-    @ManyToOne
-    @JoinColumn(name = "tabularfiledestinations_id", nullable = false)
-    private TabularFileDestinationEntity destination;
-
-    private String format;
-
+    @Override
     public Long getId() {
-        return id;
+        return this.id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }
 
-    public String getTableName() {
-        return tableName;
+    public String getFromId() {
+        return fromId;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setFromId(String fromId) {
+        this.fromId = fromId;
     }
 
-    public String getColumnName() {
-        return columnName;
+    public String getDescription() {
+        return description;
     }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
-    public Long getRowRank() {
-        return rowRank;
-    }
-
-    public void setRowRank(Long rowRank) {
-        this.rowRank = rowRank;
-    }
-
-    public Long getRank() {
-        return rank;
-    }
-
-    public void setRank(Long rank) {
-        this.rank = rank;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public void setFormat(String format) {
-        this.format = format;
-    }
-
-    public void setDestination(TabularFileDestinationEntity inDestination) {
-        if (this.destination != inDestination) {
-            if (this.destination != null) {
-                this.destination.removeTableColumn(this);
-            }
-            this.destination = inDestination;
-            if (this.destination != null) {
-                this.destination.addTableColumn(this);
-            }
-        }
-    }
-
-    public TabularFileDestinationEntity getDestination() {
-        return this.destination;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public IdPoolEntity getIdPool() {
-        return idPool;
+        return this.idPool;
     }
 
     public void setIdPool(IdPoolEntity idPool) {
         this.idPool = idPool;
+    }
+    
+    public IdPoolId toIdPoolId() {
+        IdPoolId idPoolId = new IdPoolId();
+        idPoolId.setId(this.id);
+        idPoolId.setFromId(this.fromId);
+        idPoolId.setDescription(this.description);
+        return idPoolId;
     }
     
 }
