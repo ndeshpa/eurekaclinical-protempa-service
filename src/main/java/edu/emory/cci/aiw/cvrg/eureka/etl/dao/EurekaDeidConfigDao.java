@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DeidPerPatientParams;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import java.util.Random;
@@ -50,12 +49,12 @@ import java.util.Random;
  */
 public interface EurekaDeidConfigDao extends AutoCloseable {
 
-	Integer getOffset(String inKeyId, DestinationEntity inDestination);
-	
-	DeidPerPatientParams getOrCreatePatientParams(String inKeyId, DestinationEntity inDestination);
-	
-	void update(DeidPerPatientParams inDeidPerPatientParams);
-	
-	Random getRandom();
-    
+    Integer getOffset(String inKeyId, DestinationEntity inDestination);
+
+    DeidPerPatientParams getOrCreatePatientParams(String inKeyId, DestinationEntity inDestination);
+
+    void update(DeidPerPatientParams inDeidPerPatientParams);
+
+    Random getRandom();
+
 }

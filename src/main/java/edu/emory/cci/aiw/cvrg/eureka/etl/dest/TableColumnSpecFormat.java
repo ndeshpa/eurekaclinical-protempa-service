@@ -45,6 +45,7 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.MessageFormat;
 import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,8 @@ import org.protempa.dest.table.Link;
 import org.protempa.dest.table.OutputConfig;
 import org.protempa.dest.table.PropositionColumnSpec;
 import org.protempa.dest.table.Reference;
+import org.protempa.pool.Pool;
+import org.protempa.proposition.value.ValueType;
 
 /**
  *
@@ -64,15 +67,21 @@ class TableColumnSpecFormat extends Format {
 
     private static final long serialVersionUID = 1L;
     private final String columnName;
-    private final Format positionFormat;
+    private final String formatStr;
+    private final Pool<Long> pool;
 
     TableColumnSpecFormat(String columnName) {
         this(columnName, null);
     }
 
-    TableColumnSpecFormat(String columnName, Format positionFormat) {
+    TableColumnSpecFormat(String columnName, String formatStr) {
+        this(columnName, formatStr, null);
+    }
+
+    TableColumnSpecFormat(String columnName, String formatStr, Pool<Long> pool) {
         this.columnName = columnName;
-        this.positionFormat = positionFormat;
+        this.formatStr = formatStr;
+        this.pool = pool;
     }
 
     @Override
@@ -109,6 +118,7 @@ class TableColumnSpecFormat extends Format {
             String propType = null;
             String referenceNames = null;
             String propertyName = null;
+            ValueType propertyType = null;
             boolean inPropSpec = false;
             int index = 0;
             List<Link> linksList = new ArrayList<>();
@@ -161,62 +171,78 @@ class TableColumnSpecFormat extends Format {
                         propertyName = nextToken;
                         break;
                     case "$":
-                        if ("value".equals(propertyName)) {
-                            //print a value
-                        } else {
-                            //print a property value
-                        }
+                        propertyType = ValueType.valueOf(nextToken);
+                        break;
                 }
             }
+
+            Format format = parseFormat(propertyType);
+
             OutputConfig outputConfig = null;
             if (propertyName != null) {
                 switch (propertyName) {
                     case "value":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, true, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, true, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     case "position":
                     case "start":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, false, false, false, true, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, true, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     case "finish":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     case "uniqueId":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     case "localUniqueId":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     case "numericalId":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     case "inequalityValue":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, true, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     case "numberValue":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, true, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, true, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     case "nominalValue":
                         propertyName = null;
-                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, false, false, false, false, true, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, null, format);
                         break;
                     default:
                         Map<String, String> propertyHeadings = new HashMap<>();
                         propertyHeadings.put(propertyName, this.columnName);
-                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, propertyHeadings, this.positionFormat);
+                        outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, propertyHeadings, format);
                 }
             }
-            return new TableColumnSpecWrapper(firstPropId, new PropositionColumnSpec(this.columnName, propertyName != null ? new String[]{propertyName} : null, outputConfig, null, linksList.toArray(new Link[linksList.size()]), 1));
+            return new TableColumnSpecWrapper(firstPropId, new PropositionColumnSpec(this.columnName, propertyName != null ? new String[]{propertyName} : null, outputConfig, null, linksList.toArray(new Link[linksList.size()]), 1, this.pool));
         }
         return new TableColumnSpecWrapper(new ConstantColumnSpec(this.columnName, links));
+    }
+
+    private Format parseFormat(ValueType propertyType) {
+        Format format;
+        if (propertyType != null) {
+            switch (propertyType) {
+                case DATEVALUE:
+                    format = new SimpleDateFormat(this.formatStr);
+                    break;
+                default:
+                    format = null;
+            }
+        } else {
+            format = null;
+        }
+        return format;
     }
 
 }

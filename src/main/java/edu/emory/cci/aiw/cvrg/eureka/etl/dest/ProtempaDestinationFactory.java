@@ -39,10 +39,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.protempa.dest.keyloader.KeyLoaderDestination;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import org.protempa.dest.key.KeyLoaderDestination;
 
 import org.eurekaclinical.eureka.client.comm.Cohort;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
@@ -61,6 +58,9 @@ import edu.emory.cci.aiw.neo4jetl.Neo4jDestination;
 import org.protempa.dest.DestinationInitException;
 import org.protempa.dest.deid.DeidentifiedDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.protempa.query.QueryMode;
 
 /**
@@ -74,13 +74,19 @@ public class ProtempaDestinationFactory {
     private final DestinationDao destinationDao;
     private final DeidPerPatientParamsDao deidPerPatientParamsDao;
     private final EurekaDeidConfigFactory eurekaDeidConfigFactory;
+    private final IdPoolDao idPoolDao;
 
     @Inject
-    public ProtempaDestinationFactory(DestinationDao inDestinationDao, DeidPerPatientParamsDao inDeidPerPatientParamsDao, EtlProperties etlProperties, EurekaDeidConfigFactory inEurekaDeidConfigFactory) {
+    public ProtempaDestinationFactory(DestinationDao inDestinationDao, 
+            DeidPerPatientParamsDao inDeidPerPatientParamsDao, 
+            IdPoolDao inIdPoolDao,
+            EtlProperties etlProperties, 
+            EurekaDeidConfigFactory inEurekaDeidConfigFactory) {
         this.destinationDao = inDestinationDao;
         this.deidPerPatientParamsDao = inDeidPerPatientParamsDao;
         this.etlProperties = etlProperties;
         this.eurekaDeidConfigFactory = inEurekaDeidConfigFactory;
+        this.idPoolDao = inIdPoolDao;
     }
 
     public org.protempa.dest.Destination getInstance(Long destId, QueryMode queryMode) throws DestinationInitException {
@@ -104,7 +110,7 @@ public class ProtempaDestinationFactory {
             } else if (dest instanceof PatientSetSenderDestinationEntity) {
                 result = new PatientSetSenderDestination(this.etlProperties, (PatientSetSenderDestinationEntity) dest);
             } else if (dest instanceof TabularFileDestinationEntity) {
-                result = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest);
+                result = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest, this.idPoolDao);
             } else {
                 throw new AssertionError("Invalid destination entity type " + dest.getClass());
             }
