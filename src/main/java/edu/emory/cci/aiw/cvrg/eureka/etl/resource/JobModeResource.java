@@ -41,59 +41,55 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.EncryptionAlgorithm;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
+import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
-import org.eurekaclinical.standardapis.exception.HttpStatusException;
+import org.eurekaclinical.common.resource.AbstractNamedReadOnlyResource;
+import org.eurekaclinical.eureka.client.comm.JobMode;
 
 @Transactional
-@Path("/protected/encryptionalgorithms")
-@RolesAllowed({"researcher"})
+@Path("/protected/jobmodes")
 @Produces(MediaType.APPLICATION_JSON)
-public class EncryptionAlgorithmResource {
+public class JobModeResource extends AbstractNamedReadOnlyResource<JobModeEntity, JobMode> {
 
-    private final EncryptionAlgorithmDao encryptionAlgorithmDao;
+    private final JobModeDao jobModeDao;
 
     @Inject
-    public EncryptionAlgorithmResource(EncryptionAlgorithmDao inEncryptionAlgorithmDao) {
-        this.encryptionAlgorithmDao = inEncryptionAlgorithmDao;
+    public JobModeResource(JobModeDao inJobModeDao) {
+        super(inJobModeDao);
+        this.jobModeDao = inJobModeDao;
     }
 
     @GET
-    @Path("/{id}")
-    public EncryptionAlgorithm get(@Context HttpServletRequest req,
-            @PathParam("id") Long inId) {
-        EncryptionAlgorithm result = this.encryptionAlgorithmDao.retrieve(inId);
-        if (result != null) {
-            return result;
-        } else {
-            throw new HttpStatusException(Status.NOT_FOUND);
+    @Override
+    public List<JobMode> getAll(@Context HttpServletRequest req) {
+        List<JobMode> result = new ArrayList<>();
+        for (JobModeEntity jobModeEntity : this.jobModeDao.getAllAsc()) {
+            result.add(toComm(jobModeEntity, req));
         }
+        return result;
+    }
+    
+    @Override
+    protected JobMode toComm(JobModeEntity entity, HttpServletRequest req) {
+        JobMode jobMode = new JobMode();
+        jobMode.setId(entity.getId());
+        jobMode.setName(entity.getName());
+        jobMode.setDescription(entity.getDescription());
+        jobMode.setRank(entity.getRank());
+        jobMode.setDefault(entity.isDefault());
+        return jobMode;
     }
 
-    @GET
-    @Path("/byname/{name}")
-    public EncryptionAlgorithm get(@Context HttpServletRequest req,
-            @PathParam("name") String inName) {
-        EncryptionAlgorithm result = this.encryptionAlgorithmDao.getByName(inName);
-        if (result != null) {
-            return result;
-        } else {
-            throw new HttpStatusException(Status.NOT_FOUND);
-        }
-    }
-
-    @GET
-    public List<EncryptionAlgorithm> getAll(@Context HttpServletRequest req) {
-        return this.encryptionAlgorithmDao.getAll();
+    @Override
+    protected boolean isAuthorizedEntity(JobModeEntity entity, HttpServletRequest req) {
+        return true;
     }
 }

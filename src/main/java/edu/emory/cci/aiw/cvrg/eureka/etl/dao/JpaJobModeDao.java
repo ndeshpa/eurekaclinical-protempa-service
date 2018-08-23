@@ -1,3 +1,5 @@
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+
 /*
  * #%L
  * Eureka Protempa ETL
@@ -37,45 +39,38 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
-
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity_;
 import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
-import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import org.eurekaclinical.standardapis.dao.GenericDao;
 
 /**
  *
- * @author hrathod
+ * @author Andrew Post
  */
-public class JobResourceTest extends AbstractEtlResourceTest {
+public class JpaJobModeDao extends GenericDao<JobModeEntity, Long> implements JobModeDao {
 
-    /**
-     * Test if all the jobs added by the Setup class are returned properly,
-     * using a null Filter.
-     */
-    @Test
-    public void testJobListWithFilter() {
-        WebResource resource = this.resource();
-        JobFilter jobFilter = new JobFilter(null, null, null, null, null, null);
-        List<Job> jobs = resource.path("/api/protected/jobs/status").queryParam("filter",
-                jobFilter.toQueryParam()).accept(
-                MediaType.APPLICATION_JSON).get(new GenericType<List<Job>>() {
-                });
-        Assert.assertEquals(1, jobs.size());
+    @Inject
+    public JpaJobModeDao(Provider<EntityManager> inManagerProvider) {
+        super(JobModeEntity.class, inManagerProvider);
     }
 
-    @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
+    @Override
+    public JobModeEntity getByName(String name) {
+        return getDatabaseSupport().getUniqueByAttribute(JobModeEntity.class, JobModeEntity_.name, name);
+    }
+
+    @Override
+    public List<JobModeEntity> getAllAsc() {
+        return getListAsc(JobModeEntity_.rank);
+    }
+    
+    @Override
+    public JobModeEntity getDefault() {
+        return getUniqueByAttribute(JobModeEntity_.isDefault, true);
     }
 
 }

@@ -61,6 +61,7 @@ import edu.emory.cci.aiw.neo4jetl.Neo4jDestination;
 import org.protempa.dest.DestinationInitException;
 import org.protempa.dest.deid.DeidentifiedDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
+import org.protempa.query.QueryMode;
 
 /**
  *
@@ -69,57 +70,57 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
 @Singleton
 public class ProtempaDestinationFactory {
 
-	private final EtlProperties etlProperties;
-	private final DestinationDao destinationDao;
-	private final DeidPerPatientParamsDao deidPerPatientParamsDao;
-	private final EurekaDeidConfigFactory eurekaDeidConfigFactory;
+    private final EtlProperties etlProperties;
+    private final DestinationDao destinationDao;
+    private final DeidPerPatientParamsDao deidPerPatientParamsDao;
+    private final EurekaDeidConfigFactory eurekaDeidConfigFactory;
 
-	@Inject
-	public ProtempaDestinationFactory(DestinationDao inDestinationDao, DeidPerPatientParamsDao inDeidPerPatientParamsDao, EtlProperties etlProperties, EurekaDeidConfigFactory inEurekaDeidConfigFactory) {
-		this.destinationDao = inDestinationDao;
-		this.deidPerPatientParamsDao = inDeidPerPatientParamsDao;
-		this.etlProperties = etlProperties;
-		this.eurekaDeidConfigFactory = inEurekaDeidConfigFactory;
-	}
+    @Inject
+    public ProtempaDestinationFactory(DestinationDao inDestinationDao, DeidPerPatientParamsDao inDeidPerPatientParamsDao, EtlProperties etlProperties, EurekaDeidConfigFactory inEurekaDeidConfigFactory) {
+        this.destinationDao = inDestinationDao;
+        this.deidPerPatientParamsDao = inDeidPerPatientParamsDao;
+        this.etlProperties = etlProperties;
+        this.eurekaDeidConfigFactory = inEurekaDeidConfigFactory;
+    }
 
-	public org.protempa.dest.Destination getInstance(Long destId, boolean updateData) throws DestinationInitException {
-		DestinationEntity dest = this.destinationDao.retrieve(destId);
-		return getInstance(dest, updateData);
-	}
+    public org.protempa.dest.Destination getInstance(Long destId, QueryMode queryMode) throws DestinationInitException {
+        DestinationEntity dest = this.destinationDao.retrieve(destId);
+        return getInstance(dest, queryMode);
+    }
 
-	public org.protempa.dest.Destination getInstance(DestinationEntity dest, boolean updateData) throws DestinationInitException {
-		org.protempa.dest.Destination result;
-		try {
-			if (dest instanceof I2B2DestinationEntity) {
-				result = new I2b2Destination(new EurekaI2b2Configuration((I2B2DestinationEntity) dest, this.etlProperties));
-			} else if (dest instanceof CohortDestinationEntity) {
-				CohortEntity cohortEntity = ((CohortDestinationEntity) dest).getCohort();
-				Cohort cohort = cohortEntity.toCohort();
-				result = new KeyLoaderDestination(dest.getName(), new CohortCriteria(cohort));
-			} else if (dest instanceof Neo4jDestinationEntity) {
-				result = new Neo4jDestination(new EurekaNeo4jConfiguration((Neo4jDestinationEntity) dest));
-			} else if (dest instanceof PatientSetExtractorDestinationEntity) {
-				result = new PatientSetExtractorDestination(this.etlProperties, (PatientSetExtractorDestinationEntity) dest);
-			} else if (dest instanceof PatientSetSenderDestinationEntity) {
-				result = new PatientSetSenderDestination(this.etlProperties, (PatientSetSenderDestinationEntity) dest);
-			} else if (dest instanceof TabularFileDestinationEntity) {
-				result = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest);
-			} else {
-				throw new AssertionError("Invalid destination entity type " + dest.getClass());
-			}
+    public org.protempa.dest.Destination getInstance(DestinationEntity dest, QueryMode queryMode) throws DestinationInitException {
+        org.protempa.dest.Destination result;
+        try {
+            if (dest instanceof I2B2DestinationEntity) {
+                result = new I2b2Destination(new EurekaI2b2Configuration((I2B2DestinationEntity) dest, this.etlProperties));
+            } else if (dest instanceof CohortDestinationEntity) {
+                CohortEntity cohortEntity = ((CohortDestinationEntity) dest).getCohort();
+                Cohort cohort = cohortEntity.toCohort();
+                result = new KeyLoaderDestination(dest.getName(), new CohortCriteria(cohort));
+            } else if (dest instanceof Neo4jDestinationEntity) {
+                result = new Neo4jDestination(new EurekaNeo4jConfiguration((Neo4jDestinationEntity) dest));
+            } else if (dest instanceof PatientSetExtractorDestinationEntity) {
+                result = new PatientSetExtractorDestination(this.etlProperties, (PatientSetExtractorDestinationEntity) dest);
+            } else if (dest instanceof PatientSetSenderDestinationEntity) {
+                result = new PatientSetSenderDestination(this.etlProperties, (PatientSetSenderDestinationEntity) dest);
+            } else if (dest instanceof TabularFileDestinationEntity) {
+                result = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest);
+            } else {
+                throw new AssertionError("Invalid destination entity type " + dest.getClass());
+            }
 
-			if (dest.isDeidentificationEnabled()) {
-				if (updateData) {
-					this.deidPerPatientParamsDao.deleteAll(dest);
-				}
-				EurekaDeidConfig deidConfig = this.eurekaDeidConfigFactory.getInstance(dest);
-				return new DeidentifiedDestination(result, deidConfig);
-			} else {
-				return result;
-			}
-		} catch (ConfigurationInitException ex) {
-			throw new DestinationInitException(ex);
-		}
-	}
+            if (dest.isDeidentificationEnabled()) {
+                if (queryMode == QueryMode.REPLACE) {
+                    this.deidPerPatientParamsDao.deleteAll(dest);
+                }
+                EurekaDeidConfig deidConfig = this.eurekaDeidConfigFactory.getInstance(dest);
+                return new DeidentifiedDestination(result, deidConfig);
+            } else {
+                return result;
+            }
+        } catch (ConfigurationInitException ex) {
+            throw new DestinationInitException(ex);
+        }
+    }
 
 }

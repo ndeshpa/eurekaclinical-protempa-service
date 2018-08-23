@@ -39,8 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.config;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
@@ -55,23 +53,21 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaEtlUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaJobDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaJobEventDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaSourceConfigDao;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaUserTemplateDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.SourceConfigDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EurekaDeidConfigDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaEncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaEurekaDeidConfigDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaJobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaLinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaRoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity;
-
 import org.eurekaclinical.standardapis.dao.UserDao;
-import org.eurekaclinical.standardapis.dao.UserTemplateDao;
 import org.eurekaclinical.standardapis.entity.RoleEntity;
 import org.eurekaclinical.standardapis.entity.UserEntity;
 
@@ -79,16 +75,16 @@ import org.eurekaclinical.standardapis.entity.UserEntity;
  * @author hrathod
  */
 public class AppModule extends AbstractModule {
-    
+
     AppModule() {
     }
-    
+
     @Override
     protected void configure() {
-        bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
+        bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {
+        }).to(JpaEtlUserDao.class);
         bind(AuthorizedUserDao.class).to(JpaEtlUserDao.class);
         bind(RoleDao.class).to(JpaRoleDao.class);
-        bind(new TypeLiteral<UserTemplateDao<UserTemplateEntity>>() {}).to(JpaUserTemplateDao.class);
         bind(JobDao.class).to(JpaJobDao.class);
         bind(JobEventDao.class).to(JpaJobEventDao.class);
         bind(EtlGroupDao.class).to(JpaEtlGroupDao.class);
@@ -99,5 +95,6 @@ public class AppModule extends AbstractModule {
         bind(EurekaDeidConfigDao.class).to(JpaEurekaDeidConfigDao.class);
         bind(LinkDao.class).to(JpaLinkDao.class);
         bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
+        bind(JobModeDao.class).to(JpaJobModeDao.class);
     }
 }

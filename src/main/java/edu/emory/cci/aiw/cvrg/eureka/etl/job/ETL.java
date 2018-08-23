@@ -109,7 +109,7 @@ public class ETL {
     }
 
     void run(JobEntity job, PropositionDefinition[] inPropositionDefinitions,
-            String[] inPropIdsToShow, Filter filter, boolean updateData,
+            String[] inPropIdsToShow, Filter filter,
             Configuration prompts) throws EtlException {
         assert inPropositionDefinitions != null :
                 "inPropositionDefinitions cannot be null";
@@ -136,9 +136,11 @@ public class ETL {
             } else {
                 databaseFile = null;
             }
+            
+            QueryMode queryMode = QueryMode.valueOf(job.getJobMode().getName());
 
             protempaDestination
-                    = this.protempaDestFactory.getInstance(eurekaDestination.getId(), updateData);
+                    = this.protempaDestFactory.getInstance(eurekaDestination.getId(), queryMode);
 
             LOGGER.debug("Constructing Protempa query for job {}", job.getId());
             DefaultQueryBuilder q = new DefaultQueryBuilder();
@@ -152,7 +154,7 @@ public class ETL {
             q.setName(job.getName());
             q.setUsername(job.getUser().getUsername());
             q.setFilters(filter);
-            q.setQueryMode(updateData ? QueryMode.UPDATE : QueryMode.REPLACE);
+            q.setQueryMode(queryMode);
             if (databaseFile != null) {
                 q.setDatabasePath(databaseFile.getPath());
             }

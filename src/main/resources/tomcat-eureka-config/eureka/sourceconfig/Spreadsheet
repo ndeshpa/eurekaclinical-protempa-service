@@ -1,6 +1,6 @@
 [edu.emory.cci.aiw.cvrg.eureka.etl.dsb.EurekaDataSourceBackend]
 dataSourceBackendId=Spreadsheet
-databaseName = spreadsheet
+databaseName = ${project.build.directory}/eureka-db/spreadsheet
 sampleUrl = ../docs/sample.xlsx
 labsRootFullName = EK_LABS
 vitalsRootFullName = EK_VITALS

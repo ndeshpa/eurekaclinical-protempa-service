@@ -55,24 +55,24 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.test.Setup;
  * @author hrathod
  */
 public abstract class AbstractEtlResourceTest extends AbstractResourceTest {
-	
-	@Override
-	protected final Class<? extends ServletContextListener> getListener() {
-		return ContextTestListener.class;
-	}
 
-	@Override
-	protected final Class<? extends Filter> getFilter() {
-		return GuiceFilter.class;
-	}
+    @Override
+    protected final Class<? extends ServletContextListener> getListener() {
+        return ContextTestListener.class;
+    }
 
-	@Override
-	protected Class<? extends TestDataProvider> getDataProvider() {
-		return Setup.class;
-	}
+    @Override
+    protected final Class<? extends Filter> getFilter() {
+        return GuiceFilter.class;
+    }
 
-	@Override
-	protected Module[] getModules() {
-		return new Module[]{new AppTestModule()};
-	}
+    @Override
+    protected Class<? extends TestDataProvider> getDataProvider() {
+        return Setup.class;
+    }
+
+    @Override
+    protected Module[] getModules() {
+        return new Module[]{new AppTestModule()};
+    }
 }
