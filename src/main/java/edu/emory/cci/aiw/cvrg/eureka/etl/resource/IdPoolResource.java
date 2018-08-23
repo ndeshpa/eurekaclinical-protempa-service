@@ -41,6 +41,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  */
 
 import com.google.inject.persist.Transactional;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity;
 import javax.inject.Inject;
@@ -61,7 +62,7 @@ import org.eurekaclinical.protempa.client.comm.IdPool;
 public class IdPoolResource extends AbstractNamedReadWriteResource<IdPoolEntity, IdPool> {
 
     @Inject
-    public IdPoolResource(RoleDao inRoleDao) {
+    public IdPoolResource(IdPoolDao inRoleDao) {
         super(inRoleDao, true);
     }
     
