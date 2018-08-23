@@ -39,12 +39,12 @@
  */
 package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
-import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

@@ -41,13 +41,12 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.config;
 
 import java.io.File;
 
-import com.google.inject.Singleton;
-
 import edu.emory.cci.aiw.cvrg.eureka.etl.resource.ToConfigFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Singleton;
 import org.eurekaclinical.standardapis.props.CasJerseyEurekaClinicalProperties;
 
 /**

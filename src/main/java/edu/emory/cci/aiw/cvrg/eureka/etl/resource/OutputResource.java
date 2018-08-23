@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import com.google.inject.Inject;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
@@ -57,6 +56,7 @@ import javax.ws.rs.core.Response.Status;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
