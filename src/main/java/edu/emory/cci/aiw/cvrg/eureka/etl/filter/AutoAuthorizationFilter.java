@@ -7,24 +7,23 @@ import org.eurekaclinical.common.filter.AbstractAutoAuthorizationFilter;
 import org.eurekaclinical.standardapis.dao.UserDao;
 import org.eurekaclinical.standardapis.dao.UserTemplateDao;
 
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.RoleEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity;
 
 
 @Singleton
-public class AutoAuthorizationFilter extends AbstractAutoAuthorizationFilter<RoleEntity, UserEntity, UserTemplateEntity>{
+public class AutoAuthorizationFilter extends AbstractAutoAuthorizationFilter<AuthorizedRoleEntity, AuthorizedUserEntity, UserTemplateEntity>{
  
 @Inject
     public AutoAuthorizationFilter(UserTemplateDao<UserTemplateEntity> inUserTemplateDao,
-            UserDao<UserEntity> inUserDao) {
+            UserDao<AuthorizedUserEntity> inUserDao) {
         super(inUserTemplateDao, inUserDao);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
-    protected UserEntity toUserEntity(UserTemplateEntity userTemplate, String username) {
-        UserEntity user = new UserEntity();
+    protected AuthorizedUserEntity toUserEntity(UserTemplateEntity userTemplate, String username) {
+        AuthorizedUserEntity user = new AuthorizedUserEntity();
         user.setUsername(username); 
         user.setRoles(userTemplate.getRoles());
         return user;
