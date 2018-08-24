@@ -72,13 +72,19 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 
 /**
  *
  * @author hrathod
  */
 public class AppTestModule extends AbstractModule {
-
+    PhenotypeClientProvider phenotypeClientProvider;
+    public AppTestModule(){
+        EtlProperties etlProperties = new EtlProperties();
+        phenotypeClientProvider = new PhenotypeClientProvider(etlProperties.getPhenotypeServiceUrl());
+        
+    }
     @Override
     protected void configure() {
         install(new JpaPersistModule("backend-jpa-unit"));
@@ -97,5 +103,7 @@ public class AppTestModule extends AbstractModule {
         bind(JobModeDao.class).to(JpaJobModeDao.class);
         bind(IdPoolDao.class).to(JpaIdPoolDao.class);
         bind(IdPoolIdDao.class).to(JpaIdPoolIdDao.class);
+        bind(EurekaClinicalPhenotypeClient.class).toProvider(this.phenotypeClientProvider);
+
     }
 }
