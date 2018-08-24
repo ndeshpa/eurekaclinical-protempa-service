@@ -45,13 +45,18 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.conversion;
 //import org.eurekaclinical.phenotype.service.entity.TimeUnit;
 //import org.eurekaclinical.phenotype.service.entity.ValueThresholdEntity;
 //import org.eurekaclinical.phenotype.service.entity.ValueThresholdGroupEntity;
+import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.eureka.client.comm.Phenotype;
 import org.eurekaclinical.eureka.client.comm.PhenotypeField;
 import org.eurekaclinical.eureka.client.comm.ValueThreshold;
 import org.eurekaclinical.eureka.client.comm.ValueThresholds;
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 import org.eurekaclinical.phenotype.client.comm.FrequencyType;
 import org.eurekaclinical.phenotype.client.comm.RelationOperator;
 import org.eurekaclinical.phenotype.client.comm.ThresholdsOperator;
@@ -86,11 +91,20 @@ class ConversionUtil {
         private static Map<Long, String> frequencyTypeNameMap= new HashMap<>();
         private static Map<Long, String> thresholdOperationNameMap= new HashMap<>();
         private static Map<Long, String> valueComparatorNameMap= new HashMap<>();
+        private static boolean isInitialized=false;
+        @Inject
+        static EurekaClinicalPhenotypeClient phenotypeClient;
         
-        
+        static {
+            try {
+                setupTimeUnitAndOperators();
+            } catch (ClientException ex) {
+                Logger.getLogger(ConversionUtil.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 
         
-        void setTimeUnitMap(List<TimeUnit> listTimeUnit){
+        static void setTimeUnitMap(List<TimeUnit> listTimeUnit){
             timeUnitMap.clear();
             for(TimeUnit tu: listTimeUnit){
                 timeUnitMap.put(tu.getId(), tu.getName());
@@ -98,7 +112,7 @@ class ConversionUtil {
             
         }
         
-        void setRelOperatorNameMap(List<RelationOperator> listRelationOperator){
+        static void setRelOperatorNameMap(List<RelationOperator> listRelationOperator){
             relOperatorNameMap.clear();
             for(RelationOperator relOp: listRelationOperator){
                 relOperatorNameMap.put(relOp.getId(), relOp.getName());
@@ -106,15 +120,15 @@ class ConversionUtil {
             
         }
         
-        void setFrequencyTypeNameMap(List<RelationOperator> listRelationOperator){
+        static void setFrequencyTypeNameMap(List<FrequencyType> listFrequencyType){
             frequencyTypeNameMap.clear();
-            for(RelationOperator relOp: listRelationOperator){
+            for(FrequencyType relOp: listFrequencyType){
                 frequencyTypeNameMap.put(relOp.getId(), relOp.getName());
             }
             
         }
         
-        void setThresholdOperationNameMap(List<ThresholdsOperator> listThresholdsOperator){
+        static void setThresholdOperationNameMap(List<ThresholdsOperator> listThresholdsOperator){
             listThresholdsOperator.clear();
             for(ThresholdsOperator item: listThresholdsOperator){
                 thresholdOperationNameMap.put(item.getId(), item.getName());
@@ -122,7 +136,7 @@ class ConversionUtil {
             
         }
         
-        void setvalueComparatorNameMap(List<ValueComparator> listValueComparator){
+        static void setValueComparatorNameMap(List<ValueComparator> listValueComparator){
             valueComparatorNameMap.clear();
             for(ValueComparator item: listValueComparator){
                 valueComparatorNameMap.put(item.getId(), item.getName());
@@ -130,6 +144,21 @@ class ConversionUtil {
             
         }
 
+        public static void setupTimeUnitAndOperators() throws ClientException{
+            if(!isInitialized){
+                setupTimeUnitAndOperatorsForce();
+                isInitialized = true;
+            }
+        }
+                
+        public static void setupTimeUnitAndOperatorsForce() throws ClientException{
+            setTimeUnitMap(phenotypeClient.getTimeUnitsAsc());
+            setRelOperatorNameMap(phenotypeClient.getRelationOperatorsAsc());
+            setFrequencyTypeNameMap(phenotypeClient.getFrequencyTypesAsc());
+            setThresholdOperationNameMap(phenotypeClient.getThresholdsOperators());
+            setValueComparatorNameMap(phenotypeClient.getValueComparatorsAsc());
+            
+        }
         
 
 //	static AbsoluteTimeUnit unit(TimeUnit unit) {
@@ -147,7 +176,7 @@ class ConversionUtil {
                 else{
                  unitName = timeUnitMap.get(unit);
                  if (unitName ==null)
-                     uniName = "day";
+                     unitName = "day";
                 }
 		return unitName != null ? AbsoluteTimeUnit.nameToUnit(unitName)
 				: null;
@@ -166,16 +195,7 @@ class ConversionUtil {
                 if(frequencyType == null)
                     return null;
                 
-                switch (frequencyType.intValue()){
-                    case 1:
-                        frequencyTypeName = "at least";
-                        break;
-                    case 2:
-                        frequencyTypeName = "first";
-                        break;
-                    default:
-                        frequencyTypeName = null;
-                }
+                frequencyTypeName = frequencyTypeNameMap.get(frequencyType);
 		return frequencyTypeName;
 	}
         
@@ -183,18 +203,8 @@ class ConversionUtil {
         static String thresholdOperationName(Long thresholdOp){
             if(thresholdOp == null)
                 return null;
-            
             String thresholdOpName;
-            switch(thresholdOp.intValue()){
-                case 1:
-                    thresholdOpName = "any";
-                    break;
-                case 2:
-                    thresholdOpName = "all";
-                    break;
-                default:
-                    thresholdOpName = null;
-            }
+            thresholdOpName = thresholdOperationNameMap.get(thresholdOp);
             
             return thresholdOpName;
         }
@@ -206,28 +216,7 @@ class ConversionUtil {
                 return null;
          
             String compName;
-            switch(compID.intValue()){
-                case 1:
-                    compName = "=";
-                    break;
-                case 2:
-                    compName = "not=";
-                    break;
-                case 3:
-                    compName = ">";
-                    break;
-                case 4:
-                    compName = ">=";
-                    break;
-                case 5:
-                    compName= "<";
-                    break;
-                case 6:
-                    compName = "<=";
-                    break;
-                default:
-                    compName = null;
-            }
+            compName = valueComparatorNameMap.get(compID);
             return compName;
         }
         
@@ -271,7 +260,7 @@ class ConversionUtil {
 			pc.setPropertyName(
 					phenotypeField.getProperty());
 			pc.setValue(ValueType.VALUE.parse(phenotypeField.getPropertyValue()));
-			pc.setValueComp(ValueComparator.EQUAL_TO);
+			pc.setValueComp(org.protempa.proposition.value.ValueComparator.EQUAL_TO);
 
 			tepd.setPropertyConstraints(new PropertyConstraint[] {pc});
 		}
