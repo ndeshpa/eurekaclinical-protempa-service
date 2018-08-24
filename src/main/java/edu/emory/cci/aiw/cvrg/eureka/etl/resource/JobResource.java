@@ -260,6 +260,7 @@ public class JobResource {
         jobRequest.setJobSpec(jobSpec);
         
         try{
+//            ConversionUtil.setupTimeUnitAndOperators(this.phenotypeClient);
             List<PropositionDefinition> lisUserPropDefs = this.getUserPropositionDefinitions();
             jobRequest.setUserPropositions(lisUserPropDefs);
         } catch (ClientException ex) {
