@@ -76,7 +76,7 @@ import org.protempa.proposition.value.ValueType;
  *
  * @author Andrew Post
  */
-class ConversionUtil {
+public class ConversionUtil {
 
 	static final String PRIMARY_PROP_ID_SUFFIX = "_PRIMARY";
 	static final String VALUE = "YES";
@@ -92,17 +92,7 @@ class ConversionUtil {
         private static Map<Long, String> thresholdOperationNameMap= new HashMap<>();
         private static Map<Long, String> valueComparatorNameMap= new HashMap<>();
         private static boolean isInitialized=false;
-        @Inject
-        static EurekaClinicalPhenotypeClient phenotypeClient;
         
-        static {
-            try {
-                setupTimeUnitAndOperators();
-            } catch (ClientException ex) {
-                Logger.getLogger(ConversionUtil.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
         
         static void setTimeUnitMap(List<TimeUnit> listTimeUnit){
             timeUnitMap.clear();
@@ -144,14 +134,14 @@ class ConversionUtil {
             
         }
 
-        public static void setupTimeUnitAndOperators() throws ClientException{
+        public static void setupTimeUnitAndOperators(EurekaClinicalPhenotypeClient phenotypeClient) throws ClientException{
             if(!isInitialized){
-                setupTimeUnitAndOperatorsForce();
+                setupTimeUnitAndOperatorsForce(phenotypeClient);
                 isInitialized = true;
             }
         }
                 
-        public static void setupTimeUnitAndOperatorsForce() throws ClientException{
+        public static void setupTimeUnitAndOperatorsForce(EurekaClinicalPhenotypeClient phenotypeClient) throws ClientException{
             setTimeUnitMap(phenotypeClient.getTimeUnitsAsc());
             setRelOperatorNameMap(phenotypeClient.getRelationOperatorsAsc());
             setFrequencyTypeNameMap(phenotypeClient.getFrequencyTypesAsc());
