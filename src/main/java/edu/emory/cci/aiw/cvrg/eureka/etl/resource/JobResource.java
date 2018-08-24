@@ -80,6 +80,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.ConversionSupport;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.ConversionUtil;
 import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.PropositionDefinitionCollector;
 import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.PropositionDefinitionConverterVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobDao;
@@ -260,7 +261,7 @@ public class JobResource {
         jobRequest.setJobSpec(jobSpec);
         
         try{
-//            ConversionUtil.setupTimeUnitAndOperators(this.phenotypeClient);
+            ConversionUtil.setupTimeUnitAndOperators(this.phenotypeClient);
             List<PropositionDefinition> lisUserPropDefs = this.getUserPropositionDefinitions();
             jobRequest.setUserPropositions(lisUserPropDefs);
         } catch (ClientException ex) {

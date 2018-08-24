@@ -59,6 +59,7 @@ import com.google.inject.persist.Transactional;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.ConversionUtil;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
@@ -122,6 +123,7 @@ public class JobResource1 {
                 List<Phenotype> phenotypeList;
                 System.out.println("Protempa /jobs proposition definitions");
                 try{
+                    ConversionUtil.setupTimeUnitAndOperators(this.phenotypeClient);
                     phenotypeList = this.phenotypeClient.getUserPhenotypes(false);
                     this.converterVisitor.setAllCustomPhenotypes(phenotypeList);
                     PropositionDefinitionCollector collector
