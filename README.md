@@ -6,6 +6,11 @@ It provides backend services for managing phenotypes, cohorts and running phenot
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service)
 
+## Version 2.0
+Basic support for id generation for tabular files.
+New data processing modes for managing phenotypes.
+Phenotype data store.
+
 ## Version 1.1
 * Add tabular destination setting that controls quoting columns.
 * Allow writing the LocalUniqueId id and numericalId fields to tabular files.
