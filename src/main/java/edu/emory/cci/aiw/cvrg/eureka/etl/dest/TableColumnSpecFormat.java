@@ -40,6 +40,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * #L%
  */
 import au.com.bytecode.opencsv.CSVParser;
+import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
 import java.io.IOException;
 import java.text.FieldPosition;
 import java.text.Format;
@@ -56,7 +57,6 @@ import org.protempa.dest.table.Link;
 import org.protempa.dest.table.OutputConfig;
 import org.protempa.dest.table.PropositionColumnSpec;
 import org.protempa.dest.table.Reference;
-import org.protempa.pool.Pool;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -68,17 +68,17 @@ class TableColumnSpecFormat extends Format {
     private static final long serialVersionUID = 1L;
     private final String columnName;
     private final String formatStr;
-    private final Pool<Long> pool;
+    private final Pool pool;
 
     TableColumnSpecFormat(String columnName) {
         this(columnName, null);
     }
-
+    
     TableColumnSpecFormat(String columnName, String formatStr) {
         this(columnName, formatStr, null);
     }
-
-    TableColumnSpecFormat(String columnName, String formatStr, Pool<Long> pool) {
+    
+    TableColumnSpecFormat(String columnName, String formatStr, Pool pool) {
         this.columnName = columnName;
         this.formatStr = formatStr;
         this.pool = pool;
@@ -86,19 +86,19 @@ class TableColumnSpecFormat extends Format {
 
     @Override
     public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-        if (!(obj instanceof TableColumnSpecWrapper)) {
+        if (!(obj instanceof FileTableColumnSpecWrapper)) {
             throw new IllegalArgumentException(
-                    "This Format only formats objects of type " + TableColumnSpecWrapper.class.getName()
+                    "This Format only formats objects of type " + FileTableColumnSpecWrapper.class.getName()
                     + "; you supplied a " + obj.getClass().getName());
         }
-        TableColumnSpecWrapper theObj = (TableColumnSpecWrapper) obj;
+        FileTableColumnSpecWrapper theObj = (FileTableColumnSpecWrapper) obj;
         throw new IllegalArgumentException("Not supported yet.");
     }
 
     @Override
-    public TableColumnSpecWrapper parseObject(String source, ParsePosition pos) {
+    public FileTableColumnSpecWrapper parseObject(String source, ParsePosition pos) {
         try {
-            TableColumnSpecWrapper result = doParse(source != null ? source.substring(pos.getIndex()) : null);
+            FileTableColumnSpecWrapper result = doParse(source != null ? source.substring(pos.getIndex()) : null);
             pos.setIndex(source != null ? source.length() : 0);
             return result;
         } catch (IOException ex) {
@@ -107,7 +107,7 @@ class TableColumnSpecFormat extends Format {
         }
     }
 
-    private TableColumnSpecWrapper doParse(String links) throws IOException {
+    private FileTableColumnSpecWrapper doParse(String links) throws IOException {
         if (links.startsWith("[")) {
             CSVParser referenceNameParser = new CSVParser(',');
             String tokens = "[ ]>.$";
@@ -224,9 +224,9 @@ class TableColumnSpecFormat extends Format {
                         outputConfig = new OutputConfig(false, false, false, false, false, false, false, false, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, this.columnName, propertyHeadings, format);
                 }
             }
-            return new TableColumnSpecWrapper(firstPropId, new PropositionColumnSpec(this.columnName, propertyName != null ? new String[]{propertyName} : null, outputConfig, null, linksList.toArray(new Link[linksList.size()]), 1, this.pool));
+            return new FileTableColumnSpecWrapper(firstPropId, new PropositionColumnSpec(this.columnName, propertyName != null ? new String[]{propertyName} : null, outputConfig, null, linksList.toArray(new Link[linksList.size()]), 1), new TabularWriterWithPool(this.pool));
         }
-        return new TableColumnSpecWrapper(new ConstantColumnSpec(this.columnName, links));
+        return new FileTableColumnSpecWrapper(null, new ConstantColumnSpec(this.columnName, links), new TabularWriterWithPool(this.pool));
     }
 
     private Format parseFormat(ValueType propertyType) {

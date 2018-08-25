@@ -71,20 +71,20 @@ public class TableColumnSpecFormatTest {
     @Test
     public void testParseConstantType() throws ParseException {
         Object parseObject = this.format.parseObject("bar");
-        if (parseObject instanceof TableColumnSpecWrapper) {
+        if (parseObject instanceof FileTableColumnSpecWrapper) {
             Assert.assertEquals(
                     ConstantColumnSpec.class.getName(),
-                    ((TableColumnSpecWrapper) parseObject).getTableColumnSpec().getClass().getName());
+                    ((FileTableColumnSpecWrapper) parseObject).getTableColumnSpec().getClass().getName());
         }
     }
 
     @Test
     public void testParseConstantBar() throws ParseException, TabularWriterException {
         Object parseObject = this.format.parseObject("bar");
-        if (parseObject instanceof TableColumnSpecWrapper) {
+        if (parseObject instanceof FileTableColumnSpecWrapper) {
             StringWriter sw = new StringWriter();
             try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
-                ((TableColumnSpecWrapper) parseObject)
+                ((FileTableColumnSpecWrapper) parseObject)
                         .getTableColumnSpec()
                         .columnValues("00001", null, null, null, null, null, ftw);
             }
@@ -102,23 +102,23 @@ public class TableColumnSpecFormatTest {
     public void testParseTableColumnSpecWrapper() throws ParseException {
         Object parseObject = this.format.parseObject("[PatientDetails Constant 0].patientId$NOMINALVALUE");
         if (parseObject != null) {
-            Assert.assertEquals(TableColumnSpecWrapper.class.getName(), parseObject.getClass().getName());
+            Assert.assertEquals(FileTableColumnSpecWrapper.class.getName(), parseObject.getClass().getName());
         }
     }
 
     @Test
     public void testParseObjectPropId() throws ParseException {
         Object parseObject = this.format.parseObject("[PatientDetails Constant 0].patientId$NOMINALVALUE");
-        if (parseObject != null && parseObject instanceof TableColumnSpecWrapper) {
-            Assert.assertEquals("PatientDetails", ((TableColumnSpecWrapper) parseObject).getPropId());
+        if (parseObject != null && parseObject instanceof FileTableColumnSpecWrapper) {
+            Assert.assertEquals("PatientDetails", ((FileTableColumnSpecWrapper) parseObject).getPropId());
         }
     }
 
     @Test
     public void testParseObjectPropIdWithColon() throws ParseException {
         Object parseObject = this.format.parseObject("[ICD9:Diagnoses Event 0].code$NOMINALVALUE");
-        if (parseObject != null && parseObject instanceof TableColumnSpecWrapper) {
-            Assert.assertEquals("ICD9:Diagnoses", ((TableColumnSpecWrapper) parseObject).getPropId());
+        if (parseObject != null && parseObject instanceof FileTableColumnSpecWrapper) {
+            Assert.assertEquals("ICD9:Diagnoses", ((FileTableColumnSpecWrapper) parseObject).getPropId());
         }
     }
 

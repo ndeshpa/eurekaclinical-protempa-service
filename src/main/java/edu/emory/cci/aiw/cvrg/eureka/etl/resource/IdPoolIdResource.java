@@ -57,12 +57,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.eurekaclinical.common.resource.AbstractNamedReadWriteResource;
+import org.eurekaclinical.common.resource.AbstractReadWriteResource;
 import org.eurekaclinical.protempa.client.comm.IdPoolId;
-import org.eurekaclinical.standardapis.dao.DaoWithUniqueName;
 
 /**
  *
@@ -71,14 +69,14 @@ import org.eurekaclinical.standardapis.dao.DaoWithUniqueName;
 @Transactional
 @Path("/protected/idpoolids")
 @Produces(MediaType.APPLICATION_JSON)
-public class IdPoolIdResource extends AbstractNamedReadWriteResource<IdPoolIdEntity, IdPoolId> {
+public class IdPoolIdResource extends AbstractReadWriteResource<IdPoolIdEntity, IdPoolId> {
 
     private final IdPoolIdDao idPoolIdDao;
     private final ObjectMapper objectMapper;
 
     @Inject
-    public IdPoolIdResource(IdPoolIdDao inIdPoolIdDao, DaoWithUniqueName<IdPoolIdEntity, Long> inRoleDao) {
-        super(inRoleDao, true);
+    public IdPoolIdResource(IdPoolIdDao inIdPoolIdDao) {
+        super(inIdPoolIdDao, true);
         this.idPoolIdDao = inIdPoolIdDao;
         this.objectMapper = new ObjectMapper();
     }

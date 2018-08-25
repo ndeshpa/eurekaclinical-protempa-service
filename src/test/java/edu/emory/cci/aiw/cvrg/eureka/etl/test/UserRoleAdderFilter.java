@@ -39,9 +39,8 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.test;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import com.google.inject.Singleton;
 import java.io.IOException;
+import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -57,21 +56,21 @@ import javax.servlet.http.HttpServletRequest;
 @Singleton
 public class UserRoleAdderFilter implements Filter {
 
-	public UserRoleAdderFilter() {
-	}
+    public UserRoleAdderFilter() {
+    }
 
-	@Override
-	public void init(FilterConfig fc) throws ServletException {
-	}
+    @Override
+    public void init(FilterConfig fc) throws ServletException {
+    }
 
-	@Override
-	public void doFilter(ServletRequest sr, ServletResponse sr1, FilterChain fc) throws IOException, ServletException {
-		HttpServletRequest req = (HttpServletRequest) sr;
-		fc.doFilter(new UserRoleRequestWrapper(req), sr1);
-	}
+    @Override
+    public void doFilter(ServletRequest sr, ServletResponse sr1, FilterChain fc) throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) sr;
+        fc.doFilter(new UserRoleRequestWrapper(req), sr1);
+    }
 
-	@Override
-	public void destroy() {
-	}
-    
+    @Override
+    public void destroy() {
+    }
+
 }

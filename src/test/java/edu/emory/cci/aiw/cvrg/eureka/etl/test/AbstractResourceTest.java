@@ -87,7 +87,7 @@ public abstract class AbstractResourceTest extends JerseyTest {
      */
     protected AbstractResourceTest() {
         super();
-        this.injector = Guice.createInjector(this.getModules());
+        this.injector = Guice.createInjector(getModules());
     }
 
     @Override
@@ -115,13 +115,11 @@ public abstract class AbstractResourceTest extends JerseyTest {
     @Override
     public final void setUp() throws Exception {
         super.setUp();
-        PersistService persistService = this.injector.getInstance(PersistService.class);
-        persistService.start();
-        this.persistService = persistService;
+        this.persistService = this.injector.getInstance(PersistService.class);
+        this.persistService.start();
 
-        TestDataProvider dataProvider = this.injector.getInstance(this.getDataProvider());
-        dataProvider.setUp();
-        this.dataProvider = dataProvider;
+        this.dataProvider = this.injector.getInstance(this.getDataProvider());
+        this.dataProvider.setUp();
     }
 
     /**

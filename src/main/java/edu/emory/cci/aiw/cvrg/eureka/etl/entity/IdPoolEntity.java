@@ -46,6 +46,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import org.eurekaclinical.protempa.client.comm.IdPool;
 
 /**
@@ -53,6 +54,7 @@ import org.eurekaclinical.protempa.client.comm.IdPool;
  * @author Andrew Post
  */
 @Entity
+@Table(name = "id_pools")
 public class IdPoolEntity implements org.eurekaclinical.standardapis.entity.Entity<Long> {
     @Id
     @SequenceGenerator(name = "ID_POOL_SEQ_GENERATOR",

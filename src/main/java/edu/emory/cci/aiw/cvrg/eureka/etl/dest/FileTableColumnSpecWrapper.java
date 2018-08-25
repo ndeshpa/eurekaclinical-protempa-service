@@ -1,8 +1,10 @@
-/*
+package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
+
+/*-
  * #%L
- * Eureka Services
+ * Eureka Protempa ETL
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2016 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -37,42 +39,43 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
-
-import com.sun.jersey.api.client.GenericType;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.List;
-import org.eurekaclinical.eureka.client.comm.JobMode;
+import org.protempa.dest.table.TableColumnSpec;
 
 /**
- * Tests for the {@link RoleResource} class.
  *
- * @author hrathod
- *
+ * @author Andrew Post
  */
-public class JobModeResourceTest extends AbstractEtlResourceTest {
+class FileTableColumnSpecWrapper {
 
-    /**
-     * Simply call super().
-     */
-    public JobModeResourceTest() {
-        super();
+    private final TableColumnSpec tableColumnSpec;
+    private final String propId;
+    private TabularWriterWithPool fileTabularWriterWithPool;
+    
+    FileTableColumnSpecWrapper(TableColumnSpec tableColumnSpec) {
+        this(null, tableColumnSpec);
     }
 
-    /**
-     * Test that proper number of roles are returned from the resource.
-     */
-    @Test
-    public final void testJobModeListSize() {
-        List<JobMode> roles = getJson("/api/protected/jobmodes", new GenericType<List<JobMode>>() {});
-        Assert.assertEquals(1, roles.size());
+    FileTableColumnSpecWrapper(String propId, TableColumnSpec tableColumnSpec) {
+        this(propId, tableColumnSpec, null);
     }
     
-    @Test
-    public void testJobModeName() {
-        JobMode jobMode = getJson("/api/protected/jobmodes/byname/REPLACE", JobMode.class);
-        Assert.assertEquals("REPLACE", jobMode.getName());
+    FileTableColumnSpecWrapper(String propId, TableColumnSpec tableColumnSpec, TabularWriterWithPool fileTabularWriterWithPool) {
+        assert tableColumnSpec != null : "tableColumnSpec cannot be null";
+        this.propId = propId;
+        this.tableColumnSpec = tableColumnSpec;
+        this.fileTabularWriterWithPool = fileTabularWriterWithPool;
     }
+
+    String getPropId() {
+        return this.propId;
+    }
+
+    TableColumnSpec getTableColumnSpec() {
+        return this.tableColumnSpec;
+    }
+
+    TabularWriterWithPool getFileTabularWriterWithPool() {
+        return fileTabularWriterWithPool;
+    }
+    
 }

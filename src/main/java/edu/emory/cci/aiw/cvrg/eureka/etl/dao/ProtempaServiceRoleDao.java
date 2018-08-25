@@ -1,10 +1,8 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
-
-/*-
+/*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
- * Copyright (C) 2012 - 2016 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,33 +37,17 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.protempa.dest.table.TableColumnSpec;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
 
 /**
+ * A data access object interface for working with {@link RoleEntity} objects in the
+ * data store.
  *
- * @author Andrew Post
+ * @author hrathod
+ *
  */
-class TableColumnSpecWrapper {
-
-    private final TableColumnSpec tableColumnSpec;
-    private final String propId;
-    
-    TableColumnSpecWrapper(TableColumnSpec tableColumnSpec) {
-        this(null, tableColumnSpec);
-    }
-
-    TableColumnSpecWrapper(String propId, TableColumnSpec tableColumnSpec) {
-        assert tableColumnSpec != null : "tableColumnSpec cannot be null";
-        this.tableColumnSpec = tableColumnSpec;
-        this.propId = propId;
-    }
-
-    String getPropId() {
-        return this.propId;
-    }
-
-    TableColumnSpec getTableColumnSpec() {
-        return this.tableColumnSpec;
-    }
+public interface ProtempaServiceRoleDao extends org.eurekaclinical.standardapis.dao.RoleDao<AuthorizedRoleEntity> {
 
 }

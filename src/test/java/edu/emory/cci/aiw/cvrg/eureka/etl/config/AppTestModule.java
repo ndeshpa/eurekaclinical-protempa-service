@@ -40,6 +40,7 @@
 package edu.emory.cci.aiw.cvrg.eureka.etl.config;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
@@ -68,10 +69,19 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaIdPoolIdDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaJobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaLinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaRoleDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaUserTemplateDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ProtempaServiceRoleDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity;
+import org.eurekaclinical.standardapis.dao.RoleDao;
+import org.eurekaclinical.standardapis.dao.UserDao;
+import org.eurekaclinical.standardapis.dao.UserTemplateDao;
+import org.eurekaclinical.standardapis.entity.RoleEntity;
+import org.eurekaclinical.standardapis.entity.UserEntity;
 
 /**
  *
@@ -85,7 +95,7 @@ public class AppTestModule extends AbstractModule {
         bind(JobDao.class).to(JpaJobDao.class);
         bind(JobEventDao.class).to(JpaJobEventDao.class);
         bind(AuthorizedUserDao.class).to(JpaEtlUserDao.class);
-        bind(RoleDao.class).to(JpaRoleDao.class);
+        bind(ProtempaServiceRoleDao.class).to(JpaRoleDao.class);
         bind(EtlGroupDao.class).to(JpaEtlGroupDao.class);
         bind(DestinationDao.class).to(JpaDestinationDao.class);
         bind(DeidPerPatientParamsDao.class).to(JpaDeidPerPatientParamsDao.class);
@@ -97,5 +107,9 @@ public class AppTestModule extends AbstractModule {
         bind(JobModeDao.class).to(JpaJobModeDao.class);
         bind(IdPoolDao.class).to(JpaIdPoolDao.class);
         bind(IdPoolIdDao.class).to(JpaIdPoolIdDao.class);
+        bind(new TypeLiteral<RoleDao<AuthorizedRoleEntity>>() {}).to(JpaRoleDao.class);
+        bind(new TypeLiteral<UserTemplateDao<AuthorizedRoleEntity, UserTemplateEntity>>() {}).to(JpaUserTemplateDao.class);
+        bind(new TypeLiteral<UserDao<AuthorizedUserEntity>>() {}).to(JpaEtlUserDao.class);
+        bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
     }
 }
