@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -51,65 +50,66 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "ps_extractor_destinations")
 public class PatientSetExtractorDestinationEntity extends DestinationEntity implements PatientSetExtractionConfig {
-	@Column(nullable = false)
-	private String aliasPropositionId;
-	
-	@Column(nullable = false)
-	private String aliasPatientIdProperty;
-	
-	private String aliasFieldNameProperty;
-	
-	private String aliasFieldName;
 
-	@Override
-	public String getAliasPropositionId() {
-		return aliasPropositionId;
-	}
+    @Column(nullable = false)
+    private String aliasPropositionId;
 
-	public void setAliasPropositionId(String aliasPropositionId) {
-		this.aliasPropositionId = aliasPropositionId;
-	}
+    @Column(nullable = false)
+    private String aliasPatientIdProperty;
 
-	@Override
-	public String getAliasFieldNameProperty() {
-		return aliasFieldNameProperty;
-	}
+    private String aliasFieldNameProperty;
 
-	public void setAliasFieldNameProperty(String aliasFieldNameProperty) {
-		this.aliasFieldNameProperty = aliasFieldNameProperty;
-	}
+    private String aliasFieldName;
 
-	@Override
-	public String getAliasFieldName() {
-		return aliasFieldName;
-	}
+    @Override
+    public String getAliasPropositionId() {
+        return aliasPropositionId;
+    }
 
-	public void setAliasFieldName(String aliasFieldName) {
-		this.aliasFieldName = aliasFieldName;
-	}
+    public void setAliasPropositionId(String aliasPropositionId) {
+        this.aliasPropositionId = aliasPropositionId;
+    }
 
-	@Override
-	public String getAliasPatientIdProperty() {
-		return aliasPatientIdProperty;
-	}
+    @Override
+    public String getAliasFieldNameProperty() {
+        return aliasFieldNameProperty;
+    }
 
-	public void setAliasPatientIdProperty(String aliasPatientIdProperty) {
-		this.aliasPatientIdProperty = aliasPatientIdProperty;
-	}
+    public void setAliasFieldNameProperty(String aliasFieldNameProperty) {
+        this.aliasFieldNameProperty = aliasFieldNameProperty;
+    }
 
-	@Override
-	public boolean isGetStatisticsSupported() {
-		return false;
-	}
-	
-	@Override
-	public boolean isAllowingQueryPropositionIds() {
-		return false;
-	}
-	
-	@Override
-	public void accept(DestinationEntityVisitor visitor) {
-		visitor.visit(this);
-	}
-	
+    @Override
+    public String getAliasFieldName() {
+        return aliasFieldName;
+    }
+
+    public void setAliasFieldName(String aliasFieldName) {
+        this.aliasFieldName = aliasFieldName;
+    }
+
+    @Override
+    public String getAliasPatientIdProperty() {
+        return aliasPatientIdProperty;
+    }
+
+    public void setAliasPatientIdProperty(String aliasPatientIdProperty) {
+        this.aliasPatientIdProperty = aliasPatientIdProperty;
+    }
+
+    @Override
+    public boolean isGetStatisticsSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean isAllowingQueryPropositionIds() {
+        return false;
+    }
+
+    @Override
+    public void accept(DestinationEntityVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }
