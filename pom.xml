@@ -528,6 +528,11 @@
             <artifactId>eurekaclinical-common</artifactId>
             <version>${eurekaclinical-common-version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eurekaclinical</groupId>
+            <artifactId>eurekaclinical-phenotype-client</artifactId>
+            <version>${eurekaclinical-phenotype-client-version}</version>
+        </dependency>
     </dependencies>
 </project>
 

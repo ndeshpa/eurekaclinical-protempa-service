@@ -79,6 +79,10 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.config.EurekaProtempaConfigurations;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.ConversionSupport;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.ConversionUtil;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.PropositionDefinitionCollector;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.PropositionDefinitionConverterVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
@@ -92,6 +96,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.common.auth.AuthorizedUserSupport;
+import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.eureka.client.comm.JobSpec.Side;
 import org.eurekaclinical.eureka.client.comm.Phenotype;
 import org.eurekaclinical.eureka.client.comm.PhenotypeVisitor;
@@ -128,14 +133,20 @@ public class JobResource {
     private final Provider<Task> taskProvider;
     private final JobModeDao jobModeDao;
     private final EurekaClinicalPhenotypeClient phenotypeClient;
+    private final PropositionDefinitionConverterVisitor converterVisitor;
+    private final ConversionSupport conversionSupport;
+
+
 
     @Inject
     public JobResource(JobDao inJobDao, TaskManager inTaskManager, AuthorizedUserDao inEtlUserDao,
             DestinationDao inDestinationDao, EtlProperties inEtlProperties,
             ProtempaDestinationFactory inProtempaDestinationFactory, Provider<EntityManager> inEntityManagerProvider,
             Provider<Task> inTaskProvider, JobModeDao inJobModeDao,
-            EurekaClinicalPhenotypeClient inPhenotypeClient)
-    {
+            EurekaClinicalPhenotypeClient inPhenotypeClient,
+            PropositionDefinitionConverterVisitor  inConverterVisitor,
+            ConversionSupport inConversionSupport
+            ) {
         this.jobDao = inJobDao;
         this.taskManager = inTaskManager;
         this.etlUserDao = inEtlUserDao;
@@ -147,6 +158,8 @@ public class JobResource {
         this.taskProvider = inTaskProvider;
         this.jobModeDao = inJobModeDao;
         this.phenotypeClient = inPhenotypeClient;
+        this.converterVisitor = inConverterVisitor;
+        this.conversionSupport = inConversionSupport;
     }
 
     @Transactional
@@ -233,55 +246,6 @@ public class JobResource {
         }
     }
 
-	//Finer grained transactions in the implementation
-	@POST
-	@Consumes({MediaType.APPLICATION_JSON})
-	public Response submit(@Context HttpServletRequest request,
-			JobSpec jobSpec) {
-                List<PropositionDefinition> propositionList;
-                System.out.println("Protempa /jobs proposition definitions");
-
-                try{
-                    propositionList = this.phenotypeClient.getPhenotypes2Proposition();       
-                    
-                    
-                }
-                catch (ClientException ex) {
-                    throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
-		} 
-                
-                
-                
-                AuthorizedUserEntity user = this.etlUserDao.getByHttpServletRequest(request);
-		JobRequest jobRequest = new JobRequest();
-		
-                System.out.println(String.format("Sending {} proposition definitions: %d", propositionList.size()));
-                
-                for (PropositionDefinition pd : propositionList) {
-                    System.out.println(pd.getPropositionId());
-		}
-                
-
-		jobRequest.setJobSpec(jobSpec);
-                
-		jobRequest.setUserPropositions(propositionList);
-                
-                
-		List<String> conceptIds = jobSpec.getPropositionIds();
-         	List<String> propIds = new ArrayList<>(conceptIds != null ? conceptIds.size() : 0);
-		if (conceptIds != null) {
-			for (String conceptId : conceptIds) {
-				propIds.add(this.toPropositionId(conceptId));
-                                System.out.println(conceptId + "===>" + this.toPropositionId(conceptId));
-			}
-		}
-		jobRequest.setPropositionIdsToShow(propIds);
-            
-            
-		Long jobId = doCreateJob(jobRequest, request);
-              
-		return Response.created(URI.create("/" + jobId)).build();
-	}
     @Transactional
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -292,6 +256,42 @@ public class JobResource {
     }
 
 
+    // Finer grained transactions in the implementation
+    @POST
+    public Response submit(@Context HttpServletRequest request, JobSpec jobSpec) {
+  
+        JobRequest jobRequest = new JobRequest();
+        jobRequest.setJobSpec(jobSpec);
+        
+        try{
+            ConversionUtil.setupTimeUnitAndOperators(this.phenotypeClient);
+            List<PropositionDefinition> lisUserPropDefs = this.getUserPropositionDefinitions();
+            jobRequest.setUserPropositions(lisUserPropDefs);
+        } catch (ClientException ex) {
+            throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
+        } catch (PhenotypeHandlingException ex) {
+            Logger.getLogger(JobResource.class.getName()).log(Level.SEVERE, null, ex);
+            throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
+        }
+        
+        List<String> conceptIds = jobSpec.getPropositionIds();
+        List<String> propIds = new ArrayList<>(conceptIds != null ? conceptIds.size() : 0);
+        if (conceptIds != null) {
+            for (String conceptId : conceptIds) {
+                propIds.add(this.conversionSupport.toPropositionId(conceptId));
+            }
+        }
+        jobRequest.setPropositionIdsToShow(propIds);
+
+        validate(jobRequest);
+
+        Long jobId;
+
+        jobId = doCreateJob(jobRequest, request);
+     
+
+        return Response.created(URI.create("/" + jobId)).build();
+    }
 
     @Transactional
     @GET
@@ -466,6 +466,20 @@ public class JobResource {
         if (jobSpec.getJobMode() == null) {
             throw new HttpStatusException(Status.BAD_REQUEST, "The jobSpec must have a jobMode");
         }
+    }
+    
+    List<PropositionDefinition> getUserPropositionDefinitions() throws PhenotypeHandlingException, ClientException{
+        List<PropositionDefinition> propositionList;
+                List<Phenotype> phenotypeList;
+                System.out.println("Protempa /jobs proposition definitions");
+                phenotypeList = this.phenotypeClient.getUserPhenotypes(false);
+                this.converterVisitor.setAllCustomPhenotypes(phenotypeList);
+                PropositionDefinitionCollector collector
+                    = PropositionDefinitionCollector.getInstance(
+						this.converterVisitor, phenotypeList);
+                propositionList = collector.getUserPropDefs();
+                  
+		return propositionList;
     }
 
 }

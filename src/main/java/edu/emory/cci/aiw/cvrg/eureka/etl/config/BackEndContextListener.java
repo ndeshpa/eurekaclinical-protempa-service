@@ -49,6 +49,7 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
 import org.eurekaclinical.common.config.InjectorSupport;
 import org.eurekaclinical.common.config.ProxyingServiceServletModule;
+import org.eurekaclinical.common.config.ServiceServletModule;
 
 /**
  * Loaded up on application initialization, sets up the application with Guice
@@ -66,9 +67,9 @@ public class BackEndContextListener extends GuiceServletContextListener {
 	private Injector injector;
         
         public BackEndContextListener(){
-            phenotypeClientProvider = new PhenotypeClientProvider(this.etlProperties.getPhenotypeServiceUrl());
+                phenotypeClientProvider = new PhenotypeClientProvider(this.etlProperties.getPhenotypeServiceUrl());
         }
-                
+
 	@Override
 	public void contextInitialized(ServletContextEvent inServletContextEvent) {
 		super.contextInitialized(inServletContextEvent);

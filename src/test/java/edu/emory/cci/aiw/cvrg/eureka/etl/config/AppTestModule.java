@@ -82,13 +82,19 @@ import org.eurekaclinical.standardapis.dao.UserDao;
 import org.eurekaclinical.standardapis.dao.UserTemplateDao;
 import org.eurekaclinical.standardapis.entity.RoleEntity;
 import org.eurekaclinical.standardapis.entity.UserEntity;
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 
 /**
  *
  * @author hrathod
  */
 public class AppTestModule extends AbstractModule {
-
+    PhenotypeClientProvider phenotypeClientProvider;
+    public AppTestModule(){
+        EtlProperties etlProperties = new EtlProperties();
+        phenotypeClientProvider = new PhenotypeClientProvider(etlProperties.getPhenotypeServiceUrl());
+        
+    }
     @Override
     protected void configure() {
         install(new JpaPersistModule("backend-jpa-unit"));
@@ -111,5 +117,6 @@ public class AppTestModule extends AbstractModule {
         bind(new TypeLiteral<UserTemplateDao<AuthorizedRoleEntity, UserTemplateEntity>>() {}).to(JpaUserTemplateDao.class);
         bind(new TypeLiteral<UserDao<AuthorizedUserEntity>>() {}).to(JpaEtlUserDao.class);
         bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
+        bind(EurekaClinicalPhenotypeClient.class).toProvider(this.phenotypeClientProvider);
     }
 }
