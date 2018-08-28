@@ -62,60 +62,60 @@ import org.junit.BeforeClass;
  */
 public class FileResourceTest extends AbstractEtlResourceTest {
 
-	private File tmpFile;
-	private static EtlProperties etlProperties;
-	private final FileUploadSupport fileUploadSupport;
+    private File tmpFile;
+    private static EtlProperties etlProperties;
+    private final FileUploadSupport fileUploadSupport;
 
-	public FileResourceTest() {
-		this.fileUploadSupport = new FileUploadSupport();
-	}
+    public FileResourceTest() {
+        this.fileUploadSupport = new FileUploadSupport();
+    }
 
-	@BeforeClass
-	public static void setupClass() throws IOException {
-		etlProperties = new EtlProperties();
-		FileUtils.deleteDirectory(etlProperties.getUploadedDirectory());
-	}
+    @BeforeClass
+    public static void setupClass() throws IOException {
+        etlProperties = new EtlProperties();
+        FileUtils.deleteDirectory(etlProperties.getUploadedDirectory());
+    }
 
-	@Before
-	public void fileResourceSetUp() throws IOException {
-		this.tmpFile = File.createTempFile("mockdatafile", null);
-	}
+    @Before
+    public void fileResourceSetUp() throws IOException {
+        this.tmpFile = File.createTempFile("mockdatafile", null);
+    }
 
-	@After
-	public void fileResourceTearDown() throws IOException {
-		if (this.tmpFile != null) {
-			this.tmpFile.delete();
-		}
-	}
-	
-	@After
-	public void uploadedDirectoryTearDown() throws IOException {
-		if (etlProperties != null) {
-			FileUtils.deleteDirectory(etlProperties.getUploadedDirectory());
-		}
-	}
+    @After
+    public void fileResourceTearDown() throws IOException {
+        if (this.tmpFile != null) {
+            this.tmpFile.delete();
+        }
+    }
 
-	@Test
-	public final void testFileUploadCreated1() throws IOException {
-		assertEquals(Status.CREATED, doUpload("foo", "oof"));
-	}
+    @After
+    public void uploadedDirectoryTearDown() throws IOException {
+        if (etlProperties != null) {
+            FileUtils.deleteDirectory(etlProperties.getUploadedDirectory());
+        }
+    }
 
-	@Test
-	public final void testFileUploadNotFound() throws IOException {
-		assertEquals(Status.NOT_FOUND, doUpload("baz", "oof"));
-	}
+    @Test
+    public final void testFileUploadCreated1() throws IOException {
+        assertEquals(Status.CREATED, doUpload("foo", "oof"));
+    }
 
-	@Test
-	public final void testFileUploadCreated2() throws IOException {
-		doUpload("foo", "bar");
-		File dir = etlProperties.uploadedDirectory("foo", "bar");
-		File[] files = dir.listFiles();
-		assertEquals(1, files == null ? 0 : files.length);
-	}
+    @Test
+    public final void testFileUploadNotFound() throws IOException {
+        assertEquals(Status.NOT_FOUND, doUpload("baz", "oof"));
+    }
 
-	private Status doUpload(String sourceId, String fileTypeId) throws UniformInterfaceException,
-			ClientHandlerException, IOException {
-		return this.fileUploadSupport.doUploadFile(resource(), this.tmpFile, sourceId, fileTypeId);
-	}
+    @Test
+    public final void testFileUploadCreated2() throws IOException {
+        doUpload("foo", "bar");
+        File dir = etlProperties.uploadedDirectory("foo", "bar");
+        File[] files = dir.listFiles();
+        assertEquals(1, files == null ? 0 : files.length);
+    }
+
+    private Status doUpload(String sourceId, String fileTypeId) throws UniformInterfaceException,
+            ClientHandlerException, IOException {
+        return this.fileUploadSupport.doUploadFile(resource(), this.tmpFile, sourceId, fileTypeId);
+    }
 
 }

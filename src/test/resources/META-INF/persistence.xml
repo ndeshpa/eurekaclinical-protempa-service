@@ -18,13 +18,12 @@
   limitations under the License.
   #L%
   -->
-
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
   <persistence-unit name="backend-jpa-unit" transaction-type="RESOURCE_LOCAL">
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEventEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity</class>
-	<class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.EtlGroup</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.SourceConfigEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity</class>
@@ -40,13 +39,18 @@
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.Neo4jDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.LinkEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity</class>
-	<class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity</class>
-	<class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.DeidPerPatientParams</class>
-	<class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.CipherEncryptionAlgorithm</class>
-	<class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.EncryptionAlgorithm</class>
-	<class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.MessageDigestEncryptionAlgorithm</class>
-	<class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity</class>
-	<class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.DeidPerPatientParams</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.CipherEncryptionAlgorithm</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.EncryptionAlgorithm</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.MessageDigestEncryptionAlgorithm</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationIdPoolIdEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity</class>
     <properties>
       <!-- Disable the second-level cache -->
       <property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheProvider"/>
@@ -57,8 +61,6 @@
       <property name="hibernate.connection.pool_size" value="1"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
       <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
-      <!-- Default is false for backwards compatibility. Should be used on all 
-				new projects -->
       <property name="hibernate.id.new_generator_mappings" value="true"/>
     </properties>
   </persistence-unit>

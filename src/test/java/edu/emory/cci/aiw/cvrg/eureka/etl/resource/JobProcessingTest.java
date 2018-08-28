@@ -52,6 +52,7 @@ import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eurekaclinical.eureka.client.comm.FileSourceConfigOption;
 import org.eurekaclinical.eureka.client.comm.Job;
+import org.eurekaclinical.eureka.client.comm.JobMode;
 import org.eurekaclinical.eureka.client.comm.JobSpec;
 import org.eurekaclinical.eureka.client.comm.JobStatus;
 import org.eurekaclinical.eureka.client.comm.PatientSet;
@@ -68,71 +69,78 @@ import org.junit.Test;
  */
 public class JobProcessingTest extends AbstractEtlResourceTest {
 
-	private final FileUploadSupport fileUploadSupport;
+    private final FileUploadSupport fileUploadSupport;
 
-	public JobProcessingTest() {
-		this.fileUploadSupport = new FileUploadSupport();
-	}
+    public JobProcessingTest() {
+        this.fileUploadSupport = new FileUploadSupport();
+    }
 
-	@Before
-	public void fileResourceSetUp() throws IOException {
-		this.fileUploadSupport.doUploadFile(resource(), "/docs/sample.xlsx", Constants.SOURCECONFIG_NAME, "filename");
-	}
+    @Before
+    public void fileResourceSetUp() throws IOException {
+        this.fileUploadSupport.doUploadFile(resource(), "/docs/sample.xlsx", Constants.SOURCECONFIG_NAME, "filename");
+    }
 
-	@Test
-	public void submitPatientSetExtractorJob() throws IOException {
-		JobRequest jobRequest = new JobRequest();
-		JobSpec jobSpec = new JobSpec();
-		jobSpec.setSourceConfigId(Constants.SOURCECONFIG_NAME);
-		jobSpec.setDestinationId(Constants.DESTINATION_NAME);
-		SourceConfig prompts = new SourceConfig();
-		prompts.setId(Constants.SOURCECONFIG_NAME);
-		Section section = new Section();
-		section.setId(EurekaDataSourceBackend.class.getName());
-		FileSourceConfigOption fsco = new FileSourceConfigOption();
-		fsco.setName("filename");
-		fsco.setValue("testupload.xlsx");
-		section.setOptions(new SourceConfigOption[]{fsco});
-		prompts.setDataSourceBackends(new Section[]{section});
-		jobSpec.setPrompts(prompts);
-		
-		jobSpec.setPropositionIds(Arrays.asList(Constants.ALIAS_PROPOSITION_ID));
-		jobSpec.setName("test job");
-		jobRequest.setJobSpec(jobSpec);
+    @Test
+    public void submitPatientSetExtractorJob() throws IOException {
+        JobMode jobMode = this.resource()
+                .path("/api/protected/jobmodes/byname/REPLACE")
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .get(JobMode.class);
+        JobRequest jobRequest = new JobRequest();
+        JobSpec jobSpec = new JobSpec();
+        jobSpec.setSourceConfigId(Constants.SOURCECONFIG_NAME);
+        jobSpec.setDestinationId(Constants.DESTINATION_NAME);
+        jobSpec.setJobMode(jobMode.getId());
+        SourceConfig prompts = new SourceConfig();
+        prompts.setId(Constants.SOURCECONFIG_NAME);
+        Section section = new Section();
+        section.setId(EurekaDataSourceBackend.class.getName());
+        FileSourceConfigOption fsco = new FileSourceConfigOption();
+        fsco.setName("filename");
+        fsco.setValue("testupload.xlsx");
+        section.setOptions(new SourceConfigOption[]{fsco});
+        prompts.setDataSourceBackends(new Section[]{section});
+        jobSpec.setPrompts(prompts);
 
-		ClientResponse response = this.resource()
-				.path("/api/protected/jobs")
-				.accept(MediaType.APPLICATION_JSON)
-				.type(MediaType.APPLICATION_JSON)
-				.post(ClientResponse.class, jobRequest);
-		assertEquals(ClientResponse.Status.CREATED, response.getClientResponseStatus());
+        jobSpec.setPropositionIds(Arrays.asList(Constants.ALIAS_PROPOSITION_ID));
+        jobSpec.setName("test job");
+        jobRequest.setJobSpec(jobSpec);
 
-		URI location = response.getLocation();
+        ClientResponse response = this.resource()
+                .path("/api/protected/jobs")
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(ClientResponse.class, jobRequest);
+        assertEquals(ClientResponse.Status.CREATED, response.getClientResponseStatus());
 
-		Job job;
-		JobStatus jobStatus;
-		do {
-			try {
-				Thread.sleep(5 * 1000L);
-			} catch (InterruptedException ex) {}
-			job = resource().uri(location).accept(
-					MediaType.APPLICATION_JSON).get(new GenericType<Job>() {
-					});
-			jobStatus = job.getStatus();
-		} while (jobStatus != JobStatus.COMPLETED && jobStatus != JobStatus.FAILED);
+        URI location = response.getLocation();
 
-		assertEquals(JobStatus.COMPLETED, jobStatus);
-		
-		PatientSet expected;
-		try (InputStream expectedIn = getClass().getResourceAsStream("/truth/submitPatientSetSenderJobOutput.json")) {
-			expected = new ObjectMapper().readValue(expectedIn, PatientSet.class);
-		}
-		
-		PatientSet actual = this.resource()
-				.path("/api/protected/output/" + Constants.DESTINATION_NAME)
-				.accept(MediaType.APPLICATION_JSON)
-				.get(PatientSet.class);
-		
-		assertEquals(actual, expected);
-	}
+        Job job;
+        JobStatus jobStatus;
+        do {
+            try {
+                Thread.sleep(5 * 1000L);
+            } catch (InterruptedException ex) {
+            }
+            job = resource().uri(location).accept(
+                    MediaType.APPLICATION_JSON).get(new GenericType<Job>() {
+                    });
+            jobStatus = job.getStatus();
+        } while (jobStatus != JobStatus.COMPLETED && jobStatus != JobStatus.FAILED);
+
+        assertEquals(JobStatus.COMPLETED, jobStatus);
+
+        PatientSet expected;
+        try (InputStream expectedIn = getClass().getResourceAsStream("/truth/submitPatientSetSenderJobOutput.json")) {
+            expected = new ObjectMapper().readValue(expectedIn, PatientSet.class);
+        }
+
+        PatientSet actual = this.resource()
+                .path("/api/protected/output/" + Constants.DESTINATION_NAME)
+                .accept(MediaType.APPLICATION_JSON)
+                .get(PatientSet.class);
+
+        assertEquals(actual, expected);
+    }
 }

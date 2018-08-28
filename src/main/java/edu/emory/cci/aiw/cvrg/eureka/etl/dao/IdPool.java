@@ -1,8 +1,10 @@
-/*
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+
+/*-
  * #%L
- * Eureka Services
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -37,17 +39,29 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
 
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
+import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
+import org.protempa.proposition.value.NumberValue;
+import org.protempa.proposition.value.Value;
 
 /**
- * A data access object interface for working with {@link RoleEntity} objects in the
- * data store.
  *
- * @author hrathod
- *
+ * @author Andrew Post
  */
-public interface RoleDao extends org.eurekaclinical.standardapis.dao.RoleDao<AuthorizedRoleEntity> {
+public class IdPool implements Pool {
 
+    private final Long id;
+    private final IdPoolIdDao idPoolIdDao;
+    
+    IdPool(Long inId, IdPoolIdDao inIdPoolIdDao) {
+        this.id = inId;
+        this.idPoolIdDao = inIdPoolIdDao;
+    }
+
+    @Override
+    public Value valueFor(Value inValue) throws PoolException {
+        return NumberValue.getInstance(this.idPoolIdDao.getByPoolIdAndFromId(this.id, inValue != null ? inValue.getFormatted() : null).getId());
+    }
+    
 }

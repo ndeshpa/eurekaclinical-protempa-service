@@ -94,13 +94,17 @@ public class TabularFileDestinationEntity extends DestinationEntity {
     public Character getDelimiter() {
         return '\t';
     }
-
+    
     public boolean isAlwaysQuoted() {
         return alwaysQuoted;
     }
 
     public void setAlwaysQuoted(boolean alwaysQuoted) {
         this.alwaysQuoted = alwaysQuoted;
+    }
+    
+    public String getNullValue() {
+        return null;
     }
 
     @Override

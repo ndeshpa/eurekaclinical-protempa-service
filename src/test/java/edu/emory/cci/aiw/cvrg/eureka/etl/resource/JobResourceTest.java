@@ -57,34 +57,25 @@ import org.eurekaclinical.eureka.client.comm.JobFilter;
  */
 public class JobResourceTest extends AbstractEtlResourceTest {
 
-	/**
-	 * Test if all the jobs added by the Setup class are returned properly,
-	 * using a null Filter.
-	 */
-	@Test
-	public void testJobListWithFilter() {
-		WebResource resource = this.resource();
-		JobFilter jobFilter = new JobFilter(null, null, null, null, null,null);
-		List<Job> jobs = resource.path("/api/protected/jobs/status").queryParam("filter",
-				jobFilter.toQueryParam()).accept(
-				MediaType.APPLICATION_JSON).get(new GenericType<List<Job>>() {
-		});
-		Assert.assertEquals(1, jobs.size());
-	}
+    /**
+     * Test if all the jobs added by the Setup class are returned properly,
+     * using a null Filter.
+     */
+    @Test
+    public void testJobListWithFilter() {
+        WebResource resource = this.resource();
+        JobFilter jobFilter = new JobFilter(null, null, null, null, null, null);
+        List<Job> jobs = resource.path("/api/protected/jobs/status").queryParam("filter",
+                jobFilter.toQueryParam()).accept(
+                MediaType.APPLICATION_JSON).get(new GenericType<List<Job>>() {
+                });
+        Assert.assertEquals(1, jobs.size());
+    }
 
-	@Test
-	public void testJobList () {
-		WebResource resource = this.resource();
-		List<Job> jobs = resource.path("/api/protected/jobs").accept(
-				MediaType.APPLICATION_JSON).get(new GenericType<List<Job>>() {
-		});
-		Assert.assertEquals(1, jobs.size());
-	}
-	
-	@Test
-	public void testJob () {
-		resource().path("/api/protected/jobs/1").accept(
-				MediaType.APPLICATION_JSON).get(new GenericType<Job>() {});
-	}
+    @Test
+    public void testJobListSize() {
+        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
+        Assert.assertEquals(1, jobs.size());
+    }
 
 }

@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
+package edu.emory.cci.aiw.cvrg.eureka.etl.pool;
 
 /*-
  * #%L
- * Eureka Protempa ETL
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2016 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -40,29 +40,14 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * #L%
  */
 
-import org.protempa.dest.table.TableColumnSpec;
+import org.protempa.proposition.value.Value;
 
 /**
  *
  * @author Andrew Post
  */
-class TableColumnSpecWrapper {
+public interface Pool {
 
-	private final TableColumnSpec tableColumnSpec;
-	private final String propId;
-	
-	TableColumnSpecWrapper(String propId, TableColumnSpec tableColumnSpec) {
-		assert tableColumnSpec != null : "tableColumnSpec cannot be null";
-		this.tableColumnSpec = tableColumnSpec;
-		this.propId = propId;
-	}
-	
-	String getPropId() {
-		return this.propId;
-	}
-	
-	TableColumnSpec getTableColumnSpec() {
-		return this.tableColumnSpec;
-	}
-	
+    Value valueFor(Value inValue) throws PoolException;
+    
 }

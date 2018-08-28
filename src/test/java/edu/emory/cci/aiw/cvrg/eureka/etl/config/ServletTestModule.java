@@ -47,17 +47,17 @@ import org.eurekaclinical.common.config.AbstractTestJerseyServletModuleWithPersi
  * @author hrathod
  */
 class ServletTestModule extends AbstractTestJerseyServletModuleWithPersist {
-	
-	private static final String PACKAGE_NAMES = "edu.emory.cci.aiw.cvrg.eureka.etl.resource;edu.emory.cci.aiw.cvrg.eureka.common.json";
 
-	ServletTestModule() {
-		super(PACKAGE_NAMES);
-	}
-	
-	@Override
-	protected void configureServlets() {
-		super.configureServlets();
-		filter(getContainerPath()).through(UserRoleAdderFilter.class);
-	}
+    private static final String PACKAGE_NAMES = "edu.emory.cci.aiw.cvrg.eureka.etl.resource;edu.emory.cci.aiw.cvrg.eureka.common.json";
+
+    ServletTestModule() {
+        super(PACKAGE_NAMES);
+    }
+
+    @Override
+    protected void configureServlets() {
+        super.configureServlets();
+        filter(getContainerPath()).through(UserRoleAdderFilter.class);
+    }
 
 }

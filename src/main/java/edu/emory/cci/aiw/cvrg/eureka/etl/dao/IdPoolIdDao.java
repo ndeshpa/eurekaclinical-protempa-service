@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.authentication;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
 
-/*
+/*-
  * #%L
- * Eureka Common
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2014 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -40,26 +40,24 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.authentication;
  * #L%
  */
 
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserEntity;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import org.eurekaclinical.common.comm.User;
-import org.jasig.cas.client.authentication.AttributePrincipal;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity;
+import java.util.List;
+import org.eurekaclinical.standardapis.dao.Dao;
 
 /**
  *
  * @author Andrew Post
  */
-public interface UserSupport {
-	
-	AttributePrincipal getUserPrincipal(HttpServletRequest request);
-
-	Map<String, Object> getUserPrincipalAttributes(HttpServletRequest request);
-
-	boolean isSameUser(HttpServletRequest servletRequest, User user);
-
-	boolean isSameUser(HttpServletRequest servletRequest, UserEntity user);
-
-	boolean isSameUser(HttpServletRequest servletRequest, String username);
+public interface IdPoolIdDao extends Dao<IdPoolIdEntity, Long> {
+    List<IdPoolIdEntity> getAllByPoolName(String inPoolName);
     
+    List<IdPoolIdEntity> getAllByPoolName(String inPoolName, int inFirstResult, int inMaxResults);
+    
+    List<IdPoolIdEntity> getAllByPoolId(Long inPoolId);
+    
+    List<IdPoolIdEntity> getAllByPoolId(Long inPoolId, int inFirstResult, int inMaxResults);
+    
+    IdPoolIdEntity getByPoolNameAndFromId(String inPoolName, String inFromId);
+    
+    IdPoolIdEntity getByPoolIdAndFromId(Long inPoolId, String inFromId);
 }

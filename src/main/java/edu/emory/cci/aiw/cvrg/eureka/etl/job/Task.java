@@ -62,184 +62,175 @@ import javax.inject.Inject;
 
 public class Task implements Runnable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Task.class);
-	private final ETL etl;
-	private Long jobId;
-	private List<PropositionDefinition> propositionDefinitions;
-	private List<String> propIdsToShow;
-	private Filter filter;
-	private boolean updateData;
-	private Configuration prompts;
-	private JobDao jobDao;
-	
-	@Inject
-	private Injector injector;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Task.class);
+    private final ETL etl;
+    private Long jobId;
+    private List<PropositionDefinition> propositionDefinitions;
+    private List<String> propIdsToShow;
+    private Filter filter;
+    private Configuration prompts;
+    private JobDao jobDao;
 
-	@Inject
-	Task(ETL inEtl) {
-		this.etl = inEtl;
-		this.propIdsToShow = Collections.emptyList();
-		this.propositionDefinitions = Collections.emptyList();
-	}
+    @Inject
+    private Injector injector;
 
-	public Long getJobId() {
-		return jobId;
-	}
+    @Inject
+    Task(ETL inEtl) {
+        this.etl = inEtl;
+        this.propIdsToShow = Collections.emptyList();
+        this.propositionDefinitions = Collections.emptyList();
+    }
 
-	public void setJobId(Long inJobId) {
-		jobId = inJobId;
-	}
+    public Long getJobId() {
+        return jobId;
+    }
 
-	public Filter getFilter() {
-		return filter;
-	}
+    public void setJobId(Long inJobId) {
+        jobId = inJobId;
+    }
 
-	public void setFilter(Filter filter) {
-		this.filter = filter;
-	}
+    public Filter getFilter() {
+        return filter;
+    }
 
-	public List<String> getPropositionIdsToShow() {
-		return new ArrayList<>(this.propIdsToShow);
-	}
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
 
-	public void setPropositionIdsToShow(List<String> propIdsToShow) {
-		if (propIdsToShow == null) {
-			this.propIdsToShow = Collections.emptyList();
-		} else {
-			this.propIdsToShow = new ArrayList<>(propIdsToShow);
-		}
-	}
+    public List<String> getPropositionIdsToShow() {
+        return new ArrayList<>(this.propIdsToShow);
+    }
 
-	public List<PropositionDefinition> getPropositionDefinitions() {
-		return propositionDefinitions;
-	}
+    public void setPropositionIdsToShow(List<String> propIdsToShow) {
+        if (propIdsToShow == null) {
+            this.propIdsToShow = Collections.emptyList();
+        } else {
+            this.propIdsToShow = new ArrayList<>(propIdsToShow);
+        }
+    }
 
-	public void setPropositionDefinitions(List<PropositionDefinition> inPropositionDefinitions) {
-		if (inPropositionDefinitions != null) {
-			this.propositionDefinitions = inPropositionDefinitions;
-		} else {
-			propositionDefinitions = Collections.emptyList();
-		}
-	}
+    public List<PropositionDefinition> getPropositionDefinitions() {
+        return propositionDefinitions;
+    }
 
-	public boolean isUpdateData() {
-		return updateData;
-	}
+    public void setPropositionDefinitions(List<PropositionDefinition> inPropositionDefinitions) {
+        if (inPropositionDefinitions != null) {
+            this.propositionDefinitions = inPropositionDefinitions;
+        } else {
+            propositionDefinitions = Collections.emptyList();
+        }
+    }
 
-	public void setUpdateData(boolean updateData) {
-		this.updateData = updateData;
-	}
+    public Configuration getPrompts() {
+        return prompts;
+    }
 
-	public Configuration getPrompts() {
-		return prompts;
-	}
+    public void setPrompts(Configuration prompts) {
+        this.prompts = prompts;
+    }
 
-	public void setPrompts(Configuration prompts) {
-		this.prompts = prompts;
-	}
+    @Override
+    public void run() {
+        this.jobDao = this.injector.getInstance(JobDao.class);
+        try {
+            storeProcessingStartedEvent();
+            PropositionDefinition[] propDefArray
+                    = new PropositionDefinition[this.getPropositionDefinitions()
+                            .size()];
+            this.propositionDefinitions.toArray(propDefArray);
 
-	@Override
-	public void run() {
-		this.jobDao = this.injector.getInstance(JobDao.class);
-		try {
-			storeProcessingStartedEvent();
-			PropositionDefinition[] propDefArray
-					= new PropositionDefinition[this.getPropositionDefinitions()
-							.size()];
-			this.propositionDefinitions.toArray(propDefArray);
+            String[] propIdsToShowArray
+                    = this.propIdsToShow.toArray(
+                            new String[this.propIdsToShow.size()]);
+            doRunJob(propDefArray, propIdsToShowArray);
+            storeProcessingFinishedWithoutErrorEvent();
+        } catch (EtlException | Error | RuntimeException e) {
+            try {
+                handleError(e);
+            } finally {
+                storeJobFinishedWithErrorsEvent();
+            }
+        }
+    }
 
-			String[] propIdsToShowArray
-					= this.propIdsToShow.toArray(
-							new String[this.propIdsToShow.size()]);
-			doRunJob(propDefArray, propIdsToShowArray);
-			storeProcessingFinishedWithoutErrorEvent();
-		} catch (EtlException | Error | RuntimeException e) {
-			try {
-				handleError(e);
-			} finally {
-				storeJobFinishedWithErrorsEvent();
-			}
-		}
-	}
+    @Transactional
+    void storeJobFinishedWithErrorsEvent() {
+        JobEntity myJob = this.jobDao.retrieve(this.jobId);
+        Date now = new Date();
+        myJob.setFinished(now);
+        JobEventEntity failedJobEvent = new JobEventEntity();
+        failedJobEvent.setJob(myJob);
+        failedJobEvent.setTimeStamp(now);
+        failedJobEvent.setStatus(JobStatus.FAILED);
+        failedJobEvent.setMessage("Processing failed");
+        LOGGER.error("Finished job {} for user {} with errors.",
+                new Object[]{
+                    myJob.getId(), myJob.getUser().getUsername()});
+        this.jobDao.update(myJob);
+    }
 
-	@Transactional
-	void storeJobFinishedWithErrorsEvent() {
-		JobEntity myJob = this.jobDao.retrieve(this.jobId);
-		Date now = new Date();
-		myJob.setFinished(now);
-		JobEventEntity failedJobEvent = new JobEventEntity();
-		failedJobEvent.setJob(myJob);
-		failedJobEvent.setTimeStamp(now);
-		failedJobEvent.setStatus(JobStatus.FAILED);
-		failedJobEvent.setMessage("Processing failed");
-		LOGGER.error("Finished job {} for user {} with errors.",
-				new Object[]{
-					myJob.getId(), myJob.getUser().getUsername()});
-		this.jobDao.update(myJob);
-	}
+    @Transactional
+    void storeProcessingFinishedWithoutErrorEvent() {
+        JobEntity myJob = this.jobDao.retrieve(this.jobId);
+        JobEventEntity completedJobEvent = new JobEventEntity();
+        Date now = new Date();
+        myJob.setFinished(now);
+        completedJobEvent.setJob(myJob);
+        completedJobEvent.setTimeStamp(now);
+        completedJobEvent.setStatus(JobStatus.COMPLETED);
+        completedJobEvent.setMessage("Processing completed without error");
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Completed job {} for user {} without errors.",
+                    new Object[]{
+                        myJob.getId(), myJob.getUser().getUsername()});
+        }
+        this.jobDao.update(myJob);
+    }
 
-	@Transactional
-	void storeProcessingFinishedWithoutErrorEvent() {
-		JobEntity myJob = this.jobDao.retrieve(this.jobId);
-		JobEventEntity completedJobEvent = new JobEventEntity();
-		Date now = new Date();
-		myJob.setFinished(now);
-		completedJobEvent.setJob(myJob);
-		completedJobEvent.setTimeStamp(now);
-		completedJobEvent.setStatus(JobStatus.COMPLETED);
-		completedJobEvent.setMessage("Processing completed without error");
-		if (LOGGER.isInfoEnabled()) {
-			LOGGER.info("Completed job {} for user {} without errors.",
-					new Object[]{
-						myJob.getId(), myJob.getUser().getUsername()});
-		}
-		this.jobDao.update(myJob);
-	}
+    @Transactional
+    void doRunJob(PropositionDefinition[] propDefArray, String[] propIdsToShowArray) throws EtlException {
+        JobEntity myJob = this.jobDao.retrieve(this.jobId);
+        this.etl.run(myJob, propDefArray, propIdsToShowArray, this.filter, this.prompts);
+        this.jobDao.update(myJob);
+    }
 
-	@Transactional
-	void doRunJob(PropositionDefinition[] propDefArray, String[] propIdsToShowArray) throws EtlException {
-		JobEntity myJob = this.jobDao.retrieve(this.jobId);
-		this.etl.run(myJob, propDefArray, propIdsToShowArray, this.filter, this.updateData, this.prompts);
-		this.jobDao.update(myJob);
-	}
+    @Transactional
+    void storeProcessingStartedEvent() {
+        JobEntity myJob = this.jobDao.retrieve(this.jobId);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Just got job {} from user {}",
+                    new Object[]{myJob.getId(),
+                        myJob.getUser().getUsername()});
+        }
+        JobEventEntity startedJobEvent = new JobEventEntity();
+        startedJobEvent.setJob(myJob);
+        startedJobEvent.setTimeStamp(new Date());
+        startedJobEvent.setStatus(JobStatus.STARTED);
+        startedJobEvent.setMessage("Processing started");
+        this.jobDao.update(myJob);
+    }
 
-	@Transactional
-	void storeProcessingStartedEvent() {
-		JobEntity myJob = this.jobDao.retrieve(this.jobId);
-		if (LOGGER.isInfoEnabled()) {
-			LOGGER.info("Just got job {} from user {}",
-					new Object[]{myJob.getId(),
-						myJob.getUser().getUsername()});
-		}
-		JobEventEntity startedJobEvent = new JobEventEntity();
-		startedJobEvent.setJob(myJob);
-		startedJobEvent.setTimeStamp(new Date());
-		startedJobEvent.setStatus(JobStatus.STARTED);
-		startedJobEvent.setMessage("Processing started");
-		this.jobDao.update(myJob);
-	}
+    @Transactional
+    private void handleError(Throwable e) {
+        JobEntity job = this.jobDao.retrieve(this.jobId);
+        LOGGER.error("Job " + job.getId() + " for user "
+                + job.getUser().getUsername() + " failed: " + e.getMessage(), e);
 
-        @Transactional
-	private void handleError(Throwable e) {
-		JobEntity job = this.jobDao.retrieve(this.jobId);
-		LOGGER.error("Job " + job.getId() + " for user "
-				+ job.getUser().getUsername() + " failed: " + e.getMessage(), e);
+        StringWriter sw = new StringWriter();
+        try (PrintWriter ps = new PrintWriter(sw)) {
+            e.printStackTrace(ps);
+        }
+        String msg = e.getMessage();
+        if (msg == null) {
+            msg = e.getClass().getName();
+        }
+        JobEventEntity errorJobEvent = new JobEventEntity();
+        errorJobEvent.setJob(job);
+        errorJobEvent.setTimeStamp(new Date());
+        errorJobEvent.setStatus(JobStatus.ERROR);
+        errorJobEvent.setMessage(msg);
+        errorJobEvent.setExceptionStackTrace(sw.toString());
+        this.jobDao.update(job);
 
-		StringWriter sw = new StringWriter();
-		try (PrintWriter ps = new PrintWriter(sw)) {
-			e.printStackTrace(ps);
-		}
-		String msg = e.getMessage();
-		if (msg == null) {
-			msg = e.getClass().getName();
-		}
-		JobEventEntity errorJobEvent = new JobEventEntity();
-		errorJobEvent.setJob(job);
-		errorJobEvent.setTimeStamp(new Date());
-		errorJobEvent.setStatus(JobStatus.ERROR);
-		errorJobEvent.setMessage(msg);
-		errorJobEvent.setExceptionStackTrace(sw.toString());
-		this.jobDao.update(job);
-
-	}
+    }
 }

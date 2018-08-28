@@ -64,40 +64,40 @@ import org.eurekaclinical.standardapis.dao.GenericDao;
  */
 public class JpaDeidPerPatientParamsDao extends GenericDao<DeidPerPatientParams, Long> implements DeidPerPatientParamsDao {
 
-	/**
-	 * Construct instance with the given EntityManager provider.
-	 *
-	 * @param inEMProvider The entity manager provider.
-	 */
-	@Inject
-	public JpaDeidPerPatientParamsDao(final Provider<EntityManager> inEMProvider) {
-		super(DeidPerPatientParams.class, inEMProvider);
-	}
+    /**
+     * Construct instance with the given EntityManager provider.
+     *
+     * @param inEMProvider The entity manager provider.
+     */
+    @Inject
+    public JpaDeidPerPatientParamsDao(final Provider<EntityManager> inEMProvider) {
+        super(DeidPerPatientParams.class, inEMProvider);
+    }
 
-	@Override
-	public void deleteAll(DestinationEntity destination) {
-		// No bulk delete in JPA 2.0 for criteria queries, so we have to use
-		// a regular query. JPA 2.1 does support bulk delete.
-		EntityManager entityManager = getEntityManager();
-		Query query = entityManager.createQuery("DELETE FROM DeidPerPatientParams do WHERE do.destination = :d");
-		query.setParameter("d", destination);
-		query.executeUpdate();
-	}
+    @Override
+    public void deleteAll(DestinationEntity destination) {
+        // No bulk delete in JPA 2.0 for criteria queries, so we have to use
+        // a regular query. JPA 2.1 does support bulk delete.
+        EntityManager entityManager = getEntityManager();
+        Query query = entityManager.createQuery("DELETE FROM DeidPerPatientParams do WHERE do.destination = :d");
+        query.setParameter("d", destination);
+        query.executeUpdate();
+    }
 
-	@Override
-	public DeidPerPatientParams getByKeyId(String keyId) {
-		EntityManager entityManager = getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<DeidPerPatientParams> criteriaQuery = builder.createQuery(DeidPerPatientParams.class);
-		Root<DeidPerPatientParams> root = criteriaQuery.from(DeidPerPatientParams.class);
-		Path<String> usernamePath = root.get(DeidPerPatientParams_.keyId);
-		TypedQuery<DeidPerPatientParams> query = entityManager.createQuery(criteriaQuery.where(
-				builder.equal(usernamePath, keyId)));
-		try {
-			return query.getSingleResult();
-		} catch (NoResultException ex) {
-			return null;
-		}
-	}
+    @Override
+    public DeidPerPatientParams getByKeyId(String keyId) {
+        EntityManager entityManager = getEntityManager();
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<DeidPerPatientParams> criteriaQuery = builder.createQuery(DeidPerPatientParams.class);
+        Root<DeidPerPatientParams> root = criteriaQuery.from(DeidPerPatientParams.class);
+        Path<String> usernamePath = root.get(DeidPerPatientParams_.keyId);
+        TypedQuery<DeidPerPatientParams> query = entityManager.createQuery(criteriaQuery.where(
+                builder.equal(usernamePath, keyId)));
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException ex) {
+            return null;
+        }
+    }
 
 }

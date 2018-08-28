@@ -41,11 +41,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
-import edu.emory.cci.aiw.cvrg.eureka.etl.authentication.AuthorizedUserSupport;
-
-import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.EncryptionAlgorithm;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
 import java.util.List;
@@ -65,39 +60,40 @@ import org.eurekaclinical.standardapis.exception.HttpStatusException;
 @RolesAllowed({"researcher"})
 @Produces(MediaType.APPLICATION_JSON)
 public class EncryptionAlgorithmResource {
-	private final EncryptionAlgorithmDao encryptionAlgorithmDao;
 
-	@Inject
-	public EncryptionAlgorithmResource(EncryptionAlgorithmDao inEncryptionAlgorithmDao) {
-		this.encryptionAlgorithmDao = inEncryptionAlgorithmDao;
-	}
+    private final EncryptionAlgorithmDao encryptionAlgorithmDao;
 
-	@GET
-	@Path("/{id}")
-	public EncryptionAlgorithm get(@Context HttpServletRequest req,
-			@PathParam("id") Long inId) {
-		EncryptionAlgorithm result = this.encryptionAlgorithmDao.retrieve(inId);
-		if (result != null) {
-			return result;
-		} else {
-			throw new HttpStatusException(Status.NOT_FOUND);
-		}
-	}
-	
-	@GET
-	@Path("/byname/{name}")
-	public EncryptionAlgorithm get(@Context HttpServletRequest req,
-			@PathParam("name") String inName) {
-		EncryptionAlgorithm result = this.encryptionAlgorithmDao.getByName(inName);
-		if (result != null) {
-			return result;
-		} else {
-			throw new HttpStatusException(Status.NOT_FOUND);
-		}
-	}
+    @Inject
+    public EncryptionAlgorithmResource(EncryptionAlgorithmDao inEncryptionAlgorithmDao) {
+        this.encryptionAlgorithmDao = inEncryptionAlgorithmDao;
+    }
 
-	@GET
-	public List<EncryptionAlgorithm> getAll(@Context HttpServletRequest req) {
-		return this.encryptionAlgorithmDao.getAll();
-	}
+    @GET
+    @Path("/{id}")
+    public EncryptionAlgorithm get(@Context HttpServletRequest req,
+            @PathParam("id") Long inId) {
+        EncryptionAlgorithm result = this.encryptionAlgorithmDao.retrieve(inId);
+        if (result != null) {
+            return result;
+        } else {
+            throw new HttpStatusException(Status.NOT_FOUND);
+        }
+    }
+
+    @GET
+    @Path("/byname/{name}")
+    public EncryptionAlgorithm get(@Context HttpServletRequest req,
+            @PathParam("name") String inName) {
+        EncryptionAlgorithm result = this.encryptionAlgorithmDao.getByName(inName);
+        if (result != null) {
+            return result;
+        } else {
+            throw new HttpStatusException(Status.NOT_FOUND);
+        }
+    }
+
+    @GET
+    public List<EncryptionAlgorithm> getAll(@Context HttpServletRequest req) {
+        return this.encryptionAlgorithmDao.getAll();
+    }
 }

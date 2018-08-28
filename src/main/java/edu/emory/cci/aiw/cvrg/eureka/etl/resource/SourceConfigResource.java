@@ -41,7 +41,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
-import edu.emory.cci.aiw.cvrg.eureka.etl.authentication.AuthorizedUserSupport;
 
 import org.eurekaclinical.eureka.client.comm.SourceConfig;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
@@ -60,6 +59,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
+import org.eurekaclinical.common.auth.AuthorizedUserSupport;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
 @Transactional
@@ -68,39 +68,40 @@ import org.eurekaclinical.standardapis.exception.HttpStatusException;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class SourceConfigResource {
-	private final EtlProperties etlProperties;
-	private final AuthorizedUserDao userDao;
-	private final SourceConfigDao sourceConfigDao;
-	private final AuthorizedUserSupport authenticationSupport;
-	private final EtlGroupDao groupDao;
 
-	@Inject
-	public SourceConfigResource(EtlProperties inEtlProperties, AuthorizedUserDao inUserDao, SourceConfigDao inSourceConfigDao, EtlGroupDao inGroupDao) {
-		this.etlProperties = inEtlProperties;
-		this.userDao = inUserDao;
-		this.sourceConfigDao = inSourceConfigDao;
-		this.authenticationSupport = new AuthorizedUserSupport(this.userDao);
-		this.groupDao = inGroupDao;
-	}
+    private final EtlProperties etlProperties;
+    private final AuthorizedUserDao userDao;
+    private final SourceConfigDao sourceConfigDao;
+    private final AuthorizedUserSupport<AuthorizedUserEntity, AuthorizedUserDao, ?> authenticationSupport;
+    private final EtlGroupDao groupDao;
 
-	@GET
-	@Path("/{sourceConfigId}")
-	public SourceConfig getSource(@Context HttpServletRequest req,
-			@PathParam("sourceConfigId") String sourceConfigId) {
-		AuthorizedUserEntity user = this.authenticationSupport.getUser(req);
-		SourceConfigs sourceConfigs = new SourceConfigs(this.etlProperties, user, this.sourceConfigDao, this.groupDao);
-		SourceConfig sourceConfig = sourceConfigs.getOne(sourceConfigId);
-		if (sourceConfig != null) {
-			return sourceConfig;
-		} else {
-			throw new HttpStatusException(Status.NOT_FOUND);
-		}
-	}
+    @Inject
+    public SourceConfigResource(EtlProperties inEtlProperties, AuthorizedUserDao inUserDao, SourceConfigDao inSourceConfigDao, EtlGroupDao inGroupDao) {
+        this.etlProperties = inEtlProperties;
+        this.userDao = inUserDao;
+        this.sourceConfigDao = inSourceConfigDao;
+        this.authenticationSupport = new AuthorizedUserSupport<>(this.userDao);
+        this.groupDao = inGroupDao;
+    }
 
-	@GET
-	public List<SourceConfig> getAll(@Context HttpServletRequest req) {
-		AuthorizedUserEntity user = this.authenticationSupport.getUser(req);
-		SourceConfigs sourceConfigs = new SourceConfigs(this.etlProperties, user, this.sourceConfigDao, this.groupDao);
-		return sourceConfigs.getAll();
-	}
+    @GET
+    @Path("/{sourceConfigId}")
+    public SourceConfig getSource(@Context HttpServletRequest req,
+            @PathParam("sourceConfigId") String sourceConfigId) {
+        AuthorizedUserEntity user = this.authenticationSupport.getUser(req);
+        SourceConfigs sourceConfigs = new SourceConfigs(this.etlProperties, user, this.sourceConfigDao, this.groupDao);
+        SourceConfig sourceConfig = sourceConfigs.getOne(sourceConfigId);
+        if (sourceConfig != null) {
+            return sourceConfig;
+        } else {
+            throw new HttpStatusException(Status.NOT_FOUND);
+        }
+    }
+
+    @GET
+    public List<SourceConfig> getAll(@Context HttpServletRequest req) {
+        AuthorizedUserEntity user = this.authenticationSupport.getUser(req);
+        SourceConfigs sourceConfigs = new SourceConfigs(this.etlProperties, user, this.sourceConfigDao, this.groupDao);
+        return sourceConfigs.getAll();
+    }
 }

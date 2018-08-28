@@ -43,11 +43,11 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntit
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.eurekaclinical.patientset.client.PatientSetJsonWriter;
-import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
@@ -61,74 +61,78 @@ import org.protempa.query.Query;
  */
 public class PatientSetSenderQueryResultsHandler extends AbstractFileQueryResultsHandler {
 
-	private final String queryId;
-	private final String username;
-	private final PatientIdExtractor patientIdExtractor;
-	private final PatientSetSender patientSetSender;
-	private PatientSetJsonWriter jsonGenerator;
+    private final String queryId;
+    private final String username;
+    private final PatientIdExtractor patientIdExtractor;
+    private final PatientSetSender patientSetSender;
+    private PatientSetJsonWriter jsonGenerator;
 
-	PatientSetSenderQueryResultsHandler(Query query, PatientSetSenderDestinationEntity inPatientSetSenderDestinationEntity, EtlProperties inEtlProperties) {
-		super(inPatientSetSenderDestinationEntity, inEtlProperties);
-		assert inPatientSetSenderDestinationEntity != null : "inPatientSetSenderDestinationEntity cannot be null";
+    PatientSetSenderQueryResultsHandler(Query query, PatientSetSenderDestinationEntity inPatientSetSenderDestinationEntity, EtlProperties inEtlProperties) {
+        super(inPatientSetSenderDestinationEntity, inEtlProperties);
+        assert inPatientSetSenderDestinationEntity != null : "inPatientSetSenderDestinationEntity cannot be null";
 
-		this.patientIdExtractor = new PatientIdExtractor(inPatientSetSenderDestinationEntity);
-		this.patientSetSender = new PatientSetSender(inEtlProperties, inPatientSetSenderDestinationEntity);
+        this.patientIdExtractor = new PatientIdExtractor(inPatientSetSenderDestinationEntity);
+        this.patientSetSender = new PatientSetSender(inEtlProperties, inPatientSetSenderDestinationEntity);
 
-		this.queryId = query.getName();
-		this.username = query.getUsername();
-	}
+        this.queryId = query.getName();
+        this.username = query.getUsername();
+    }
 
-	@Override
-	public void validate() throws QueryResultsHandlerValidationFailedException {
-	}
+    @Override
+    public void validate() throws QueryResultsHandlerValidationFailedException {
+    }
 
-	@Override
-	public void start(OutputStream outputStream, Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
-		try {
-			this.jsonGenerator = new PatientSetJsonWriter(outputStream, this.queryId, this.username);
-		} catch (IOException ex) {
-			throw new QueryResultsHandlerProcessingException("Error starting output", ex);
-		}
-	}
+    @Override
+    public void start(OutputStream outputStream, PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
+        try {
+            this.jsonGenerator = new PatientSetJsonWriter(outputStream, this.queryId, this.username);
+        } catch (IOException ex) {
+            throw new QueryResultsHandlerProcessingException("Error starting output", ex);
+        }
+    }
 
-	@Override
-	public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
-		try {
-			this.jsonGenerator.writePatient(this.patientIdExtractor.extract(keyId, propositions));
-		} catch (IOException ex) {
-			throw new QueryResultsHandlerProcessingException("Error writing output", ex);
-		}
-	}
+    @Override
+    public void handleQueryResult(String keyId,
+            List<Proposition> propositions,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
+            Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+        try {
+            this.jsonGenerator.writePatient(this.patientIdExtractor.extract(keyId, propositions));
+        } catch (IOException ex) {
+            throw new QueryResultsHandlerProcessingException("Error writing output", ex);
+        }
+    }
 
-	@Override
-	public void finish() throws QueryResultsHandlerProcessingException {
-		try {
-			this.jsonGenerator.finish();
-		} catch (IOException ex) {
-			throw new QueryResultsHandlerProcessingException(ex);
-		}
-		try {
-			this.jsonGenerator.close();
-		} catch (IOException ex) {
-			throw new QueryResultsHandlerProcessingException("Error closing patient set JSON output stream", ex);
-		}
-		this.jsonGenerator = null;
-		try {
-			this.patientSetSender.doSend();
-		} catch (IOException ex) {
-			throw new QueryResultsHandlerProcessingException("Error sending patient set", ex);
-		}
-	}
+    @Override
+    public void finish() throws QueryResultsHandlerProcessingException {
+        try {
+            this.jsonGenerator.finish();
+        } catch (IOException ex) {
+            throw new QueryResultsHandlerProcessingException(ex);
+        }
+        try {
+            this.jsonGenerator.close();
+        } catch (IOException ex) {
+            throw new QueryResultsHandlerProcessingException("Error closing patient set JSON output stream", ex);
+        }
+        this.jsonGenerator = null;
+        try {
+            this.patientSetSender.doSend();
+        } catch (IOException ex) {
+            throw new QueryResultsHandlerProcessingException("Error sending patient set", ex);
+        }
+    }
 
-	@Override
-	public void cleanup() throws QueryResultsHandlerCloseException {
-		if (this.jsonGenerator != null) {
-			try {
-				this.jsonGenerator.close();
-			} catch (IOException ex) {
-				throw new QueryResultsHandlerCloseException("Error closing", ex);
-			}
-		}
-	}
+    @Override
+    public void cleanup() throws QueryResultsHandlerCloseException {
+        if (this.jsonGenerator != null) {
+            try {
+                this.jsonGenerator.close();
+            } catch (IOException ex) {
+                throw new QueryResultsHandlerCloseException("Error closing", ex);
+            }
+        }
+    }
 
 }
