@@ -67,160 +67,223 @@ import org.eurekaclinical.standardapis.entity.UserEntity;
 @Table(name = "users")
 public class AuthorizedUserEntity implements UserEntity<AuthorizedRoleEntity> {
 
-	/**
-	 * The user's unique identifier.
-	 */
-	@Id
-	@SequenceGenerator(name = "USER_SEQ_GENERATOR", sequenceName = "USER_SEQ",
-			allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,
-			generator = "USER_SEQ_GENERATOR")
-	private Long id;
+    /**
+     * The user's unique identifier.
+     */
+    @Id
+    @SequenceGenerator(name = "USER_SEQ_GENERATOR", sequenceName = "USER_SEQ",
+            allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "USER_SEQ_GENERATOR")
+    private Long id;
 
-	/**
-	 * The user's email address.
-	 */
-	@Column(unique = true, nullable = false)
-	private String username;
+    /**
+     * The user's email address.
+     */
+    @Column(unique = true, nullable = false)
+    private String username;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-	private List<JobEntity> jobs;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    private List<JobEntity> jobs;
 
-	@ManyToMany
-	private List<EtlGroup> groups;
+    @ManyToMany
+    private List<EtlGroup> groups;
 
-	@OneToMany(mappedBy = "owner")
-	private List<SourceConfigEntity> sourceConfigs;
+    @OneToMany(mappedBy = "owner")
+    private List<SourceConfigEntity> sourceConfigs;
 
-	@OneToMany(mappedBy = "owner")
-	private List<DestinationEntity> destinations;
+    @OneToMany(mappedBy = "owner")
+    private List<DestinationEntity> destinations;
 
-	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE})
-	@JoinTable(joinColumns=@JoinColumn(name="user_id"), inverseJoinColumns=@JoinColumn(name="role_id"))
-	private List<AuthorizedRoleEntity> roles;
+    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE})
+    @JoinTable(joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private List<AuthorizedRoleEntity> roles;
 
-	/**
-	 * Create an empty User object.
-	 */
-	public AuthorizedUserEntity() {
-		this.jobs = new ArrayList<>();
-		this.roles = new ArrayList<>();
-		this.sourceConfigs = new ArrayList<>();
-		this.destinations = new ArrayList<>();
-	}
+    @OneToMany(mappedBy = "owner")
+    private List<IdPoolEntity> idPools;
 
-	/**
-	 * Get the user's unique identifier.
-	 *
-	 * @return A {@link Long} representing the user's unique identifier.
-	 */
-	@Override
-	public Long getId() {
-		return this.id;
-	}
+    /**
+     * Create an empty User object.
+     */
+    public AuthorizedUserEntity() {
+        this.jobs = new ArrayList<>();
+        this.roles = new ArrayList<>();
+        this.sourceConfigs = new ArrayList<>();
+        this.destinations = new ArrayList<>();
+    }
 
-	/**
-	 * Set the user's unique identifier.
-	 *
-	 * @param inId A {@link Long} representing the user's unique identifier.
-	 */
-	@Override
-	public void setId(final Long inId) {
-		this.id = inId;
-	}
+    /**
+     * Get the user's unique identifier.
+     *
+     * @return A {@link Long} representing the user's unique identifier.
+     */
+    @Override
+    public Long getId() {
+        return this.id;
+    }
 
-	/**
-	 * Get the user's email address.
-	 *
-	 * @return A String containing the user's email address.
-	 */
-	@Override
-	public String getUsername() {
-		return this.username;
-	}
+    /**
+     * Set the user's unique identifier.
+     *
+     * @param inId A {@link Long} representing the user's unique identifier.
+     */
+    @Override
+    public void setId(Long inId) {
+        this.id = inId;
+    }
 
-	/**
-	 * Set the user's email address.
-	 *
-	 * @param inUsername A String containing the user's email address.
-	 */
-	@Override
-	public void setUsername(final String inUsername) {
-		this.username = inUsername;
-	}
+    public List<IdPoolEntity> getIdPools() {
+        return new ArrayList<>(this.idPools);
+    }
 
-	public List<JobEntity> getJobs() {
-		return jobs;
-	}
+    public void setIdPools(List<IdPoolEntity> idPools) {
+        if (idPools == null) {
+            this.idPools = new ArrayList<>();
+        } else {
+            this.idPools = new ArrayList<>(idPools);
+            for (IdPoolEntity idPool : this.idPools) {
+                idPool.setOwner(this);
+            }
+        }
+    }
 
-	public void setJobs(List<JobEntity> jobs) {
-		if (jobs == null) {
-			this.jobs = new ArrayList<>();
-		} else {
-			this.jobs = jobs;
-		}
-	}
+    public void addIdPool(IdPoolEntity idPool) {
+        if (!this.idPools.contains(idPool)) {
+            this.idPools.add(idPool);
+            idPool.setOwner(this);
+        }
+    }
+    
+    public void removeIdPool(IdPoolEntity idPool) {
+        if (this.idPools.remove(idPool)) {
+            idPool.setOwner(null);
+        }
+    }
 
-	public List<EtlGroup> getGroups() {
-		return groups;
-	}
+    /**
+     * Get the user's email address.
+     *
+     * @return A String containing the user's email address.
+     */
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
 
-	public void setGroups(List<EtlGroup> groups) {
-		this.groups = groups;
-	}
+    /**
+     * Set the user's email address.
+     *
+     * @param inUsername A String containing the user's email address.
+     */
+    @Override
+    public void setUsername(final String inUsername) {
+        this.username = inUsername;
+    }
 
-	public List<SourceConfigEntity> getSourceConfigs() {
-		return sourceConfigs;
-	}
+    public List<JobEntity> getJobs() {
+        return jobs;
+    }
 
-	public void setSourceConfigs(List<SourceConfigEntity> sourceConfigs) {
-		if (sourceConfigs == null) {
-			this.sourceConfigs = new ArrayList<>();
-		} else {
-			this.sourceConfigs = sourceConfigs;
-		}
-	}
+    public void setJobs(List<JobEntity> jobs) {
+        if (jobs == null) {
+            this.jobs = new ArrayList<>();
+        } else {
+            this.jobs = new ArrayList<>(jobs);
+        }
+    }
 
-	public List<DestinationEntity> getDestinations() {
-		return destinations;
-	}
+    public List<EtlGroup> getGroups() {
+        return groups;
+    }
 
-	public void setDestinations(List<DestinationEntity> destinations) {
-		if (destinations == null) {
-			this.destinations = new ArrayList<>();
-		} else {
-			this.destinations = destinations;
-		}
-	}
+    public void setGroups(List<EtlGroup> groups) {
+        if (groups == null) {
+            this.groups = new ArrayList<>();
+        } else {
+            this.groups = new ArrayList<>(groups);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
-	}
+    public List<SourceConfigEntity> getSourceConfigs() {
+        return new ArrayList<>(this.sourceConfigs);
+    }
 
-	@Override
-	public List<AuthorizedRoleEntity> getRoles() {
-		return this.roles;
-	}
+    public void setSourceConfigs(List<SourceConfigEntity> sourceConfigs) {
+        if (sourceConfigs == null) {
+            this.sourceConfigs = new ArrayList<>();
+        } else {
+            this.sourceConfigs = new ArrayList<>(sourceConfigs);
+        }
+    }
+    
+    public void addSourceConfig(SourceConfigEntity sourceConfig) {
+        if (!this.sourceConfigs.contains(sourceConfig)) {
+            this.sourceConfigs.add(sourceConfig);
+            sourceConfig.setOwner(this);
+        }
+    }
+    
+    public void removeSourceConfig(SourceConfigEntity sourceConfig) {
+        if (this.sourceConfigs.remove(sourceConfig)) {
+            sourceConfig.setOwner(this);
+        }
+    }
 
-	@Override
-	public void setRoles(List<AuthorizedRoleEntity> inRoles) {
-		if (inRoles == null) {
-			this.roles = new ArrayList<>();
-		} else {
-			this.roles = inRoles;
-		}
-	}
+    public List<DestinationEntity> getDestinations() {
+        return new ArrayList<>(this.destinations);
+    }
 
-	@Override
-	public void addRole(AuthorizedRoleEntity role) {
-		this.roles.add(role);
-	}
+    public void setDestinations(List<DestinationEntity> destinations) {
+        if (destinations == null) {
+            this.destinations = new ArrayList<>();
+        } else {
+            this.destinations = new ArrayList<>(destinations);
+            for (DestinationEntity dest : destinations) {
+                dest.setOwner(this);
+            }
+        }
+    }
+    
+    public void addDestination(DestinationEntity dest) {
+        if (!this.destinations.contains(dest)) {
+            this.destinations.add(dest);
+            dest.setOwner(this);
+        }
+    }
+    
+    public void removeDestination(DestinationEntity dest) {
+        if (this.destinations.remove(dest)) {
+            dest.setOwner(null);
+        }
+    }
 
-	@Override
-	public void removeRole(AuthorizedRoleEntity role) {
-		this.roles.remove(role);
-	}
-	
-	
+    @Override
+    public List<AuthorizedRoleEntity> getRoles() {
+        return new ArrayList<>(this.roles);
+    }
+
+    @Override
+    public void setRoles(List<AuthorizedRoleEntity> inRoles) {
+        if (inRoles == null) {
+            this.roles = new ArrayList<>();
+        } else {
+            this.roles = new ArrayList<>(inRoles);
+        }
+    }
+
+    @Override
+    public void addRole(AuthorizedRoleEntity role) {
+        this.roles.add(role);
+    }
+
+    @Override
+    public void removeRole(AuthorizedRoleEntity role) {
+        this.roles.remove(role);
+    }
+    
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+
 }

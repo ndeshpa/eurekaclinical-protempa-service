@@ -39,12 +39,12 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.eurekaclinical.protempa.client.comm.IdPool;
@@ -56,18 +56,22 @@ import org.eurekaclinical.protempa.client.comm.IdPool;
 @Entity
 @Table(name = "id_pools")
 public class IdPoolEntity implements org.eurekaclinical.standardapis.entity.Entity<Long> {
+
     @Id
     @SequenceGenerator(name = "ID_POOL_SEQ_GENERATOR",
             sequenceName = "ID_POOL_SEQ", allocationSize = 1, initialValue = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
             generator = "ID_POOL_SEQ_GENERATOR")
     private Long id;
-    
+
+    @ManyToOne
+    private AuthorizedUserEntity owner;
+
     @Column(nullable = false)
     private String name;
-    
+
     private String description;
-    
+
     @Override
     public Long getId() {
         return id;
@@ -93,7 +97,23 @@ public class IdPoolEntity implements org.eurekaclinical.standardapis.entity.Enti
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
+    public AuthorizedUserEntity getOwner() {
+        return owner;
+    }
+
+    public void setOwner(AuthorizedUserEntity inOwner) {
+        if (this.owner != inOwner) {
+            if (this.owner != null) {
+                this.owner.removeIdPool(this);
+            }
+            this.owner = inOwner;
+            if (this.owner != null) {
+                this.owner.addIdPool(this);
+            }
+        }
+    }
+
     public IdPool toIdPool() {
         IdPool idPoolId = new IdPool();
         idPoolId.setId(this.id);

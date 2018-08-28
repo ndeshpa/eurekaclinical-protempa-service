@@ -106,7 +106,7 @@ public class AppModule extends AbstractModule {
         bind(LinkDao.class).to(JpaLinkDao.class);
         bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
         bind(JobModeDao.class).to(JpaJobModeDao.class);
-        bind(IdPoolDao.class).to(JpaIdPoolDao.class);
         bind(IdPoolIdDao.class).to(JpaIdPoolIdDao.class);
+        bind(IdPoolDao.class).to(JpaIdPoolDao.class);
     }
 }

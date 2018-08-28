@@ -57,12 +57,12 @@ import org.eurekaclinical.standardapis.dao.GenericDao;
  */
 public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPoolDao {
 
-    private final IdPoolIdDao idPoolIdDao;
+    private final Provider<IdPoolIdDao> idPoolIdDaoProvider;
 
     @Inject
-    public JpaIdPoolDao(Provider<EntityManager> inManagerProvider, IdPoolIdDao inIdPoolIdDao) {
+    public JpaIdPoolDao(Provider<EntityManager> inManagerProvider, Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
         super(IdPoolEntity.class, inManagerProvider);
-        this.idPoolIdDao = inIdPoolIdDao;
+        this.idPoolIdDaoProvider = inIdPoolIdDaoProvider;
     }
 
     @Override
@@ -71,9 +71,9 @@ public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPo
     }
     
     public IdPool getIdPool(Long inId) {
-        IdPoolEntity retrieve = retrieve(inId);
-        if (retrieve != null) {
-            return new IdPool(inId, this.idPoolIdDao);
+        IdPoolEntity idPoolEntity = retrieve(inId);
+        if (idPoolEntity != null) {
+            return new IdPool(idPoolEntity, this.idPoolIdDaoProvider);
         } else {
             return null;
         }
@@ -82,7 +82,7 @@ public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPo
     public IdPool getIdPoolByName(String inName) {
         IdPoolEntity idPoolEntity = getByName(inName);
         if (idPoolEntity != null) {
-            return new IdPool(idPoolEntity.getId(), this.idPoolIdDao);
+            return new IdPool(idPoolEntity, this.idPoolIdDaoProvider);
         } else {
             return null;
         }
@@ -91,7 +91,7 @@ public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPo
     @Override
     public IdPool toIdPool(IdPoolEntity inIdPoolEntity) {
         if (inIdPoolEntity != null) {
-            return new IdPool(inIdPoolEntity.getId(), this.idPoolIdDao);
+            return new IdPool(inIdPoolEntity, this.idPoolIdDaoProvider);
         } else {
             return null;
         }

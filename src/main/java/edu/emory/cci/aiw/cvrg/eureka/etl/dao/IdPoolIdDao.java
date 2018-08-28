@@ -57,7 +57,13 @@ public interface IdPoolIdDao extends Dao<IdPoolIdEntity, Long> {
     
     List<IdPoolIdEntity> getAllByPoolId(Long inPoolId, int inFirstResult, int inMaxResults);
     
-    IdPoolIdEntity getByPoolNameAndFromId(String inPoolName, String inFromId);
+    Long getByPoolNameAndFromId(String inPoolName, String inFromId);
     
-    IdPoolIdEntity getByPoolIdAndFromId(Long inPoolId, String inFromId);
+    Long getByPoolIdAndFromId(Long inPoolId, String inFromId);
+    
+    void startTransaction();
+    
+    void commitTransaction();
+    
+    void rollbackTransaction();
 }
