@@ -70,164 +70,164 @@ import org.eurekaclinical.eureka.client.comm.JobStatus;
 @Table(name = "job_events")
 public class JobEventEntity {
 
-	/**
-	 * The unique identifier for the job event.
-	 */
-	@Id
-	@SequenceGenerator(name = "JOBEVENT_SEQ_GENERATOR",
-			sequenceName = "JOBEVENT_SEQ", allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,
-			generator = "JOBEVENT_SEQ_GENERATOR")
-	private Long id;
-	/**
-	 * The job for which the event was generated.
-	 */
-	@ManyToOne
-	@JoinColumn(name = "job_id", nullable = false)
-	private JobEntity job;
-	/**
-	 * The status of the event.
-	 */
-	@Column(nullable = false, name="state")
-	private JobStatus status;
+    /**
+     * The unique identifier for the job event.
+     */
+    @Id
+    @SequenceGenerator(name = "JOBEVENT_SEQ_GENERATOR",
+            sequenceName = "JOBEVENT_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "JOBEVENT_SEQ_GENERATOR")
+    private Long id;
+    /**
+     * The job for which the event was generated.
+     */
+    @ManyToOne
+    @JoinColumn(name = "job_id", nullable = false)
+    private JobEntity job;
+    /**
+     * The status of the event.
+     */
+    @Column(nullable = false, name = "state")
+    private JobStatus status;
 
-	/**
-	 * The exception stack trace. The name is prefixed with a z to force
-	 * hibernate to populate this field last in insert and update statements to
-	 * avoid the dreaded
-	 * <code>ORA-24816: Expanded non LONG bind data supplied after actual LONG or LOB column</code>
-	 * error message from Oracle. Hibernate apparently orders fields
-	 * alphabetically.
-	 */
-	@Lob
-	@Column(name = "exceptionstacktrace")
-	private String zExceptionStackTrace;
-	/**
-	 * The time stamp for the event.
-	 */
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(nullable = false)
-	private Date timeStamp;
-	/**
-	 * The message generated for the event.
-	 */
-	@Lob
-	private String message;
+    /**
+     * The exception stack trace. The name is prefixed with a z to force
+     * hibernate to populate this field last in insert and update statements to
+     * avoid the dreaded
+     * <code>ORA-24816: Expanded non LONG bind data supplied after actual LONG or LOB column</code>
+     * error message from Oracle. Hibernate apparently orders fields
+     * alphabetically.
+     */
+    @Lob
+    @Column(name = "exceptionstacktrace")
+    private String zExceptionStackTrace;
+    /**
+     * The time stamp for the event.
+     */
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    private Date timeStamp;
+    /**
+     * The message generated for the event.
+     */
+    @Lob
+    private String message;
 
-	public JobEventEntity() {
-		this.timeStamp = new Date();
-	}
+    public JobEventEntity() {
+        this.timeStamp = new Date();
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return this.id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return this.id;
+    }
 
-	/**
-	 * @param inId the id to set
-	 */
-	public void setId(Long inId) {
-		this.id = inId;
-	}
+    /**
+     * @param inId the id to set
+     */
+    public void setId(Long inId) {
+        this.id = inId;
+    }
 
-	/**
-	 * @return the job
-	 */
-	@JsonBackReference("job-event")
-	public JobEntity getJob() {
-		return this.job;
-	}
+    /**
+     * @return the job
+     */
+    @JsonBackReference("job-event")
+    public JobEntity getJob() {
+        return this.job;
+    }
 
-	/**
-	 * @param inJob the job to set
-	 */
-	public void setJob(JobEntity inJob) {
-		if (this.job != inJob) {
-			if (this.job != null) {
-				this.job.removeJobEvent(this);
-			}
-			this.job = inJob;
-			if (this.job != null) {
-				this.job.addJobEvent(this);
-			}
-		}
-	}
+    /**
+     * @param inJob the job to set
+     */
+    public void setJob(JobEntity inJob) {
+        if (this.job != inJob) {
+            if (this.job != null) {
+                this.job.removeJobEvent(this);
+            }
+            this.job = inJob;
+            if (this.job != null) {
+                this.job.addJobEvent(this);
+            }
+        }
+    }
 
-	/**
-	 * @return the status
-	 */
-	public JobStatus getStatus() {
-		return this.status;
-	}
+    /**
+     * @return the status
+     */
+    public JobStatus getStatus() {
+        return this.status;
+    }
 
-	/**
-	 * @param inStatus the status to set
-	 */
-	public void setStatus(JobStatus inStatus) {
-		this.status = inStatus;
-	}
+    /**
+     * @param inStatus the status to set
+     */
+    public void setStatus(JobStatus inStatus) {
+        this.status = inStatus;
+    }
 
-	/**
-	 * @return the exceptionStackTrace
-	 */
-	public String getExceptionStackTrace() {
-		return this.zExceptionStackTrace;
-	}
+    /**
+     * @return the exceptionStackTrace
+     */
+    public String getExceptionStackTrace() {
+        return this.zExceptionStackTrace;
+    }
 
-	/**
-	 * @param inExceptionStackTrace the exceptionStackTrace to set
-	 */
-	public void setExceptionStackTrace(String inExceptionStackTrace) {
-		this.zExceptionStackTrace = inExceptionStackTrace;
-	}
+    /**
+     * @param inExceptionStackTrace the exceptionStackTrace to set
+     */
+    public void setExceptionStackTrace(String inExceptionStackTrace) {
+        this.zExceptionStackTrace = inExceptionStackTrace;
+    }
 
-	/**
-	 * @return the timeStamp
-	 */
-	public Date getTimeStamp() {
-		return new Date(this.timeStamp.getTime());
-	}
+    /**
+     * @return the timeStamp
+     */
+    public Date getTimeStamp() {
+        return new Date(this.timeStamp.getTime());
+    }
 
-	/**
-	 * @param inTimeStamp the timeStamp to set
-	 */
-	public void setTimeStamp(Date inTimeStamp) {
-		if (inTimeStamp == null) {
-			this.timeStamp = new Date();
-		} else {
-			this.timeStamp = new Date(inTimeStamp.getTime());
-		}
-	}
+    /**
+     * @param inTimeStamp the timeStamp to set
+     */
+    public void setTimeStamp(Date inTimeStamp) {
+        if (inTimeStamp == null) {
+            this.timeStamp = new Date();
+        } else {
+            this.timeStamp = new Date(inTimeStamp.getTime());
+        }
+    }
 
-	/**
-	 * @return the message
-	 */
-	public String getMessage() {
-		return this.message;
-	}
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+        return this.message;
+    }
 
-	/**
-	 * @param inMessage the message to set
-	 */
-	public void setMessage(String inMessage) {
-		this.message = inMessage;
-	}
+    /**
+     * @param inMessage the message to set
+     */
+    public void setMessage(String inMessage) {
+        this.message = inMessage;
+    }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
-	}
-	
-	public JobEvent toJobEvent() {
-		JobEvent jobEvent = new JobEvent();
-		jobEvent.setId(this.id);
-		jobEvent.setMessage(this.message);
-		jobEvent.setStatus(this.status);
-		jobEvent.setTimeStamp(this.timeStamp);
-		jobEvent.setExceptionStackTrace(this.zExceptionStackTrace);
-		return jobEvent;
-	}
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+
+    public JobEvent toJobEvent() {
+        JobEvent jobEvent = new JobEvent();
+        jobEvent.setId(this.id);
+        jobEvent.setMessage(this.message);
+        jobEvent.setStatus(this.status);
+        jobEvent.setTimeStamp(this.timeStamp);
+        jobEvent.setExceptionStackTrace(this.zExceptionStackTrace);
+        return jobEvent;
+    }
 
 }

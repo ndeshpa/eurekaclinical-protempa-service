@@ -187,11 +187,13 @@ public class Task implements Runnable {
         this.jobDao.update(myJob);
     }
 
-    @Transactional
     void doRunJob(PropositionDefinition[] propDefArray, String[] propIdsToShowArray) throws EtlException {
-        JobEntity myJob = this.jobDao.retrieve(this.jobId);
-        this.etl.run(myJob, propDefArray, propIdsToShowArray, this.filter, this.prompts);
-        this.jobDao.update(myJob);
+        this.etl.run(this.jobDao, this.jobId, propDefArray, propIdsToShowArray, this.filter, this.prompts);
+    }
+
+    @Transactional
+    private JobEntity retrieveJob() {
+        return this.jobDao.retrieve(this.jobId);
     }
 
     @Transactional

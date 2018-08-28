@@ -60,6 +60,7 @@ import org.protempa.dest.deid.DeidentifiedDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.protempa.query.QueryMode;
 
@@ -74,19 +75,19 @@ public class ProtempaDestinationFactory {
     private final DestinationDao destinationDao;
     private final DeidPerPatientParamsDao deidPerPatientParamsDao;
     private final EurekaDeidConfigFactory eurekaDeidConfigFactory;
-    private final IdPoolDao idPoolDao;
+    private final Provider<IdPoolDao> idPoolDaoProvider;
 
     @Inject
     public ProtempaDestinationFactory(DestinationDao inDestinationDao, 
             DeidPerPatientParamsDao inDeidPerPatientParamsDao, 
-            IdPoolDao inIdPoolDao,
+            Provider<IdPoolDao> inIdPoolDaoProvider,
             EtlProperties etlProperties, 
             EurekaDeidConfigFactory inEurekaDeidConfigFactory) {
         this.destinationDao = inDestinationDao;
         this.deidPerPatientParamsDao = inDeidPerPatientParamsDao;
         this.etlProperties = etlProperties;
         this.eurekaDeidConfigFactory = inEurekaDeidConfigFactory;
-        this.idPoolDao = inIdPoolDao;
+        this.idPoolDaoProvider = inIdPoolDaoProvider;
     }
 
     public org.protempa.dest.Destination getInstance(Long destId, QueryMode queryMode) throws DestinationInitException {
@@ -110,7 +111,7 @@ public class ProtempaDestinationFactory {
             } else if (dest instanceof PatientSetSenderDestinationEntity) {
                 result = new PatientSetSenderDestination(this.etlProperties, (PatientSetSenderDestinationEntity) dest);
             } else if (dest instanceof TabularFileDestinationEntity) {
-                result = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest, this.idPoolDao);
+                result = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest, this.idPoolDaoProvider);
             } else {
                 throw new AssertionError("Invalid destination entity type " + dest.getClass());
             }
