@@ -162,4 +162,11 @@ public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements 
         this.transaction = null;
     }
 
+    @Override
+    public boolean isInTransaction() {
+        return this.transaction != null && this.transaction.isActive();
+    }
+    
+    
+
 }

@@ -66,4 +66,6 @@ public interface IdPoolIdDao extends Dao<IdPoolIdEntity, Long> {
     void commitTransaction();
     
     void rollbackTransaction();
+    
+    boolean isInTransaction();
 }
