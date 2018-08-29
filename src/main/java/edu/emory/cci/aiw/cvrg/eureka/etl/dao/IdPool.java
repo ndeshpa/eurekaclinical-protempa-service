@@ -109,16 +109,24 @@ public class IdPool implements Pool {
 
     @Override
     public void finish() throws PoolException {
+        boolean active;
         try {
-            this.idPoolIdDao.commitTransaction();
-        } catch (RollbackException ex) {
-            PoolException pe = new PoolException("Error finishing writes to the pool", ex);
+            active = this.idPoolIdDao.isInTransaction();
+        } catch (PersistenceException ex) {
+            throw new PoolException("Error finishing writes to the pool", ex);
+        }
+        if (active) {
             try {
-                this.idPoolIdDao.rollbackTransaction();
-            } catch (PersistenceException ex2) {
-                pe.addSuppressed(ex2);
+                this.idPoolIdDao.commitTransaction();
+            } catch (RollbackException ex) {
+                PoolException pe = new PoolException("Error finishing writes to the pool", ex);
+                try {
+                    this.idPoolIdDao.rollbackTransaction();
+                } catch (PersistenceException ex2) {
+                    pe.addSuppressed(ex2);
+                }
+                throw pe;
             }
-            throw pe;
         }
     }
 
@@ -129,7 +137,13 @@ public class IdPool implements Pool {
 
     @Override
     public void close() throws Exception {
-
+        try {
+            if (this.idPoolIdDao.isInTransaction()) {
+                this.idPoolIdDao.rollbackTransaction();
+            }
+        } catch (PersistenceException ex) {
+            throw new PoolException("Error closing the pool", ex);
+        }
     }
 
 }
