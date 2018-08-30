@@ -40,6 +40,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * #L%
  */
 import au.com.bytecode.opencsv.CSVParser;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
 import java.io.IOException;
 import java.text.FieldPosition;
@@ -68,7 +69,7 @@ class TableColumnSpecFormat extends Format {
     private static final long serialVersionUID = 1L;
     private final String columnName;
     private final String formatStr;
-    private final Pool pool;
+    private final IdPool pool;
 
     TableColumnSpecFormat(String columnName) {
         this(columnName, null);
@@ -78,7 +79,7 @@ class TableColumnSpecFormat extends Format {
         this(columnName, formatStr, null);
     }
     
-    TableColumnSpecFormat(String columnName, String formatStr, Pool pool) {
+    TableColumnSpecFormat(String columnName, String formatStr, IdPool pool) {
         this.columnName = columnName;
         this.formatStr = formatStr;
         this.pool = pool;

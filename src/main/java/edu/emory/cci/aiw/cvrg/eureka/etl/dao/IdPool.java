@@ -40,110 +40,30 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * #L%
  */
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import javax.inject.Provider;
-import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
-import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.Value;
 
 /**
  *
  * @author Andrew Post
  */
-public class IdPool implements Pool {
+public class IdPool {
 
-    private static final int BATCH_SIZE = 10000;
-
-    private final IdPoolIdDao idPoolIdDao;
     private final IdPoolEntity idPool;
-    private int recordsCreated;
+    private final IdPoolBase idPoolBase;
 
-    IdPool(IdPoolEntity inIdPool, Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
+    IdPool(IdPoolEntity inIdPool, IdPoolBase inIdPoolBase, Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
         assert inIdPool != null : "inIdPool cannot be null";
         assert inIdPoolIdDaoProvider != null : "inIdPoolIdDao cannot be null";
+        assert inIdPoolBase != null : "inIdPoolBase cannot be null";
         this.idPool = inIdPool;
-        this.idPoolIdDao = inIdPoolIdDaoProvider.get();
+        this.idPoolBase = inIdPoolBase;
     }
 
-    @Override
-    public void start() throws PoolException {
-        this.recordsCreated = 0;
-        this.idPoolIdDao.startTransaction();
-    }
-
-    @Override
     public Value valueFor(Value inValue) throws PoolException {
-        String valueStr;
-        if (inValue != null) {
-            valueStr = inValue.getFormatted();
-        } else {
-            valueStr = null;
-        }
-        try {
-            Long result = this.idPoolIdDao.getByPoolIdAndFromId(this.idPool.getId(), valueStr);
-            if (result == null) {
-                IdPoolIdEntity newEntity = new IdPoolIdEntity();
-                newEntity.setFromId(valueStr);
-                newEntity.setIdPool(this.idPool);
-                result = this.idPoolIdDao.create(newEntity).getId();
-                this.recordsCreated++;
-                if (this.recordsCreated % BATCH_SIZE == 0) {
-                    this.idPoolIdDao.commitTransaction();
-                    this.idPoolIdDao.startTransaction();
-                }
-            }
-            return NumberValue.getInstance(result);
-        } catch (PersistenceException ex) {
-            PoolException pe = new PoolException("Error reading/writing id pool", ex);
-            try {
-                this.idPoolIdDao.rollbackTransaction();
-            } catch (PersistenceException ex2) {
-                pe.addSuppressed(ex2);
-            }
-            throw pe;
-        }
-    }
-
-    @Override
-    public void finish() throws PoolException {
-        boolean active;
-        try {
-            active = this.idPoolIdDao.isInTransaction();
-        } catch (PersistenceException ex) {
-            throw new PoolException("Error finishing writes to the pool", ex);
-        }
-        if (active) {
-            try {
-                this.idPoolIdDao.commitTransaction();
-            } catch (RollbackException ex) {
-                PoolException pe = new PoolException("Error finishing writes to the pool", ex);
-                try {
-                    this.idPoolIdDao.rollbackTransaction();
-                } catch (PersistenceException ex2) {
-                    pe.addSuppressed(ex2);
-                }
-                throw pe;
-            }
-        }
-    }
-
-    @Override
-    public int getRecordsCreated() {
-        return this.recordsCreated;
-    }
-
-    @Override
-    public void close() throws Exception {
-        try {
-            if (this.idPoolIdDao.isInTransaction()) {
-                this.idPoolIdDao.rollbackTransaction();
-            }
-        } catch (PersistenceException ex) {
-            throw new PoolException("Error closing the pool", ex);
-        }
+        this.idPoolBase.setIdPool(this.idPool);
+        return this.idPoolBase.valueFor(inValue);
     }
 
 }

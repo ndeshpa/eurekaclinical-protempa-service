@@ -39,6 +39,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import java.text.Format;
@@ -61,9 +62,9 @@ import org.protempa.proposition.value.Value;
 public class TabularWriterWithPool implements TabularWriter {
 
     private TabularWriter tabularWriter;
-    private final Pool pool;
+    private final IdPool pool;
 
-    public TabularWriterWithPool(Pool inPool) {
+    public TabularWriterWithPool(IdPool inPool) {
         this.pool = inPool;
     }
 

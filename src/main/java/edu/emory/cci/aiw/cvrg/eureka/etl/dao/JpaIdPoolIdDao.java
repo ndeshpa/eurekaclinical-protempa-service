@@ -143,7 +143,7 @@ public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements 
             return null;
         }
     }
-
+    
     @Override
     public void startTransaction() {
         this.transaction = getEntityManager().getTransaction();
@@ -161,12 +161,10 @@ public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements 
         this.transaction.rollback();
         this.transaction = null;
     }
-
+    
     @Override
     public boolean isInTransaction() {
         return this.transaction != null && this.transaction.isActive();
     }
-    
-    
 
 }

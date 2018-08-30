@@ -46,6 +46,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  */
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity_;
+import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -58,11 +59,18 @@ import org.eurekaclinical.standardapis.dao.GenericDao;
 public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPoolDao {
 
     private final Provider<IdPoolIdDao> idPoolIdDaoProvider;
+    private final IdPoolBase idPoolBase;
 
     @Inject
     public JpaIdPoolDao(Provider<EntityManager> inManagerProvider, Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
         super(IdPoolEntity.class, inManagerProvider);
         this.idPoolIdDaoProvider = inIdPoolIdDaoProvider;
+        this.idPoolBase = new IdPoolBase(this.idPoolIdDaoProvider);
+    }
+    
+    @Override
+    public void start() throws PoolException {
+        this.idPoolBase.start();
     }
 
     @Override
@@ -73,7 +81,7 @@ public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPo
     public IdPool getIdPool(Long inId) {
         IdPoolEntity idPoolEntity = retrieve(inId);
         if (idPoolEntity != null) {
-            return new IdPool(idPoolEntity, this.idPoolIdDaoProvider);
+            return new IdPool(idPoolEntity, this.idPoolBase, this.idPoolIdDaoProvider);
         } else {
             return null;
         }
@@ -82,7 +90,7 @@ public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPo
     public IdPool getIdPoolByName(String inName) {
         IdPoolEntity idPoolEntity = getByName(inName);
         if (idPoolEntity != null) {
-            return new IdPool(idPoolEntity, this.idPoolIdDaoProvider);
+            return new IdPool(idPoolEntity, this.idPoolBase, this.idPoolIdDaoProvider);
         } else {
             return null;
         }
@@ -91,10 +99,20 @@ public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPo
     @Override
     public IdPool toIdPool(IdPoolEntity inIdPoolEntity) {
         if (inIdPoolEntity != null) {
-            return new IdPool(inIdPoolEntity, this.idPoolIdDaoProvider);
+            return new IdPool(inIdPoolEntity, this.idPoolBase, this.idPoolIdDaoProvider);
         } else {
             return null;
         }
     }
-
+    
+    @Override
+    public void finish() throws PoolException {
+        this.idPoolBase.finish();
+    }
+    
+    @Override
+    public void close() throws Exception {
+        this.idPoolBase.close();
+    }
+    
 }
