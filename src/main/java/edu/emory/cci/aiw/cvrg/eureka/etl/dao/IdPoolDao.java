@@ -41,12 +41,18 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  */
 
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import org.eurekaclinical.standardapis.dao.DaoWithUniqueName;
 
 /**
  *
  * @author Andrew Post
  */
-public interface IdPoolDao extends DaoWithUniqueName<IdPoolEntity, Long> {
+public interface IdPoolDao extends DaoWithUniqueName<IdPoolEntity, Long>, AutoCloseable {
+    void start() throws PoolException;
+    
     IdPool toIdPool(IdPoolEntity inIdPoolEntity);
+    
+    void finish() throws PoolException;
+    
 }
