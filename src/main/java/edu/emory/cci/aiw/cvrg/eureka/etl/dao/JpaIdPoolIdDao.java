@@ -65,7 +65,7 @@ public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements 
     public JpaIdPoolIdDao(Provider<EntityManager> inManagerProvider) {
         super(IdPoolIdEntity.class, inManagerProvider);
     }
-
+    
     @Override
     public List<IdPoolIdEntity> getAllByPoolId(Long inPoolId) {
         EntityManager entityManager = this.getEntityManager();
@@ -109,7 +109,7 @@ public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements 
                 .equal(root.join(IdPoolIdEntity_.idPool).get(IdPoolEntity_.name), inPoolName));
         return entityManager.createQuery(criteriaQuery).getResultList();
     }
-
+    
     @Override
     public Long getByPoolNameAndFromId(String inPoolName, String inFromId) {
         EntityManager entityManager = this.getEntityManager();
@@ -134,7 +134,7 @@ public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements 
         CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
         Root<IdPoolIdEntity> root = criteriaQuery.from(getEntityClass());
         criteriaQuery.where(builder.and(
-                builder.equal(root.join(IdPoolIdEntity_.idPool).get(IdPoolEntity_.name), inPoolId),
+                builder.equal(root.join(IdPoolIdEntity_.idPool).get(IdPoolEntity_.id), inPoolId),
                 builder.equal(root.get(IdPoolIdEntity_.fromId), inFromId)));
         criteriaQuery.select(root.get(IdPoolIdEntity_.id));
         try {
