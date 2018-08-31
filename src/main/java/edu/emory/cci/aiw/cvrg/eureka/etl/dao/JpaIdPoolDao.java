@@ -44,6 +44,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import com.google.inject.persist.UnitOfWork;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity_;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
@@ -60,10 +61,12 @@ public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPo
 
     private final Provider<IdPoolIdDao> idPoolIdDaoProvider;
     private final IdPoolBase idPoolBase;
+    private final UnitOfWork unitOfWork;
 
     @Inject
-    public JpaIdPoolDao(Provider<EntityManager> inManagerProvider, Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
+    public JpaIdPoolDao(UnitOfWork inUnitOfWork, Provider<EntityManager> inManagerProvider, Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
         super(IdPoolEntity.class, inManagerProvider);
+        this.unitOfWork = inUnitOfWork;
         this.idPoolIdDaoProvider = inIdPoolIdDaoProvider;
         this.idPoolBase = new IdPoolBase(this.idPoolIdDaoProvider);
     }
@@ -112,7 +115,11 @@ public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPo
     
     @Override
     public void close() throws Exception {
-        this.idPoolBase.close();
+        try {
+            this.idPoolBase.close();
+        } finally {
+            this.unitOfWork.end();
+        }
     }
     
 }
