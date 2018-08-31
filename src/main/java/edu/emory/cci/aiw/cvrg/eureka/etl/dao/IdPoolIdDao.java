@@ -49,6 +49,7 @@ import org.eurekaclinical.standardapis.dao.Dao;
  * @author Andrew Post
  */
 public interface IdPoolIdDao extends Dao<IdPoolIdEntity, Long> {
+    
     List<IdPoolIdEntity> getAllByPoolName(String inPoolName);
     
     List<IdPoolIdEntity> getAllByPoolName(String inPoolName, int inFirstResult, int inMaxResults);

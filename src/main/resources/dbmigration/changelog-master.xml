@@ -1071,7 +1071,7 @@
                                  deferrable="false" initiallyDeferred="false" 
                                  onDelete="CASCADE" referencedColumnNames="ID" 
                                  referencedTableName="ID_POOLS"/>
-        <addUniqueConstraint tableName="ID_POOL_IDS" columnNames="FROMID" 
+        <addUniqueConstraint tableName="ID_POOL_IDS" columnNames="FROMID,IDPOOL_ID" 
                              constraintName="UNIQ_IDPOOLID_FROMID"/>
         <addColumn tableName="TF_DEST_TABLECOLUMNS">
             <column name="IDPOOL_ID" type="BIGINT"/>

@@ -41,7 +41,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  */
 import au.com.bytecode.opencsv.CSVParser;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
-import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
 import java.io.IOException;
 import java.text.FieldPosition;
 import java.text.Format;
@@ -172,7 +171,11 @@ class TableColumnSpecFormat extends Format {
                         propertyName = nextToken;
                         break;
                     case "$":
-                        propertyType = ValueType.valueOf(nextToken);
+                        try {
+                            propertyType = ValueType.valueOf(nextToken);
+                        } catch (IllegalArgumentException ex) {
+                            throw new IOException("Invalid data type " + nextToken + " in path " + links, ex);
+                        }
                         break;
                 }
             }
