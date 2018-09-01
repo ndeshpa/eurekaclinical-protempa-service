@@ -167,4 +167,9 @@ public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements 
         return this.transaction != null && this.transaction.isActive();
     }
 
+    @Override
+    public void flush() {
+        getEntityManager().flush();
+    }
+    
 }

@@ -97,6 +97,7 @@ public class IdPoolBase implements Pool {
                 newEntity.setFromId(valueStr);
                 newEntity.setIdPool(this.idPool);
                 result = this.idPoolIdDao.create(newEntity).getId();
+                this.idPoolIdDao.flush();
                 this.recordsCreated++;
                 if (this.recordsCreated % BATCH_SIZE == 0) {
                     this.idPoolIdDao.commitTransaction();
