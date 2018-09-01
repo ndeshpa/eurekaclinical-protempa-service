@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 
 /*-
@@ -67,7 +62,9 @@ public class DestinationWithUnitOfWork implements Destination {
     private final UnitOfWork unitOfWork;
     private final Destination dest;
 
-    public DestinationWithUnitOfWork(Destination inDest, UnitOfWork inUnitOfWork) {
+    DestinationWithUnitOfWork(Destination inDest, UnitOfWork inUnitOfWork) {
+        assert inDest != null : "inDest cannot be null";
+        assert inUnitOfWork != null : "inUnitOfWork cannot be null";
         this.dest = inDest;
         this.unitOfWork = inUnitOfWork;
     }
