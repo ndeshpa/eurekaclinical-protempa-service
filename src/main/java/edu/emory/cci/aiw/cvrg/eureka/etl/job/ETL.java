@@ -67,8 +67,9 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.resource.Destinations;
 import edu.emory.cci.aiw.cvrg.eureka.etl.resource.EtlDestinationToDestinationEntityVisitor;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.inject.Inject;
 import org.eurekaclinical.eureka.client.comm.JobStatus;
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
@@ -95,22 +96,24 @@ public class ETL {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ETL.class);
     private static final String DATABASE_DIR = System.getProperty("eurekaclinical.protempaservice.database.directory");
-    private static final int PROTEMPA_EVENT_QUEUE_MAX = 1000;
     private final EtlProperties etlProperties;
     private final DestinationDao destinationDao;
     private final ProtempaDestinationFactory protempaDestFactory;
     private final EtlGroupDao groupDao;
     private final EtlDestinationToDestinationEntityVisitor destToDestEntityVisitor;
+    private final ProtempaEventLoggerThread protempaEventLoggerThread;
 
     @Inject
     public ETL(EtlProperties inEtlProperties, DestinationDao inDestinationDao,
             EtlGroupDao inGroupDao, EtlDestinationToDestinationEntityVisitor inDestToDestEntityVisitor,
-            ProtempaDestinationFactory inProtempaDestFactory) {
+            ProtempaDestinationFactory inProtempaDestFactory,
+            ProtempaEventLoggerThread inProtempaEventLoggerThread) {
         this.etlProperties = inEtlProperties;
         this.destinationDao = inDestinationDao;
         this.protempaDestFactory = inProtempaDestFactory;
         this.groupDao = inGroupDao;
         this.destToDestEntityVisitor = inDestToDestEntityVisitor;
+        this.protempaEventLoggerThread = inProtempaEventLoggerThread;
     }
 
     void run(JobDao inJobDao, Long inJobId, PropositionDefinition[] inPropositionDefinitions,
@@ -124,10 +127,11 @@ public class ETL {
         if (databaseDirectory == null) {
             databaseDirectory = this.etlProperties.getDatabaseDirectory();
         }
-        Queue<JobEventEntity> jobEventQueue = new LinkedList<>();
+        BlockingQueue<JobEventEntity> jobEventQueue = new LinkedBlockingQueue<>();
+        JobEventEntity poisonPill = new JobEventEntity();
         try (Protempa protempa = getNewProtempa(job, prompts)) {
             LOGGER.debug("Validating the data source backend data for job {}", job.getId());
-            logValidationEvents(inJobDao, job, protempa.validateDataSourceBackendData(), jobEventQueue, null);
+            logValidationEvents(protempa.validateDataSourceBackendData(), jobEventQueue, null);
 
             EtlDestination eurekaDestination;
             org.protempa.dest.Destination protempaDestination;
@@ -175,36 +179,32 @@ public class ETL {
                     protempaEvt.setStatus(JobStatus.STARTED);
                     protempaEvt.setMessage(protempaEvent.getType() + " " + protempaEvent.getDescription());
                     jobEventQueue.add(protempaEvt);
-                    updateJob(inJobDao, job, jobEventQueue);
                 }
             });
+            this.protempaEventLoggerThread.setJobId(job.getId());
+            this.protempaEventLoggerThread.setJobEvents(jobEventQueue);
+            this.protempaEventLoggerThread.setPoisonPill(poisonPill);
+            this.protempaEventLoggerThread.start();
             LOGGER.debug("Executing Protempa query {}", q);
             protempa.execute(query, protempaDestination);
         } catch (DataSourceFailedDataValidationException ex) {
-            logValidationEvents(inJobDao, job, ex.getValidationEvents(), jobEventQueue, ex);
+            logValidationEvents(ex.getValidationEvents(), jobEventQueue, ex);
             throw new EtlException("ETL failed for job " + job.getId(), ex);
         } catch (Exception ex) {
             throw new EtlException("ETL failed for job " + job.getId(), ex);
         } finally {
-            updateJob(inJobDao, job, jobEventQueue);
-        }
-    }
-
-    @Transactional
-    private JobEntity retrieveJob(JobDao jobDao, Long jobId) {
-        return jobDao.retrieve(jobId);
-    }
-
-    @Transactional
-    private void updateJob(JobDao jobDao, JobEntity job, Queue<JobEventEntity> jobEvents) {
-        if (!jobEvents.isEmpty() && jobEvents.size() % PROTEMPA_EVENT_QUEUE_MAX == 0) {
-            JobEntity refresh = jobDao.refresh(job);
-            JobEventEntity jobEvent;
-            while ((jobEvent = jobEvents.poll()) != null) {
-                jobEvent.setJob(refresh);
+            try {
+                jobEventQueue.add(poisonPill);
+                this.protempaEventLoggerThread.join();
+            } catch (InterruptedException ex) {
+                LOGGER.debug("Protempa event logger thread interrupted", ex);
             }
-            jobDao.update(refresh);
         }
+    }
+
+    @Transactional
+    public JobEntity retrieveJob(JobDao jobDao, Long jobId) {
+        return jobDao.retrieve(jobId);
     }
 
     private void createDatabaseDirectory(String databaseDirectory) throws EtlException {
@@ -221,7 +221,7 @@ public class ETL {
         }
     }
 
-    private void logValidationEvents(JobDao jobDao, JobEntity job, DataValidationEvent[] events, Queue<JobEventEntity> jobEvents, DataSourceFailedDataValidationException ex) {
+    private void logValidationEvents(DataValidationEvent[] events, Queue<JobEventEntity> jobEvents, DataSourceFailedDataValidationException ex) {
         for (DataValidationEvent event : events) {
             AbstractFileInfo fileInfo;
             JobStatus jobEventType;
@@ -243,7 +243,6 @@ public class ETL {
             validationJobEvent.setExceptionStackTrace(collectThrowableMessages(ex));
             jobEvents.add(validationJobEvent);
         }
-        updateJob(jobDao, job, jobEvents);
     }
 
     private Protempa getNewProtempa(JobEntity job, Configuration prompts) throws

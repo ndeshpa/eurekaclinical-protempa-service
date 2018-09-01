@@ -40,28 +40,68 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * #L%
  */
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity_;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
-import org.protempa.proposition.value.Value;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import org.eurekaclinical.standardapis.dao.GenericDao;
 
 /**
  *
  * @author Andrew Post
  */
-public class IdPool {
+public class ETLIdPoolDao extends GenericDao<IdPoolEntity, Long> implements AutoCloseable {
 
-    private final IdPoolEntity idPool;
     private final IdPoolBase idPoolBase;
 
-    IdPool(IdPoolEntity inIdPool, IdPoolBase inIdPoolBase) {
-        assert inIdPool != null : "inIdPool cannot be null";
-        assert inIdPoolBase != null : "inIdPoolBase cannot be null";
-        this.idPool = inIdPool;
+    @Inject
+    public ETLIdPoolDao(Provider<EntityManager> inManagerProvider, IdPoolBase inIdPoolBase) {
+        super(IdPoolEntity.class, inManagerProvider);
         this.idPoolBase = inIdPoolBase;
     }
 
-    public Value valueFor(Value inValue) throws PoolException {
-        this.idPoolBase.setIdPool(this.idPool);
-        return this.idPoolBase.valueFor(inValue);
+    public void start() throws PoolException {
+        this.idPoolBase.start();
+    }
+
+    public IdPoolEntity getByName(String inName) {
+        return getUniqueByAttribute(IdPoolEntity_.name, inName);
+    }
+
+    public IdPool getIdPool(Long inId) {
+        IdPoolEntity idPoolEntity = retrieve(inId);
+        if (idPoolEntity != null) {
+            return new IdPool(idPoolEntity, this.idPoolBase);
+        } else {
+            return null;
+        }
+    }
+
+    public IdPool getIdPoolByName(String inName) {
+        IdPoolEntity idPoolEntity = getByName(inName);
+        if (idPoolEntity != null) {
+            return new IdPool(idPoolEntity, this.idPoolBase);
+        } else {
+            return null;
+        }
+    }
+
+    public IdPool toIdPool(IdPoolEntity inIdPoolEntity) {
+        if (inIdPoolEntity != null) {
+            return new IdPool(inIdPoolEntity, this.idPoolBase);
+        } else {
+            return null;
+        }
+    }
+
+    public void finish() throws PoolException {
+        this.idPoolBase.finish();
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.idPoolBase.close();
     }
 
 }

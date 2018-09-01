@@ -43,6 +43,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
+import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
@@ -53,7 +54,7 @@ import org.protempa.proposition.value.Value;
  *
  * @author Andrew Post
  */
-class IdPoolBase implements Pool {
+public class IdPoolBase implements Pool {
 
     private static final int BATCH_SIZE = 10000;
 
@@ -61,7 +62,8 @@ class IdPoolBase implements Pool {
     private IdPoolEntity idPool;
     private int recordsCreated;
 
-    IdPoolBase(Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
+    @Inject
+    public IdPoolBase(Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
         assert inIdPoolIdDaoProvider != null : "inIdPoolIdDao cannot be null";
         this.idPoolIdDao = inIdPoolIdDaoProvider.get();
     }

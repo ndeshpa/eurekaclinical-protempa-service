@@ -41,7 +41,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  */
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
 import java.util.List;
 import javax.inject.Provider;
 import org.protempa.DataSource;
@@ -61,9 +61,9 @@ public class TabularFileDestination extends AbstractDestination {
 
     private final TabularFileDestinationEntity tabularFileDestinationEntity;
     private final EtlProperties etlProperties;
-    private final Provider<IdPoolDao> idPoolDaoProvider;
+    private final Provider<ETLIdPoolDao> idPoolDaoProvider;
 
-    TabularFileDestination(EtlProperties inEtlProperties, TabularFileDestinationEntity inTabularFileDestinationEntity, Provider<IdPoolDao> inIdPoolDaoProvider) {
+    TabularFileDestination(EtlProperties inEtlProperties, TabularFileDestinationEntity inTabularFileDestinationEntity, Provider<ETLIdPoolDao> inIdPoolDaoProvider) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
         this.tabularFileDestinationEntity = inTabularFileDestinationEntity;
         this.etlProperties = inEtlProperties;
