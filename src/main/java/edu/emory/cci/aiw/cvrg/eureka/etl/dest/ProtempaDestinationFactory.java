@@ -58,7 +58,7 @@ import edu.emory.cci.aiw.neo4jetl.Neo4jDestination;
 import org.protempa.dest.DestinationInitException;
 import org.protempa.dest.deid.DeidentifiedDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -75,12 +75,12 @@ public class ProtempaDestinationFactory {
     private final DestinationDao destinationDao;
     private final DeidPerPatientParamsDao deidPerPatientParamsDao;
     private final EurekaDeidConfigFactory eurekaDeidConfigFactory;
-    private final Provider<IdPoolDao> idPoolDaoProvider;
+    private final Provider<ETLIdPoolDao> idPoolDaoProvider;
 
     @Inject
     public ProtempaDestinationFactory(DestinationDao inDestinationDao, 
             DeidPerPatientParamsDao inDeidPerPatientParamsDao, 
-            Provider<IdPoolDao> inIdPoolDaoProvider,
+            Provider<ETLIdPoolDao> inIdPoolDaoProvider,
             EtlProperties etlProperties, 
             EurekaDeidConfigFactory inEurekaDeidConfigFactory) {
         this.destinationDao = inDestinationDao;

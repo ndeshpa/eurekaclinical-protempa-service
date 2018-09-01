@@ -42,6 +42,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
@@ -100,13 +101,13 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     private KnowledgeSourceCache ksCache;
     private Map<String, Map<Long, List<FileTableColumnSpecWrapper>>> rowRankToColumnByTableName;
     private final Query query;
-    private final Provider<IdPoolDao> idPoolDaoProvider;
-    private IdPoolDao idPoolDao;
+    private final Provider<ETLIdPoolDao> idPoolDaoProvider;
+    private ETLIdPoolDao idPoolDao;
 
     TabularFileQueryResultsHandler(Query query,
             TabularFileDestinationEntity inTabularFileDestinationEntity,
             EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource,
-            Provider<IdPoolDao> inIdPoolDaoProvider) {
+            Provider<ETLIdPoolDao> inIdPoolDaoProvider) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
         this.etlProperties = inEtlProperties;
         this.config = inTabularFileDestinationEntity;

@@ -44,10 +44,8 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import com.google.inject.persist.UnitOfWork;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity_;
-import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -59,67 +57,14 @@ import org.eurekaclinical.standardapis.dao.GenericDao;
  */
 public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPoolDao {
 
-    private final Provider<IdPoolIdDao> idPoolIdDaoProvider;
-    private final IdPoolBase idPoolBase;
-    private final UnitOfWork unitOfWork;
-
     @Inject
-    public JpaIdPoolDao(UnitOfWork inUnitOfWork, Provider<EntityManager> inManagerProvider, Provider<IdPoolIdDao> inIdPoolIdDaoProvider) {
+    public JpaIdPoolDao(Provider<EntityManager> inManagerProvider) {
         super(IdPoolEntity.class, inManagerProvider);
-        this.unitOfWork = inUnitOfWork;
-        this.idPoolIdDaoProvider = inIdPoolIdDaoProvider;
-        this.idPoolBase = new IdPoolBase(this.idPoolIdDaoProvider);
-    }
-    
-    @Override
-    public void start() throws PoolException {
-        this.idPoolBase.start();
     }
 
     @Override
     public IdPoolEntity getByName(String inName) {
         return getUniqueByAttribute(IdPoolEntity_.name, inName);
     }
-    
-    public IdPool getIdPool(Long inId) {
-        IdPoolEntity idPoolEntity = retrieve(inId);
-        if (idPoolEntity != null) {
-            return new IdPool(idPoolEntity, this.idPoolBase, this.idPoolIdDaoProvider);
-        } else {
-            return null;
-        }
-    }
 
-    public IdPool getIdPoolByName(String inName) {
-        IdPoolEntity idPoolEntity = getByName(inName);
-        if (idPoolEntity != null) {
-            return new IdPool(idPoolEntity, this.idPoolBase, this.idPoolIdDaoProvider);
-        } else {
-            return null;
-        }
-    }
-    
-    @Override
-    public IdPool toIdPool(IdPoolEntity inIdPoolEntity) {
-        if (inIdPoolEntity != null) {
-            return new IdPool(inIdPoolEntity, this.idPoolBase, this.idPoolIdDaoProvider);
-        } else {
-            return null;
-        }
-    }
-    
-    @Override
-    public void finish() throws PoolException {
-        this.idPoolBase.finish();
-    }
-    
-    @Override
-    public void close() throws Exception {
-        try {
-            this.idPoolBase.close();
-        } finally {
-            this.unitOfWork.end();
-        }
-    }
-    
 }
