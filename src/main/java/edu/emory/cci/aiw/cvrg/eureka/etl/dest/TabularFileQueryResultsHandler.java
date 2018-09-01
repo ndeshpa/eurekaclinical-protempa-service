@@ -39,13 +39,11 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import com.google.inject.persist.UnitOfWork;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import java.io.BufferedWriter;
 import java.io.File;

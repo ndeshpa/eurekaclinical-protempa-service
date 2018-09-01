@@ -40,7 +40,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * #L%
  */
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
-import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import java.text.Format;
 import org.protempa.dest.table.TabularWriter;
