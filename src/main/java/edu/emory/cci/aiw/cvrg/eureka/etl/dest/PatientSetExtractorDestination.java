@@ -39,6 +39,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import com.google.inject.persist.UnitOfWork;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import java.util.List;
@@ -56,28 +57,29 @@ import org.protempa.query.QueryMode;
  * @author Andrew Post
  */
 public class PatientSetExtractorDestination extends AbstractDestination {
-	private final PatientSetExtractorDestinationEntity patientSetExtractorDestinationEntity;
-	private final String[] propIdsSupported;
-	private final EtlProperties etlProperties;
 
-	PatientSetExtractorDestination(EtlProperties inEtlProperties, PatientSetExtractorDestinationEntity inPatientSetExtractorDestinationEntity) {
-		assert inPatientSetExtractorDestinationEntity != null : "inPatientSetExtractorDestinationEntity cannot be null";
-		this.patientSetExtractorDestinationEntity = inPatientSetExtractorDestinationEntity;
-		this.propIdsSupported = new String[] {this.patientSetExtractorDestinationEntity.getAliasPropositionId()};
-		this.etlProperties = inEtlProperties;
-	}
+    private final PatientSetExtractorDestinationEntity patientSetExtractorDestinationEntity;
+    private final String[] propIdsSupported;
+    private final EtlProperties etlProperties;
 
-	@Override
-	public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
-		if (query.getQueryMode() == QueryMode.UPDATE) {
-			throw new QueryResultsHandlerInitException("Update mode not supported");
-		}
-		return new PatientSetExtractorQueryResultsHandler(query, this.patientSetExtractorDestinationEntity, this.etlProperties);
-	}
-	
-	@Override
-	public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) {
-		return this.propIdsSupported.clone();
-	}
+    PatientSetExtractorDestination(EtlProperties inEtlProperties, PatientSetExtractorDestinationEntity inPatientSetExtractorDestinationEntity) {
+        assert inPatientSetExtractorDestinationEntity != null : "inPatientSetExtractorDestinationEntity cannot be null";
+        this.patientSetExtractorDestinationEntity = inPatientSetExtractorDestinationEntity;
+        this.propIdsSupported = new String[]{this.patientSetExtractorDestinationEntity.getAliasPropositionId()};
+        this.etlProperties = inEtlProperties;
+    }
+
+    @Override
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
+        if (query.getQueryMode() == QueryMode.UPDATE) {
+            throw new QueryResultsHandlerInitException("Update mode not supported");
+        }
+        return new PatientSetExtractorQueryResultsHandler(query, this.patientSetExtractorDestinationEntity, this.etlProperties);
+    }
+
+    @Override
+    public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) {
+        return this.propIdsSupported.clone();
+    }
 
 }

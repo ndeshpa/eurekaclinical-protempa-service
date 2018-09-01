@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CipherEncryptionAlgorithm;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.EncryptionAlgorithm;
@@ -54,22 +53,23 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class JpaEurekaDeidConfigFactory implements EurekaDeidConfigFactory {
-	private final EurekaDeidConfigDao eurekaDeidConfigDao;
-	
-	@Inject
-	public JpaEurekaDeidConfigFactory(EurekaDeidConfigDao inEurekaDeidConfigDao) {
-		this.eurekaDeidConfigDao = inEurekaDeidConfigDao;
-	}
-	
-	@Override
-	public EurekaDeidConfig getInstance(DestinationEntity inDestination) {
-		EncryptionAlgorithm encryptionAlgorithm = inDestination.getEncryptionAlgorithm();
-		if (encryptionAlgorithm instanceof MessageDigestEncryptionAlgorithm) {
-			return new EurekaMessageDigestDeidConfig(inDestination, this.eurekaDeidConfigDao);
-		} else if (encryptionAlgorithm instanceof CipherEncryptionAlgorithm) {
-			return new EurekaCipherDeidConfig(inDestination, this.eurekaDeidConfigDao);
-		} else {
-			return null;
-		}
-	}
+
+    private final EurekaDeidConfigDao eurekaDeidConfigDao;
+
+    @Inject
+    public JpaEurekaDeidConfigFactory(EurekaDeidConfigDao inEurekaDeidConfigDao) {
+        this.eurekaDeidConfigDao = inEurekaDeidConfigDao;
+    }
+
+    @Override
+    public EurekaDeidConfig getInstance(DestinationEntity inDestination) {
+        EncryptionAlgorithm encryptionAlgorithm = inDestination.getEncryptionAlgorithm();
+        if (encryptionAlgorithm instanceof MessageDigestEncryptionAlgorithm) {
+            return new EurekaMessageDigestDeidConfig(inDestination, this.eurekaDeidConfigDao);
+        } else if (encryptionAlgorithm instanceof CipherEncryptionAlgorithm) {
+            return new EurekaCipherDeidConfig(inDestination, this.eurekaDeidConfigDao);
+        } else {
+            return null;
+        }
+    }
 }

@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractionConfig;
 import java.util.Collection;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
@@ -51,38 +50,39 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 class PatientIdExtractor {
-	private final String aliasPropId;
-	private final String aliasFieldNameProperty;
-	private final String aliasFieldName;
-	private final String aliasPatientIdPropertyName;
 
-	PatientIdExtractor(PatientSetExtractionConfig inPatientSetExtractionConfig) {
-		this.aliasPropId = inPatientSetExtractionConfig.getAliasPropositionId();
-		this.aliasFieldNameProperty = inPatientSetExtractionConfig.getAliasFieldNameProperty();
-		this.aliasFieldName = inPatientSetExtractionConfig.getAliasFieldName();
-		this.aliasPatientIdPropertyName = inPatientSetExtractionConfig.getAliasPatientIdProperty();
-		
-		assert this.aliasPropId != null : "aliasPropId cannot be null";
-		assert this.aliasPatientIdPropertyName != null : "aliasPatientIdPropertyName cannot be null";
-	}
-	
-	String extract(String keyId, Collection<Proposition> propositions) throws QueryResultsHandlerProcessingException {
-		for (Proposition proposition : propositions) {
-			String propId = proposition.getId();
-			if (propId.equals(this.aliasPropId)) {
-				boolean yes = this.aliasFieldNameProperty == null;
-				if (!yes) {
-					Value aliasFieldNameVal = proposition.getProperty(this.aliasFieldNameProperty);
-					yes = this.aliasFieldName == null || this.aliasFieldName.equals(aliasFieldNameVal.getFormatted());
-				}
-				if (yes) {
-					Value val = proposition.getProperty(this.aliasPatientIdPropertyName);
-					if (val != null) {
-						return val.getFormatted();
-					}
-				}
-			}
-		}
-		throw new QueryResultsHandlerProcessingException("No patient id for keyId " + keyId);
-	}
+    private final String aliasPropId;
+    private final String aliasFieldNameProperty;
+    private final String aliasFieldName;
+    private final String aliasPatientIdPropertyName;
+
+    PatientIdExtractor(PatientSetExtractionConfig inPatientSetExtractionConfig) {
+        this.aliasPropId = inPatientSetExtractionConfig.getAliasPropositionId();
+        this.aliasFieldNameProperty = inPatientSetExtractionConfig.getAliasFieldNameProperty();
+        this.aliasFieldName = inPatientSetExtractionConfig.getAliasFieldName();
+        this.aliasPatientIdPropertyName = inPatientSetExtractionConfig.getAliasPatientIdProperty();
+
+        assert this.aliasPropId != null : "aliasPropId cannot be null";
+        assert this.aliasPatientIdPropertyName != null : "aliasPatientIdPropertyName cannot be null";
+    }
+
+    String extract(String keyId, Collection<Proposition> propositions) throws QueryResultsHandlerProcessingException {
+        for (Proposition proposition : propositions) {
+            String propId = proposition.getId();
+            if (propId.equals(this.aliasPropId)) {
+                boolean yes = this.aliasFieldNameProperty == null;
+                if (!yes) {
+                    Value aliasFieldNameVal = proposition.getProperty(this.aliasFieldNameProperty);
+                    yes = this.aliasFieldName == null || this.aliasFieldName.equals(aliasFieldNameVal.getFormatted());
+                }
+                if (yes) {
+                    Value val = proposition.getProperty(this.aliasPatientIdPropertyName);
+                    if (val != null) {
+                        return val.getFormatted();
+                    }
+                }
+            }
+        }
+        throw new QueryResultsHandlerProcessingException("No patient id for keyId " + keyId);
+    }
 }
