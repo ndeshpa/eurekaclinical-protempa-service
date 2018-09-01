@@ -128,9 +128,9 @@ public class ProtempaDestinationFactory {
                         this.deidPerPatientParamsDao.deleteAll(dest);
                 }
                 EurekaDeidConfig deidConfig = this.eurekaDeidConfigFactory.getInstance(dest);
-                return new DeidentifiedDestination(actualDest, deidConfig);
+                return new DestinationWithUnitOfWork(new DeidentifiedDestination(actualDest, deidConfig), this.unitOfWork);
             } else {
-                return actualDest;
+                return new DestinationWithUnitOfWork(actualDest, this.unitOfWork);
             }
         } catch (ConfigurationInitException ex) {
             throw new DestinationInitException(ex);
