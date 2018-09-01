@@ -39,12 +39,12 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import com.google.inject.persist.UnitOfWork;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,10 +105,12 @@ public class PatientSetExtractorQueryResultsHandler extends AbstractFileQueryRes
 
     @Override
     public void finish() throws QueryResultsHandlerProcessingException {
-        try {
-            this.jsonGenerator.finish();
-        } catch (IOException ex) {
-            throw new QueryResultsHandlerProcessingException(ex);
+        if (this.jsonGenerator != null) {
+            try {
+                this.jsonGenerator.finish();
+            } catch (IOException ex) {
+                throw new QueryResultsHandlerProcessingException(ex);
+            }
         }
     }
 

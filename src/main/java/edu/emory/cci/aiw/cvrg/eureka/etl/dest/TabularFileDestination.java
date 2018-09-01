@@ -39,6 +39,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import com.google.inject.persist.UnitOfWork;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
@@ -72,7 +73,7 @@ public class TabularFileDestination extends AbstractDestination {
 
     @Override
     public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
-        return new TabularFileQueryResultsHandler(query, this.tabularFileDestinationEntity, this.etlProperties, knowledgeSource, idPoolDaoProvider);
+        return new TabularFileQueryResultsHandler(query, this.tabularFileDestinationEntity, this.etlProperties, knowledgeSource, this.idPoolDaoProvider);
     }
 
 }

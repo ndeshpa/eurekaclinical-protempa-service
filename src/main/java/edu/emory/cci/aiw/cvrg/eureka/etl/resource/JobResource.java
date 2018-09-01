@@ -127,7 +127,6 @@ public class JobResource {
     private final DestinationDao destinationDao;
     private final ProtempaDestinationFactory protempaDestinationFactory;
     private final EtlProperties etlProperties;
-    private final Provider<EntityManager> entityManagerProvider;
     private final Provider<Task> taskProvider;
     private final JobModeDao jobModeDao;
     private final EurekaClinicalPhenotypeClient phenotypeClient;
@@ -139,7 +138,7 @@ public class JobResource {
     @Inject
     public JobResource(JobDao inJobDao, TaskManager inTaskManager, AuthorizedUserDao inEtlUserDao,
             DestinationDao inDestinationDao, EtlProperties inEtlProperties,
-            ProtempaDestinationFactory inProtempaDestinationFactory, Provider<EntityManager> inEntityManagerProvider,
+            ProtempaDestinationFactory inProtempaDestinationFactory,
             Provider<Task> inTaskProvider, JobModeDao inJobModeDao,
             EurekaClinicalPhenotypeClient inPhenotypeClient,
             PropositionDefinitionConverterVisitor  inConverterVisitor,
@@ -152,7 +151,6 @@ public class JobResource {
         this.destinationDao = inDestinationDao;
         this.etlProperties = inEtlProperties;
         this.protempaDestinationFactory = inProtempaDestinationFactory;
-        this.entityManagerProvider = inEntityManagerProvider;
         this.taskProvider = inTaskProvider;
         this.jobModeDao = inJobModeDao;
         this.phenotypeClient = inPhenotypeClient;
@@ -390,11 +388,14 @@ public class JobResource {
             throw new HttpStatusException(Status.BAD_REQUEST, "jobMode UNKNOWN is only for jobs that predate job modes and cannot be set on new jobs");
         }
         
-        EntityTransaction transaction = this.entityManagerProvider.get().getTransaction();
-        transaction.begin();
+        createJob(destinationId, jobSpec, jobEntity, etlUser, jobModeEntity);
+        return jobEntity;
+    }
+
+    @Transactional
+    public void createJob(String destinationId, JobSpec jobSpec, JobEntity jobEntity, AuthorizedUserEntity etlUser, JobModeEntity jobModeEntity) throws HttpStatusException {
         DestinationEntity destination = this.destinationDao.getCurrentByName(destinationId);
         if (destination == null) {
-            transaction.rollback();
             throw new HttpStatusException(Status.BAD_REQUEST, "Invalid destination " + jobSpec.getDestinationId());
         }
         jobEntity.setDestination(destination);
@@ -404,8 +405,6 @@ public class JobResource {
         jobEntity.setJobMode(jobModeEntity);
         
         this.jobDao.create(jobEntity);
-        transaction.commit();
-        return jobEntity;
     }
 
     private Configuration toConfiguration(SourceConfig prompts) {

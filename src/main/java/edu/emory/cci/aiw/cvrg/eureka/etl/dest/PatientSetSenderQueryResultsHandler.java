@@ -39,6 +39,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import com.google.inject.persist.UnitOfWork;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import java.io.IOException;
