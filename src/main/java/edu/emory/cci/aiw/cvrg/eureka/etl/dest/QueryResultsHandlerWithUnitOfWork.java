@@ -60,7 +60,6 @@ public class QueryResultsHandlerWithUnitOfWork implements QueryResultsHandler {
 
     private final QueryResultsHandler queryResultsHandler;
     private final UnitOfWork unitOfWork;
-    private boolean started;
 
     public QueryResultsHandlerWithUnitOfWork(QueryResultsHandler inQueryResultsHandler, UnitOfWork inUnitOfWork) {
         this.queryResultsHandler = inQueryResultsHandler;
@@ -84,15 +83,12 @@ public class QueryResultsHandlerWithUnitOfWork implements QueryResultsHandler {
 
     @Override
     public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
+        this.unitOfWork.begin();
         this.queryResultsHandler.start(cache);
     }
 
     @Override
     public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, Set<Proposition>> forwardDerivations, Map<Proposition, Set<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
-        if (!this.started) {
-            this.unitOfWork.begin();
-            this.started = true;
-        }
         this.queryResultsHandler.handleQueryResult(keyId, propositions, forwardDerivations, backwardDerivations, references);
     }
 
@@ -107,7 +103,6 @@ public class QueryResultsHandlerWithUnitOfWork implements QueryResultsHandler {
             this.queryResultsHandler.close();
         } finally {
             this.unitOfWork.end();
-            this.started = false;
         }
     }
 

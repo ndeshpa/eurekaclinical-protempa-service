@@ -39,14 +39,19 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.eurekaclinical.protempa.client.comm.IdPool;
 
 /**
@@ -54,7 +59,7 @@ import org.eurekaclinical.protempa.client.comm.IdPool;
  * @author Andrew Post
  */
 @Entity
-@Table(name = "id_pools")
+@Table(name = "id_pools", uniqueConstraints={@UniqueConstraint(columnNames={"owner_id", "name"})})
 public class IdPoolEntity implements org.eurekaclinical.standardapis.entity.Entity<Long> {
 
     @Id
@@ -71,6 +76,9 @@ public class IdPoolEntity implements org.eurekaclinical.standardapis.entity.Enti
     private String name;
 
     private String description;
+    
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idPool", fetch = FetchType.LAZY)
+    private List<IdPoolIdEntity> idPoolIds;
 
     @Override
     public Long getId() {

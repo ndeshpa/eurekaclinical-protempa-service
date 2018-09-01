@@ -1053,6 +1053,8 @@
                                  constraintName="FK_IDPOOL_OWNERID" 
                                  referencedTableName="USERS" 
                                  referencedColumnNames="ID"/>
+        <addUniqueConstraint tableName="ID_POOLS" columnNames="OWNER_ID,NAME" 
+                             constraintName="UNIQ_IDPOOL_OWNERID_NAME"/>
         <createTable tableName="ID_POOL_IDS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ID_POOL_ID_PK"/>
