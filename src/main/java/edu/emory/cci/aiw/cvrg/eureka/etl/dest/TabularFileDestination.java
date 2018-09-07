@@ -41,8 +41,9 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  */
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
 import java.util.List;
+import javax.inject.Provider;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.ProtempaEventListener;
@@ -60,18 +61,18 @@ public class TabularFileDestination extends AbstractDestination {
 
     private final TabularFileDestinationEntity tabularFileDestinationEntity;
     private final EtlProperties etlProperties;
-    private final IdPoolDao idPoolDao;
+    private final Provider<ETLIdPoolDao> idPoolDaoProvider;
 
-    TabularFileDestination(EtlProperties inEtlProperties, TabularFileDestinationEntity inTabularFileDestinationEntity, IdPoolDao inIdPoolDao) {
+    TabularFileDestination(EtlProperties inEtlProperties, TabularFileDestinationEntity inTabularFileDestinationEntity, Provider<ETLIdPoolDao> inIdPoolDaoProvider) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
         this.tabularFileDestinationEntity = inTabularFileDestinationEntity;
         this.etlProperties = inEtlProperties;
-        this.idPoolDao = inIdPoolDao;
+        this.idPoolDaoProvider = inIdPoolDaoProvider;
     }
 
     @Override
     public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
-        return new TabularFileQueryResultsHandler(query, this.tabularFileDestinationEntity, this.etlProperties, knowledgeSource, idPoolDao);
+        return new TabularFileQueryResultsHandler(query, this.tabularFileDestinationEntity, this.etlProperties, knowledgeSource, this.idPoolDaoProvider);
     }
 
 }

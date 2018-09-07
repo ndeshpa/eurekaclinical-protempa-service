@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DeidPerPatientParams;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.MessageDigestEncryptionAlgorithm;
@@ -53,49 +52,50 @@ import org.protempa.dest.deid.MessageDigestEncryption;
  * @author Andrew Post
  */
 class EurekaMessageDigestDeidConfig implements EurekaDeidConfig, MessageDigestDeidConfig {
-	private final String algorithm;
-	private final EurekaDeidConfigDao eurekaDeidConfigDao;
-	private final DestinationEntity destination;
 
-	EurekaMessageDigestDeidConfig(DestinationEntity inDestination, EurekaDeidConfigDao inEurekaDeidConfigDao) {
-		assert inDestination != null : "inDestination cannot be null";
-		assert inEurekaDeidConfigDao != null : "inEurekaDeidConfigDao cannot be null";
-		this.destination = inDestination;
-		this.algorithm = ((MessageDigestEncryptionAlgorithm) inDestination.getEncryptionAlgorithm()).getAlgorithm();
-		this.eurekaDeidConfigDao = inEurekaDeidConfigDao;
-	}
+    private final String algorithm;
+    private final EurekaDeidConfigDao eurekaDeidConfigDao;
+    private final DestinationEntity destination;
 
-	@Override
-	public MessageDigestEncryption getEncryptionInstance() throws EncryptionInitException {
-		return new MessageDigestEncryption(this);
-	}
+    EurekaMessageDigestDeidConfig(DestinationEntity inDestination, EurekaDeidConfigDao inEurekaDeidConfigDao) {
+        assert inDestination != null : "inDestination cannot be null";
+        assert inEurekaDeidConfigDao != null : "inEurekaDeidConfigDao cannot be null";
+        this.destination = inDestination;
+        this.algorithm = ((MessageDigestEncryptionAlgorithm) inDestination.getEncryptionAlgorithm()).getAlgorithm();
+        this.eurekaDeidConfigDao = inEurekaDeidConfigDao;
+    }
 
-	@Override
-	public String getAlgorithm() {
-		return this.algorithm;
-	}
-	
-	@Override
-	public byte[] getSalt(String keyId) {
-		DeidPerPatientParams deidPerPatientParams = this.eurekaDeidConfigDao.getOrCreatePatientParams(keyId, this.destination);
-		byte[] salt = deidPerPatientParams.getSalt();
-		if (salt == null) {
-			salt = new byte[20];
-			this.eurekaDeidConfigDao.getRandom().nextBytes(salt);
-			deidPerPatientParams.setSalt(salt);
-			this.eurekaDeidConfigDao.update(deidPerPatientParams);
-		}
-		return salt;
-	}
+    @Override
+    public MessageDigestEncryption getEncryptionInstance() throws EncryptionInitException {
+        return new MessageDigestEncryption(this);
+    }
 
-	@Override
-	public Integer getOffset(String inKeyId) {
-		return this.eurekaDeidConfigDao.getOffset(inKeyId, this.destination);
-	}
+    @Override
+    public String getAlgorithm() {
+        return this.algorithm;
+    }
 
-	@Override
-	public void close() throws Exception {
-		this.eurekaDeidConfigDao.close();
-	}
+    @Override
+    public byte[] getSalt(String keyId) {
+        DeidPerPatientParams deidPerPatientParams = this.eurekaDeidConfigDao.getOrCreatePatientParams(keyId, this.destination);
+        byte[] salt = deidPerPatientParams.getSalt();
+        if (salt == null) {
+            salt = new byte[20];
+            this.eurekaDeidConfigDao.getRandom().nextBytes(salt);
+            deidPerPatientParams.setSalt(salt);
+            this.eurekaDeidConfigDao.update(deidPerPatientParams);
+        }
+        return salt;
+    }
+
+    @Override
+    public Integer getOffset(String inKeyId) {
+        return this.eurekaDeidConfigDao.getOffset(inKeyId, this.destination);
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.eurekaDeidConfigDao.close();
+    }
 
 }

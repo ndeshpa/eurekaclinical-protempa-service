@@ -42,8 +42,9 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
-import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
+import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -55,7 +56,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
 import org.protempa.KnowledgeSource;
@@ -97,12 +100,13 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     private KnowledgeSourceCache ksCache;
     private Map<String, Map<Long, List<FileTableColumnSpecWrapper>>> rowRankToColumnByTableName;
     private final Query query;
-    private final IdPoolDao idPoolDao;
+    private final Provider<ETLIdPoolDao> idPoolDaoProvider;
+    private ETLIdPoolDao idPoolDao;
 
     TabularFileQueryResultsHandler(Query query,
             TabularFileDestinationEntity inTabularFileDestinationEntity,
             EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource,
-            IdPoolDao inIdPoolDao) {
+            Provider<ETLIdPoolDao> inIdPoolDaoProvider) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
         this.etlProperties = inEtlProperties;
         this.config = inTabularFileDestinationEntity;
@@ -117,7 +121,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         this.rowPropositionIdMap = new HashMap<>();
         this.rowRankToColumnByTableName = new HashMap<>();
         this.query = query;
-        this.idPoolDao = inIdPoolDao;
+        this.idPoolDaoProvider = inIdPoolDaoProvider;
     }
 
     @Override
@@ -126,6 +130,12 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
     @Override
     public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
+        this.idPoolDao = this.idPoolDaoProvider.get();
+        try {
+            this.idPoolDao.start();
+        } catch (PoolException ex) {
+            throw new QueryResultsHandlerProcessingException("Start query results handler", ex);
+        }
         createWriters();
         mapColumnSpecsToColumnNames(cache);
         writeHeaders();
@@ -148,7 +158,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
         Map<String, List<Proposition>> collect = new HashMap<>();
         for (Proposition prop : propositions) {
-            Collections.putListMult(collect, prop.getId(), propositions);
+            Collections.putList(collect, prop.getId(), prop);
         }
 
         for (Map.Entry<String, Map<Long, List<FileTableColumnSpecWrapper>>> tableNameToRowNumToColumnSpecs : this.rowRankToColumnByTableName.entrySet()) {
@@ -175,7 +185,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
                                     }
                                     writer.newRow();
                                 } catch (TabularWriterException ex) {
-                                    throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
+                                    throw new QueryResultsHandlerProcessingException("Could not write row", ex);
                                 }
                             }
                         }
@@ -187,12 +197,26 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
     @Override
     public void finish() throws QueryResultsHandlerProcessingException {
+        try {
+            this.idPoolDao.finish();
+        } catch (PoolException ex) {
+            throw new QueryResultsHandlerProcessingException("Error finishing up", ex);
+        }
     }
 
     @Override
     public void close() throws QueryResultsHandlerCloseException {
         QueryResultsHandlerCloseException exception = null;
         exception = closeWriters(exception);
+        try {
+            this.idPoolDao.close();
+        } catch (Exception ex) {
+            if (exception != null) {
+                exception.addSuppressed(ex);
+            } else {
+                exception = new QueryResultsHandlerCloseException(ex);
+            }
+        }
         if (exception != null) {
             throw exception;
         }
@@ -250,9 +274,10 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
                 rowRankToTableColumnSpecs = new HashMap<>();
                 this.rowRankToColumnByTableName.put(tableName, rowRankToTableColumnSpecs);
             }
-            Pool idPool = this.idPoolDao != null ? this.idPoolDao.toIdPool(tableColumn.getIdPool()) : null;
+
+            IdPool idPool = idPoolDao != null ? idPoolDao.toIdPool(tableColumn.getIdPool()) : null;
             TableColumnSpecFormat linksFormat
-                    = new TableColumnSpecFormat(tableColumn.getColumnName(), tableColumn.getFormat());
+                    = new TableColumnSpecFormat(tableColumn.getColumnName(), tableColumn.getFormat(), idPool);
             try {
                 FileTableColumnSpecWrapper tableColumnSpecWrapper = newTableColumnSpec(tableColumn, linksFormat, idPool);
                 String pid = tableColumnSpecWrapper.getPropId();
@@ -307,12 +332,14 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
     private static FileTableColumnSpecWrapper newTableColumnSpec(
             TabularFileDestinationTableColumnEntity tableColumn,
-            TableColumnSpecFormat linksFormat, Pool pool) throws ParseException {
+            TableColumnSpecFormat linksFormat, IdPool pool) throws ParseException {
         String path = tableColumn.getPath();
         if (path != null) {
             return (FileTableColumnSpecWrapper) linksFormat.parseObject(path);
         } else {
-            return new FileTableColumnSpecWrapper(null, new ConstantColumnSpec(tableColumn.getColumnName(), null), new TabularWriterWithPool(pool));
+            return new FileTableColumnSpecWrapper(null,
+                    new ConstantColumnSpec(tableColumn.getColumnName(), null),
+                    new TabularWriterWithPool(pool));
         }
     }
 

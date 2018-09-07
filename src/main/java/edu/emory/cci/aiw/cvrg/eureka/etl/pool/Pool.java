@@ -46,8 +46,14 @@ import org.protempa.proposition.value.Value;
  *
  * @author Andrew Post
  */
-public interface Pool {
+public interface Pool extends AutoCloseable {
+    
+    void start() throws PoolException;
 
     Value valueFor(Value inValue) throws PoolException;
+    
+    void finish() throws PoolException;
+    
+    int getRecordsCreated();
     
 }

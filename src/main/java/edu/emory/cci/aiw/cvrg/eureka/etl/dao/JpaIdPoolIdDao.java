@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity_;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity_;
@@ -47,6 +46,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -58,11 +59,13 @@ import org.eurekaclinical.standardapis.dao.GenericDao;
  */
 public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements IdPoolIdDao {
 
+    private EntityTransaction transaction;
+
     @Inject
     public JpaIdPoolIdDao(Provider<EntityManager> inManagerProvider) {
         super(IdPoolIdEntity.class, inManagerProvider);
     }
-
+    
     @Override
     public List<IdPoolIdEntity> getAllByPoolId(Long inPoolId) {
         EntityManager entityManager = this.getEntityManager();
@@ -106,31 +109,67 @@ public class JpaIdPoolIdDao extends GenericDao<IdPoolIdEntity, Long> implements 
                 .equal(root.join(IdPoolIdEntity_.idPool).get(IdPoolEntity_.name), inPoolName));
         return entityManager.createQuery(criteriaQuery).getResultList();
     }
-
+    
     @Override
-    public IdPoolIdEntity getByPoolNameAndFromId(String inPoolName, String inFromId) {
+    public Long getByPoolNameAndFromId(String inPoolName, String inFromId) {
         EntityManager entityManager = this.getEntityManager();
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<IdPoolIdEntity> criteriaQuery = builder.createQuery(getEntityClass());
+        CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
         Root<IdPoolIdEntity> root = criteriaQuery.from(getEntityClass());
         criteriaQuery.where(builder.and(
                 builder.equal(root.join(IdPoolIdEntity_.idPool).get(IdPoolEntity_.name), inPoolName),
                 builder.equal(root.get(IdPoolIdEntity_.fromId), inFromId)));
-        return entityManager.createQuery(criteriaQuery).getSingleResult();
+        criteriaQuery.select(root.get(IdPoolIdEntity_.id));
+        try {
+            return entityManager.createQuery(criteriaQuery).getSingleResult();
+        } catch (NoResultException ex) {
+            return null;
+        }
     }
 
     @Override
-    public IdPoolIdEntity getByPoolIdAndFromId(Long inPoolId, String inFromId) {
+    public Long getByPoolIdAndFromId(Long inPoolId, String inFromId) {
         EntityManager entityManager = this.getEntityManager();
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<IdPoolIdEntity> criteriaQuery = builder.createQuery(getEntityClass());
+        CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
         Root<IdPoolIdEntity> root = criteriaQuery.from(getEntityClass());
         criteriaQuery.where(builder.and(
-                builder.equal(root.join(IdPoolIdEntity_.idPool).get(IdPoolEntity_.name), inPoolId),
+                builder.equal(root.join(IdPoolIdEntity_.idPool).get(IdPoolEntity_.id), inPoolId),
                 builder.equal(root.get(IdPoolIdEntity_.fromId), inFromId)));
-        return entityManager.createQuery(criteriaQuery).getSingleResult();
+        criteriaQuery.select(root.get(IdPoolIdEntity_.id));
+        try {
+            return entityManager.createQuery(criteriaQuery).getSingleResult();
+        } catch (NoResultException ex) {
+            return null;
+        }
     }
     
+    @Override
+    public void startTransaction() {
+        this.transaction = getEntityManager().getTransaction();
+        this.transaction.begin();
+    }
+
+    @Override
+    public void commitTransaction() {
+        this.transaction.commit();
+        this.transaction = null;
+    }
+
+    @Override
+    public void rollbackTransaction() {
+        this.transaction.rollback();
+        this.transaction = null;
+    }
     
+    @Override
+    public boolean isInTransaction() {
+        return this.transaction != null && this.transaction.isActive();
+    }
+
+    @Override
+    public void flush() {
+        getEntityManager().flush();
+    }
     
 }

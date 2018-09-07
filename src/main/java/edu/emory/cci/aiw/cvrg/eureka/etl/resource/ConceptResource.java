@@ -194,7 +194,6 @@ public class ConceptResource {
 
 	@GET
 	@Path("/propsearch/{sourceConfigId}/{searchKey}")
-	@Transactional
 	public List<PropositionDefinition> getPropositionsInTheOntologyBySearchKey(
 			@PathParam("sourceConfigId") String inSourceConfigId,
 			@PathParam("searchKey") String inSearchKey) {

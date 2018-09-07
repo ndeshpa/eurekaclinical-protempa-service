@@ -56,28 +56,29 @@ import org.protempa.query.QueryMode;
  * @author Andrew Post
  */
 public class PatientSetSenderDestination extends AbstractDestination {
-	private final PatientSetSenderDestinationEntity patientSetSenderDestinationEntity;
-	private final String[] propIdsSupported;
-	private final EtlProperties etlProperties;
 
-	PatientSetSenderDestination(EtlProperties inEtlProperties, PatientSetSenderDestinationEntity inPatientSetSenderDestinationEntity) {
-		assert inPatientSetSenderDestinationEntity != null : "inPatientSetSenderDestinationEntity cannot be null";
-		this.patientSetSenderDestinationEntity = inPatientSetSenderDestinationEntity;
-		this.propIdsSupported = new String[] {this.patientSetSenderDestinationEntity.getAliasPropositionId()};
-		this.etlProperties = inEtlProperties;
-	}
+    private final PatientSetSenderDestinationEntity patientSetSenderDestinationEntity;
+    private final String[] propIdsSupported;
+    private final EtlProperties etlProperties;
 
-	@Override
-	public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
-		if (query.getQueryMode() == QueryMode.UPDATE) {
-			throw new QueryResultsHandlerInitException("Update mode not supported");
-		}
-		return new PatientSetSenderQueryResultsHandler(query, this.patientSetSenderDestinationEntity, this.etlProperties);
-	}
-	
-	@Override
-	public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) {
-		return this.propIdsSupported.clone();
-	}
+    PatientSetSenderDestination(EtlProperties inEtlProperties, PatientSetSenderDestinationEntity inPatientSetSenderDestinationEntity) {
+        assert inPatientSetSenderDestinationEntity != null : "inPatientSetSenderDestinationEntity cannot be null";
+        this.patientSetSenderDestinationEntity = inPatientSetSenderDestinationEntity;
+        this.propIdsSupported = new String[]{this.patientSetSenderDestinationEntity.getAliasPropositionId()};
+        this.etlProperties = inEtlProperties;
+    }
+
+    @Override
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
+        if (query.getQueryMode() == QueryMode.UPDATE) {
+            throw new QueryResultsHandlerInitException("Update mode not supported");
+        }
+        return new PatientSetSenderQueryResultsHandler(query, this.patientSetSenderDestinationEntity, this.etlProperties);
+    }
+
+    @Override
+    public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) {
+        return this.propIdsSupported.clone();
+    }
 
 }

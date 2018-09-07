@@ -48,5 +48,5 @@ import org.eurekaclinical.standardapis.dao.DaoWithUniqueName;
  * @author Andrew Post
  */
 public interface IdPoolDao extends DaoWithUniqueName<IdPoolEntity, Long> {
-    IdPool toIdPool(IdPoolEntity inIdPoolEntity);
+    
 }

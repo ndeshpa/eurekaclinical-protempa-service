@@ -1,8 +1,10 @@
-/*
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+
+/*-
  * #%L
- * Eureka Protempa ETL
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -37,7 +39,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,6 +60,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity_;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEntity_;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEventEntity_;
+import javax.persistence.EntityTransaction;
 import org.eurekaclinical.standardapis.dao.GenericDao;
 
 /**
@@ -69,120 +72,138 @@ import org.eurekaclinical.standardapis.dao.GenericDao;
  */
 public class JpaJobDao extends GenericDao<JobEntity, Long> implements JobDao {
 
-	/**
-	 * The class level logger.
-	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(JpaJobDao.class);
+    /**
+     * The class level logger.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaJobDao.class);
+    private EntityTransaction transaction;
 
-	/**
-	 * Construct instance with the given EntityManager provider.
-	 *
-	 * @param inEMProvider The entity manager provider.
-	 */
-	@Inject
-	public JpaJobDao(final Provider<EntityManager> inEMProvider) {
-		super(JobEntity.class, inEMProvider);
-	}
+    /**
+     * Construct instance with the given EntityManager provider.
+     *
+     * @param inEMProvider The entity manager provider.
+     */
+    @Inject
+    public JpaJobDao(final Provider<EntityManager> inEMProvider) {
+        super(JobEntity.class, inEMProvider);
+    }
 
-	@Override
-	public List<JobEntity> getWithFilterDesc(JobFilter jobFilter) {
-		EntityManager entityManager = this.getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<JobEntity> query = builder.createQuery(JobEntity.class);
-		Root<JobEntity> root = query.from(JobEntity.class);
-		Predicate[] predicatesArray = buildWhere(jobFilter, builder, root, null);
-		query.where(predicatesArray);
-		query.orderBy(builder.desc(root.get(JobEntity_.created)));
-		LOGGER.debug("Creating typed query.");
-		TypedQuery<JobEntity> typedQuery = entityManager.createQuery(query);
-		LOGGER.debug("Returning results.");
-		return typedQuery.getResultList();
-	}
+    @Override
+    public List<JobEntity> getWithFilterDesc(JobFilter jobFilter) {
+        EntityManager entityManager = this.getEntityManager();
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<JobEntity> query = builder.createQuery(JobEntity.class);
+        Root<JobEntity> root = query.from(JobEntity.class);
+        Predicate[] predicatesArray = buildWhere(jobFilter, builder, root, null);
+        query.where(predicatesArray);
+        query.orderBy(builder.desc(root.get(JobEntity_.created)));
+        LOGGER.debug("Creating typed query.");
+        TypedQuery<JobEntity> typedQuery = entityManager.createQuery(query);
+        LOGGER.debug("Returning results.");
+        return typedQuery.getResultList();
+    }
 
-	@Override
-	public List<JobEntity> getLatestWithFilter(JobFilter jobFilter) {
-		EntityManager entityManager = this.getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<JobEntity> query = builder.createQuery(JobEntity.class);
-		Root<JobEntity> root = query.from(JobEntity.class);
-		Subquery<Date> subQuery = query.subquery(Date.class);
-		Root<JobEntity> subQueryRoot = subQuery.from(JobEntity.class);
-		subQuery.select(builder.greatest(subQueryRoot.get(JobEntity_.created)));
-		Long userId = jobFilter.getUserId();
-		if (userId != null) {
-			subQuery.where(builder.equal(subQueryRoot.get(JobEntity_.user).get(AuthorizedUserEntity_.id), userId));
-		}
-		Predicate[] predicatesArray = buildWhere(jobFilter, builder, root,subQuery);
-		query.where(predicatesArray);
-		LOGGER.debug("Creating typed query.");
-		TypedQuery<JobEntity> typedQuery = entityManager.createQuery(query);
-		LOGGER.debug("Returning results.");
-		return typedQuery.getResultList();
+    @Override
+    public List<JobEntity> getLatestWithFilter(JobFilter jobFilter) {
+        EntityManager entityManager = this.getEntityManager();
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<JobEntity> query = builder.createQuery(JobEntity.class);
+        Root<JobEntity> root = query.from(JobEntity.class);
+        Subquery<Date> subQuery = query.subquery(Date.class);
+        Root<JobEntity> subQueryRoot = subQuery.from(JobEntity.class);
+        subQuery.select(builder.greatest(subQueryRoot.get(JobEntity_.created)));
+        Long userId = jobFilter.getUserId();
+        if (userId != null) {
+            subQuery.where(builder.equal(subQueryRoot.get(JobEntity_.user).get(AuthorizedUserEntity_.id), userId));
+        }
+        Predicate[] predicatesArray = buildWhere(jobFilter, builder, root, subQuery);
+        query.where(predicatesArray);
+        LOGGER.debug("Creating typed query.");
+        TypedQuery<JobEntity> typedQuery = entityManager.createQuery(query);
+        LOGGER.debug("Returning results.");
+        return typedQuery.getResultList();
 
-	}
+    }
 
-	@Override
-	public List<JobEntity> getWithFilter(final JobFilter jobFilter) {
-		EntityManager entityManager = this.getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<JobEntity> query = builder.createQuery(JobEntity.class);
-		Root<JobEntity> root = query.from(JobEntity.class);
-		Predicate[] predicatesArray = buildWhere(jobFilter, builder, root, null);
-		query.where(predicatesArray);
-		LOGGER.debug("Creating typed query.");
-		TypedQuery<JobEntity> typedQuery = entityManager.createQuery(query);
-		LOGGER.debug("Returning results.");
-		return typedQuery.getResultList();
-	}
+    @Override
+    public List<JobEntity> getWithFilter(final JobFilter jobFilter) {
+        EntityManager entityManager = this.getEntityManager();
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<JobEntity> query = builder.createQuery(JobEntity.class);
+        Root<JobEntity> root = query.from(JobEntity.class);
+        Predicate[] predicatesArray = buildWhere(jobFilter, builder, root, null);
+        query.where(predicatesArray);
+        LOGGER.debug("Creating typed query.");
+        TypedQuery<JobEntity> typedQuery = entityManager.createQuery(query);
+        LOGGER.debug("Returning results.");
+        return typedQuery.getResultList();
+    }
 
+    private Predicate[] buildWhere(JobFilter jobFilter, CriteriaBuilder builder, Root<JobEntity> root, Subquery<Date> subQuery) {
+        List<Predicate> predicates = new ArrayList<>();
+        if (jobFilter != null) {
+            LOGGER.debug("Checking for job ID.");
+            if (jobFilter.getJobId() != null) {
+                LOGGER.debug("Found job ID: {}", jobFilter.getJobId());
+                predicates.add(builder.equal(root.get(JobEntity_.id),
+                        jobFilter.getJobId()));
+            }
+            LOGGER.debug("Checking for user ID.");
+            if (jobFilter.getUserId() != null) {
+                LOGGER.debug("Found user ID: {}", jobFilter.getUserId());
+                predicates.add(builder.equal(root.get(JobEntity_.user).get(AuthorizedUserEntity_.id), jobFilter.getUserId()));
+            }
+            LOGGER.debug("Checking for start time.");
+            if (jobFilter.getFrom() != null) {
+                LOGGER.debug("Found start time: {}", jobFilter.getFrom());
+                predicates.add(builder.greaterThanOrEqualTo(
+                        root.<Date>get(JobEntity_.created), jobFilter.getFrom()));
+            }
+            LOGGER.debug("Checking for end time.");
+            if (jobFilter.getTo() != null) {
+                LOGGER.debug("Found end time: {}", jobFilter.getTo());
+                predicates.add(builder.lessThanOrEqualTo(
+                        root.<Date>get(JobEntity_.created), jobFilter.getTo()));
+            }
+            LOGGER.debug("Checking for state.");
+            if (jobFilter.getState() != null) {
+                LOGGER.debug("Found state: {}", jobFilter.getState());
+                predicates.add(builder.equal(
+                        root.join(JobEntity_.jobEvents).get(JobEventEntity_.status),
+                        jobFilter.getState()));
+            }
+            LOGGER.debug("Checking for recent.");
+            if (jobFilter.getLatest() != null && jobFilter.getLatest()) {
+                LOGGER.debug("Get latest job");
+                if (subQuery != null) {
+                    predicates.add(builder.equal(root.<Date>get(JobEntity_.created), subQuery));
+                } else {
+                    LOGGER.debug("Subquery is null");
 
-	private Predicate[] buildWhere(JobFilter jobFilter, CriteriaBuilder builder, Root<JobEntity> root, Subquery<Date> subQuery) {
-		List<Predicate> predicates = new ArrayList<>();
-		if (jobFilter != null) {
-			LOGGER.debug("Checking for job ID.");
-			if (jobFilter.getJobId() != null) {
-				LOGGER.debug("Found job ID: {}", jobFilter.getJobId());
-				predicates.add(builder.equal(root.get(JobEntity_.id),
-						jobFilter.getJobId()));
-			}
-			LOGGER.debug("Checking for user ID.");
-			if (jobFilter.getUserId() != null) {
-				LOGGER.debug("Found user ID: {}", jobFilter.getUserId());
-				predicates.add(builder.equal(root.get(JobEntity_.user).get(AuthorizedUserEntity_.id), jobFilter.getUserId()));
-			}
-			LOGGER.debug("Checking for start time.");
-			if (jobFilter.getFrom() != null) {
-				LOGGER.debug("Found start time: {}", jobFilter.getFrom());
-				predicates.add(builder.greaterThanOrEqualTo(
-						root.<Date>get(JobEntity_.created), jobFilter.getFrom()));
-			}
-			LOGGER.debug("Checking for end time.");
-			if (jobFilter.getTo() != null) {
-				LOGGER.debug("Found end time: {}", jobFilter.getTo());
-				predicates.add(builder.lessThanOrEqualTo(
-						root.<Date>get(JobEntity_.created), jobFilter.getTo()));
-			}
-			LOGGER.debug("Checking for state.");
-			if (jobFilter.getState() != null) {
-				LOGGER.debug("Found state: {}", jobFilter.getState());
-				predicates.add(builder.equal(
-						root.join(JobEntity_.jobEvents).get(JobEventEntity_.status),
-						jobFilter.getState()));
-			}
-			LOGGER.debug("Checking for recent.");
-			if (jobFilter.getLatest()!=null && jobFilter.getLatest()) {
-				LOGGER.debug("Get latest job");
-				if(subQuery!=null) {
-					predicates.add(builder.equal(root.<Date>get(JobEntity_.created), subQuery));
-				}else{
-					LOGGER.debug("Subquery is null");
+                }
+            }
+        }
+        LOGGER.debug("{} predicates found from filter", predicates.size());
+        Predicate[] predicatesArray = new Predicate[predicates.size()];
+        predicates.toArray(predicatesArray);
+        return predicatesArray;
+    }
 
-				}
-			}
-		}
-		LOGGER.debug("{} predicates found from filter", predicates.size());
-		Predicate[] predicatesArray = new Predicate[predicates.size()];
-		predicates.toArray(predicatesArray);
-		return predicatesArray;
-	}
+    @Override
+    public void startTransaction() {
+        this.transaction = getEntityManager().getTransaction();
+        this.transaction.begin();
+    }
+
+    @Override
+    public void commitTransaction() {
+        this.transaction.commit();
+        this.transaction = null;
+    }
+
+    @Override
+    public void rollbackTransaction() {
+        this.transaction.rollback();
+        this.transaction = null;
+    }
 }

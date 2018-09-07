@@ -57,44 +57,14 @@ import org.eurekaclinical.standardapis.dao.GenericDao;
  */
 public class JpaIdPoolDao extends GenericDao<IdPoolEntity, Long> implements IdPoolDao {
 
-    private final IdPoolIdDao idPoolIdDao;
-
     @Inject
-    public JpaIdPoolDao(Provider<EntityManager> inManagerProvider, IdPoolIdDao inIdPoolIdDao) {
+    public JpaIdPoolDao(Provider<EntityManager> inManagerProvider) {
         super(IdPoolEntity.class, inManagerProvider);
-        this.idPoolIdDao = inIdPoolIdDao;
     }
 
     @Override
     public IdPoolEntity getByName(String inName) {
         return getUniqueByAttribute(IdPoolEntity_.name, inName);
-    }
-    
-    public IdPool getIdPool(Long inId) {
-        IdPoolEntity retrieve = retrieve(inId);
-        if (retrieve != null) {
-            return new IdPool(inId, this.idPoolIdDao);
-        } else {
-            return null;
-        }
-    }
-
-    public IdPool getIdPoolByName(String inName) {
-        IdPoolEntity idPoolEntity = getByName(inName);
-        if (idPoolEntity != null) {
-            return new IdPool(idPoolEntity.getId(), this.idPoolIdDao);
-        } else {
-            return null;
-        }
-    }
-    
-    @Override
-    public IdPool toIdPool(IdPoolEntity inIdPoolEntity) {
-        if (inIdPoolEntity != null) {
-            return new IdPool(inIdPoolEntity.getId(), this.idPoolIdDao);
-        } else {
-            return null;
-        }
     }
 
 }

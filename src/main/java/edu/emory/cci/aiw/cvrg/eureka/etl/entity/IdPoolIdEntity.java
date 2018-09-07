@@ -48,6 +48,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.eurekaclinical.protempa.client.comm.IdPoolId;
 
 /**
@@ -55,7 +56,7 @@ import org.eurekaclinical.protempa.client.comm.IdPoolId;
  * @author Andrew Post
  */
 @Entity
-@Table(name="id_pool_ids")
+@Table(name="id_pool_ids", uniqueConstraints={@UniqueConstraint(columnNames={"fromid", "idpool_id"})})
 public class IdPoolIdEntity implements org.eurekaclinical.standardapis.entity.Entity<Long> {
     @Id
     @SequenceGenerator(name = "ID_POOL_ID_SEQ_GENERATOR",

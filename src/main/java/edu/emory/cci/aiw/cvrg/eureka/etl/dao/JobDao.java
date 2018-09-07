@@ -1,8 +1,10 @@
-/*
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+
+/*-
  * #%L
- * Eureka Protempa ETL
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -37,7 +39,7 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+
 
 import java.util.List;
 
@@ -54,16 +56,22 @@ import org.eurekaclinical.standardapis.dao.Dao;
  */
 public interface JobDao extends Dao<JobEntity, Long> {
 
-	/**
-	 * Gets a list of jobs that meet the given filter criteria.
-	 *
-	 * @param jobFilter The filter criteria.
-	 * @return A list of jobs that meet the filter criteria.
-	 */
-	public List<JobEntity> getWithFilter(JobFilter jobFilter);
-	
-	public List<JobEntity> getWithFilterDesc(JobFilter jobFilter);
+    /**
+     * Gets a list of jobs that meet the given filter criteria.
+     *
+     * @param jobFilter The filter criteria.
+     * @return A list of jobs that meet the filter criteria.
+     */
+    List<JobEntity> getWithFilter(JobFilter jobFilter);
 
-	public List<JobEntity> getLatestWithFilter(JobFilter jobFilter);
+    List<JobEntity> getWithFilterDesc(JobFilter jobFilter);
+
+    List<JobEntity> getLatestWithFilter(JobFilter jobFilter);
+    
+    void startTransaction();
+    
+    void commitTransaction();
+    
+    void rollbackTransaction();
 
 }

@@ -1039,12 +1039,22 @@
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ID_POOL_PK"/>
             </column>
+            <column name="OWNER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
             <column name="NAME" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="DESCRIPTION" type="VARCHAR(255)"/>
         </createTable>
         <createSequence sequenceName="ID_POOL_SEQ"/>
+        <addForeignKeyConstraint baseTableName="ID_POOLS" 
+                                 baseColumnNames="OWNER_ID" 
+                                 constraintName="FK_IDPOOL_OWNERID" 
+                                 referencedTableName="USERS" 
+                                 referencedColumnNames="ID"/>
+        <addUniqueConstraint tableName="ID_POOLS" columnNames="OWNER_ID,NAME" 
+                             constraintName="UNIQ_IDPOOL_OWNERID_NAME"/>
         <createTable tableName="ID_POOL_IDS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ID_POOL_ID_PK"/>
@@ -1063,6 +1073,8 @@
                                  deferrable="false" initiallyDeferred="false" 
                                  onDelete="CASCADE" referencedColumnNames="ID" 
                                  referencedTableName="ID_POOLS"/>
+        <addUniqueConstraint tableName="ID_POOL_IDS" columnNames="FROMID,IDPOOL_ID" 
+                             constraintName="UNIQ_IDPOOLID_FROMID"/>
         <addColumn tableName="TF_DEST_TABLECOLUMNS">
             <column name="IDPOOL_ID" type="BIGINT"/>
         </addColumn>

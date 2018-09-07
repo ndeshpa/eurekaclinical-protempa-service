@@ -39,8 +39,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
 import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import java.text.Format;
 import org.protempa.dest.table.TabularWriter;
@@ -62,9 +61,9 @@ import org.protempa.proposition.value.Value;
 public class TabularWriterWithPool implements TabularWriter {
 
     private TabularWriter tabularWriter;
-    private final Pool pool;
+    private final IdPool pool;
 
-    public TabularWriterWithPool(Pool inPool) {
+    public TabularWriterWithPool(IdPool inPool) {
         this.pool = inPool;
     }
 
@@ -78,119 +77,227 @@ public class TabularWriterWithPool implements TabularWriter {
 
     @Override
     public void writeNominal(NominalValue inValue) throws TabularWriterException {
-        this.tabularWriter.writeNominal(inValue);
+        if (this.pool != null) {
+            writeValueFromPool(inValue);
+        } else {
+            this.tabularWriter.writeNominal(inValue);
+        }
     }
 
     @Override
     public void writeNominal(NominalValue inValue, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writeNominal(inValue, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inValue, inFormat);
+        } else {
+            this.tabularWriter.writeNominal(inValue, inFormat);
+        }
     }
 
     @Override
     public void writeNumber(NumberValue inValue) throws TabularWriterException {
-        this.tabularWriter.writeNumber(inValue);
+        if (this.pool != null) {
+            writeValueFromPool(inValue);
+        } else {
+            this.tabularWriter.writeNumber(inValue);
+        }
     }
 
     @Override
     public void writeNumber(NumberValue inValue, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writeNumber(inValue, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inValue, inFormat);
+        } else {
+            this.tabularWriter.writeNumber(inValue, inFormat);
+        }
     }
 
     @Override
     public void writeInequality(InequalityNumberValue inValue) throws TabularWriterException {
-        this.tabularWriter.writeInequality(inValue);
+        if (this.pool != null) {
+            writeValueFromPool(inValue);
+        } else {
+            this.tabularWriter.writeInequality(inValue);
+        }
     }
 
     @Override
     public void writeInequality(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writeInequality(inValue, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inValue, inFormat);
+        } else {
+            this.tabularWriter.writeInequality(inValue, inFormat);
+        }
     }
 
     @Override
     public void writeNumber(InequalityNumberValue inValue) throws TabularWriterException {
-        this.tabularWriter.writeNumber(inValue);
+        if (this.pool != null) {
+            writeValueFromPool(inValue);
+        } else {
+            this.tabularWriter.writeNumber(inValue);
+        }
     }
 
     @Override
     public void writeNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writeNumber(inValue, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inValue, inFormat);
+        } else {
+            this.tabularWriter.writeNumber(inValue, inFormat);
+        }
     }
 
     @Override
     public void writeInequalityNumber(InequalityNumberValue inValue) throws TabularWriterException {
-        this.tabularWriter.writeInequalityNumber(inValue);
+        if (this.pool != null) {
+            writeValueFromPool(inValue);
+        } else {
+            this.tabularWriter.writeInequalityNumber(inValue);
+        }
     }
 
     @Override
     public void writeInequalityNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writeInequalityNumber(inValue, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inValue, inFormat);
+        } else {
+            this.tabularWriter.writeInequalityNumber(inValue, inFormat);
+        }
     }
 
     @Override
     public void writeDate(DateValue inValue) throws TabularWriterException {
-        this.tabularWriter.writeDate(inValue);
+        if (this.pool != null) {
+            writeValueFromPool(inValue);
+        } else {
+            this.tabularWriter.writeDate(inValue);
+        }
     }
 
     @Override
     public void writeDate(DateValue inValue, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writeDate(inValue, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inValue, inFormat);
+        } else {
+            this.tabularWriter.writeDate(inValue, inFormat);
+        }
     }
 
     @Override
     public void writeBoolean(BooleanValue inValue) throws TabularWriterException {
-        this.tabularWriter.writeBoolean(inValue);
+        if (this.pool != null) {
+            writeValueFromPool(inValue);
+        } else {
+            this.tabularWriter.writeBoolean(inValue);
+        }
     }
 
     @Override
     public void writeBoolean(BooleanValue inValue, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writeBoolean(inValue, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inValue, inFormat);
+        } else {
+            this.tabularWriter.writeBoolean(inValue, inFormat);
+        }
     }
 
     @Override
     public void writeId(Proposition inProposition) throws TabularWriterException {
-        this.tabularWriter.writeId(inProposition);
+        if (this.pool != null) {
+            writeValueFromPool(NominalValue.getInstance(inProposition.getId()));
+        } else {
+            this.tabularWriter.writeId(inProposition);
+        }
     }
 
     @Override
     public void writeUniqueId(Proposition inProposition) throws TabularWriterException {
-        this.tabularWriter.writeUniqueId(inProposition);
+        if (this.pool != null) {
+            writeValueFromPool(NominalValue.getInstance(inProposition.getUniqueId().getStringRepresentation()));
+        } else {
+            this.tabularWriter.writeUniqueId(inProposition);
+        }
     }
 
     @Override
     public void writeLocalUniqueId(Proposition inProposition) throws TabularWriterException {
-        this.tabularWriter.writeLocalUniqueId(inProposition);
+        if (this.pool != null) {
+            writeValueFromPool(NominalValue.getInstance(inProposition.getUniqueId().getLocalUniqueId().getId()));
+        } else {
+            this.tabularWriter.writeLocalUniqueId(inProposition);
+        }
     }
 
     @Override
     public void writeNumericalId(Proposition inProposition) throws TabularWriterException {
-        this.tabularWriter.writeNumericalId(inProposition);
+        if (this.pool != null) {
+            writeValueFromPool(NumberValue.getInstance(inProposition.getUniqueId().getLocalUniqueId().getNumericalId()));
+        } else {
+            this.tabularWriter.writeNumericalId(inProposition);
+        }
     }
 
+    /**
+     * Pool not supported.
+     *
+     * @param inProposition
+     * @throws TabularWriterException
+     */
     @Override
     public void writeStart(TemporalProposition inProposition) throws TabularWriterException {
         this.tabularWriter.writeStart(inProposition);
     }
 
+    /**
+     * Pool not supported.
+     *
+     * @param inProposition
+     * @throws TabularWriterException
+     */
     @Override
     public void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         this.tabularWriter.writeStart(inProposition, inFormat);
     }
 
+    /**
+     * Pool not supported.
+     *
+     * @param inProposition
+     * @throws TabularWriterException
+     */
     @Override
     public void writeFinish(TemporalProposition inProposition) throws TabularWriterException {
         this.tabularWriter.writeFinish(inProposition);
     }
 
+    /**
+     * Pool not supported.
+     *
+     * @param inProposition
+     * @throws TabularWriterException
+     */
     @Override
     public void writeFinish(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         this.tabularWriter.writeFinish(inProposition, inFormat);
     }
 
+    /**
+     * Pool not supported.
+     *
+     * @param inProposition
+     * @throws TabularWriterException
+     */
     @Override
     public void writeLength(TemporalProposition inProposition) throws TabularWriterException {
         this.tabularWriter.writeLength(inProposition);
     }
 
+    /**
+     * Pool not supported.
+     *
+     * @param inProposition
+     * @throws TabularWriterException
+     */
     @Override
     public void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         this.tabularWriter.writeLength(inProposition, inFormat);
@@ -198,22 +305,38 @@ public class TabularWriterWithPool implements TabularWriter {
 
     @Override
     public void writeParameterValue(Parameter inProposition) throws TabularWriterException {
-        this.tabularWriter.writeParameterValue(inProposition);
+        if (this.pool != null) {
+            writeValueFromPool(inProposition.getValue());
+        } else {
+            this.tabularWriter.writeParameterValue(inProposition);
+        }
     }
 
     @Override
     public void writeParameterValue(Parameter inProposition, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writeParameterValue(inProposition, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inProposition.getValue(), inFormat);
+        } else {
+            this.tabularWriter.writeParameterValue(inProposition, inFormat);
+        }
     }
 
     @Override
     public void writePropertyValue(Proposition inProposition, String inPropertyName) throws TabularWriterException {
-        this.tabularWriter.writePropertyValue(inProposition, inPropertyName);
+        if (this.pool != null) {
+            writeValueFromPool(inProposition.getProperty(inPropertyName));
+        } else {
+            this.tabularWriter.writePropertyValue(inProposition, inPropertyName);
+        }
     }
 
     @Override
     public void writePropertyValue(Proposition inProposition, String inPropertyName, Format inFormat) throws TabularWriterException {
-        this.tabularWriter.writePropertyValue(inProposition, inPropertyName, inFormat);
+        if (this.pool != null) {
+            writeValueFromPool(inProposition.getProperty(inPropertyName), inFormat);
+        } else {
+            this.tabularWriter.writePropertyValue(inProposition, inPropertyName, inFormat);
+        }
     }
 
     @Override
@@ -233,20 +356,36 @@ public class TabularWriterWithPool implements TabularWriter {
 
     @Override
     public void writeValue(Value inValue) throws TabularWriterException {
-        try {
-            this.tabularWriter.writeValue(this.pool != null ? this.pool.valueFor(inValue) : inValue);
-        } catch (PoolException ex) {
-            throw new TabularWriterException(ex);
+        if (this.pool != null) {
+            writeValueFromPool(getValueFromPool(inValue));
+        } else {
+            this.tabularWriter.writeValue(inValue);
         }
     }
 
     @Override
     public void writeValue(Value inValue, Format inFormat) throws TabularWriterException {
+        if (this.pool != null) {
+            writeValueFromPool(inValue, inFormat);
+        } else {
+            this.tabularWriter.writeValue(inValue, inFormat);
+        }
+    }
+
+    private Value getValueFromPool(Value inValue) throws TabularWriterException {
         try {
-            this.tabularWriter.writeValue(this.pool != null ? this.pool.valueFor(inValue) : inValue, inFormat);
+            return this.pool.valueFor(inValue);
         } catch (PoolException ex) {
             throw new TabularWriterException(ex);
         }
+    }
+
+    private void writeValueFromPool(Value inValue) throws TabularWriterException {
+        this.tabularWriter.writeValue(getValueFromPool(inValue));
+    }
+    
+    private void writeValueFromPool(Value inValue, Format inFormat) throws TabularWriterException {
+        this.tabularWriter.writeValue(getValueFromPool(inValue), inFormat);
     }
 
 }
