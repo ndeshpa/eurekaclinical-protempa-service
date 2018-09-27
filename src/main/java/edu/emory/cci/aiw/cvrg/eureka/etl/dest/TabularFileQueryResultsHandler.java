@@ -138,7 +138,9 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         }
         createWriters();
         mapColumnSpecsToColumnNames(cache);
-        writeHeaders();
+        if (this.query.getQueryMode() == QueryMode.REPLACE) {
+            writeHeaders();
+        }
 
         try {
             this.ksCache = new KnowledgeSourceCacheFactory().getInstance(this.knowledgeSource, cache, true);

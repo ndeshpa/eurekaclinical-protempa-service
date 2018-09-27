@@ -40,10 +40,12 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * #L%
  */
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 /**
@@ -53,8 +55,22 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "tabular_file_destinations")
 public class TabularFileDestinationEntity extends DestinationEntity {
+    
+    private static final Comparator<TabularFileDestinationTableColumnEntity> TABLE_COLUMN_COMPARATOR = new Comparator<TabularFileDestinationTableColumnEntity>() {
+        @Override
+        public int compare(TabularFileDestinationTableColumnEntity o1, TabularFileDestinationTableColumnEntity o2) {
+            int result = o1.getRowRank().compareTo(o2.getRowRank());
+            if (result != 0) {
+                return result;
+            } else {
+                return o1.getRank().compareTo(o2.getRank());
+            }
+        }
+
+    };
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
+    @OrderBy("rowRank, rank")
     private List<TabularFileDestinationTableColumnEntity> tableColumns;
     
     private boolean alwaysQuoted = false;
@@ -75,6 +91,7 @@ public class TabularFileDestinationEntity extends DestinationEntity {
             for (TabularFileDestinationTableColumnEntity tableColumn : this.tableColumns) {
                 tableColumn.setDestination(this);
             }
+            this.tableColumns.sort(TABLE_COLUMN_COMPARATOR);
         }
     }
 
@@ -82,6 +99,7 @@ public class TabularFileDestinationEntity extends DestinationEntity {
         if (!this.tableColumns.contains(inTableColumn)) {
             this.tableColumns.add(inTableColumn);
             inTableColumn.setDestination(this);
+            this.tableColumns.sort(TABLE_COLUMN_COMPARATOR);
         }
     }
 
