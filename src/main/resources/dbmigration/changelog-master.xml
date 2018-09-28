@@ -1121,18 +1121,6 @@
                                  referencedTableName="USERTEMPLATES"/>
     </changeSet>
     <changeSet id="1361552652236-51" author="dileep">
-        <insert tableName="ROLES">
-            <column name="ID" valueSequenceNext="ROLE_SEQ"/>
-            <column name="DEFAULTROLE" valueBoolean="false"/>
-            <column name="NAME" value="researcher"/>
-        </insert>
-        <rollback>
-            <delete tableName="ROLES">
-                <where>NAME='researcher'</where>
-            </delete>
-        </rollback>
-    </changeSet>
-    <changeSet id="1361552652236-52" author="dileep">
         <insert tableName="USERTEMPLATES">
             <column name="ID" valueSequenceNext="UT_SEQ"/>
             <column name="NAME" value="Auto Authorize"/>
