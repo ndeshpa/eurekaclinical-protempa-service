@@ -78,8 +78,6 @@ public class BackEndContextListener extends GuiceServletContextListener {
 
 	@Override
 	protected Injector getInjector() {
-                System.out.println("etl================================================");
-                System.out.println(this.phenotypeClientProvider);
 		this.injector = new InjectorSupport(
 				new Module[]{
 					new AppModule(this.phenotypeClientProvider),
