@@ -453,7 +453,6 @@ public class JobResource {
     List<PropositionDefinition> getUserPropositionDefinitions() throws PhenotypeHandlingException, ClientException{
         List<PropositionDefinition> propositionList;
                 List<Phenotype> phenotypeList;
-                System.out.println("Protempa /jobs proposition definitions");
                 phenotypeList = this.phenotypeClient.getUserPhenotypes(false);
                 this.converterVisitor.setAllCustomPhenotypes(phenotypeList);
                 PropositionDefinitionCollector collector
