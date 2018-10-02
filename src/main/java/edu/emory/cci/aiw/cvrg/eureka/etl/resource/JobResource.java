@@ -79,6 +79,10 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.config.EurekaProtempaConfigurations;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.ConversionSupport;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.ConversionUtil;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.PropositionDefinitionCollector;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.PropositionDefinitionConverterVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
@@ -86,11 +90,20 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.Task;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.common.auth.AuthorizedUserSupport;
+import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.eureka.client.comm.JobSpec.Side;
+import org.eurekaclinical.eureka.client.comm.Phenotype;
+import org.eurekaclinical.eureka.client.comm.PhenotypeVisitor;
+import org.eurekaclinical.eureka.client.comm.exception.PhenotypeHandlingException;
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
+import org.protempa.PropositionDefinition;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.BackendSpecNotFoundException;
@@ -118,12 +131,21 @@ public class JobResource {
     private final EtlProperties etlProperties;
     private final Provider<Task> taskProvider;
     private final JobModeDao jobModeDao;
+    private final EurekaClinicalPhenotypeClient phenotypeClient;
+    private final PropositionDefinitionConverterVisitor converterVisitor;
+    private final ConversionSupport conversionSupport;
+
+
 
     @Inject
     public JobResource(JobDao inJobDao, TaskManager inTaskManager, AuthorizedUserDao inEtlUserDao,
             DestinationDao inDestinationDao, EtlProperties inEtlProperties,
             ProtempaDestinationFactory inProtempaDestinationFactory,
-            Provider<Task> inTaskProvider, JobModeDao inJobModeDao) {
+            Provider<Task> inTaskProvider, JobModeDao inJobModeDao,
+            EurekaClinicalPhenotypeClient inPhenotypeClient,
+            PropositionDefinitionConverterVisitor  inConverterVisitor,
+            ConversionSupport inConversionSupport
+            ) {
         this.jobDao = inJobDao;
         this.taskManager = inTaskManager;
         this.etlUserDao = inEtlUserDao;
@@ -133,6 +155,9 @@ public class JobResource {
         this.protempaDestinationFactory = inProtempaDestinationFactory;
         this.taskProvider = inTaskProvider;
         this.jobModeDao = inJobModeDao;
+        this.phenotypeClient = inPhenotypeClient;
+        this.converterVisitor = inConverterVisitor;
+        this.conversionSupport = inConversionSupport;
     }
 
     @Transactional
@@ -228,11 +253,41 @@ public class JobResource {
         return getJobStats(request, inJobId, null);
     }
 
+
     // Finer grained transactions in the implementation
     @POST
-    public Response submit(@Context HttpServletRequest request, JobRequest inJobRequest) {
-        validate(inJobRequest);
-        Long jobId = doCreateJob(inJobRequest, request);
+    public Response submit(@Context HttpServletRequest request, JobSpec jobSpec) {
+  
+        JobRequest jobRequest = new JobRequest();
+        jobRequest.setJobSpec(jobSpec);
+        
+        try{
+            ConversionUtil.setupTimeUnitAndOperators(this.phenotypeClient);
+            List<PropositionDefinition> lisUserPropDefs = this.getUserPropositionDefinitions();
+            jobRequest.setUserPropositions(lisUserPropDefs);
+        } catch (ClientException ex) {
+            throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
+        } catch (PhenotypeHandlingException ex) {
+            Logger.getLogger(JobResource.class.getName()).log(Level.SEVERE, null, ex);
+            throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, ex);
+        }
+        
+        List<String> conceptIds = jobSpec.getPropositionIds();
+        List<String> propIds = new ArrayList<>(conceptIds != null ? conceptIds.size() : 0);
+        if (conceptIds != null) {
+            for (String conceptId : conceptIds) {
+                propIds.add(this.conversionSupport.toPropositionId(conceptId));
+            }
+        }
+        jobRequest.setPropositionIdsToShow(propIds);
+
+        validate(jobRequest);
+
+        Long jobId;
+
+        jobId = doCreateJob(jobRequest, request);
+     
+
         return Response.created(URI.create("/" + jobId)).build();
     }
 
@@ -301,7 +356,21 @@ public class JobResource {
         this.taskManager.queueTask(task);
         return jobEntity.getId();
     }
+  
+    public String toPropositionId(String phenotypeKey) {
+        final  String PRIMARY_PROP_ID_SUFFIX = "_PRIMARY";
+        final  String VALUE = "YES";
+        final  String VALUE_COMP = "NO";
+        final String PROP_ID_WRAPPED_SUFFIX = "_WRAPPED";
+        final String USER_KEY_PREFIX = "USER:";
 
+            if (phenotypeKey == null || !phenotypeKey.startsWith(USER_KEY_PREFIX)) {
+                    return phenotypeKey;
+            } else {
+                    return phenotypeKey + PRIMARY_PROP_ID_SUFFIX;
+            }
+    }
+    
     private static Interval.Side toProtempaSide(Side side) {
         switch (side) {
             case START:
@@ -396,6 +465,19 @@ public class JobResource {
         if (jobSpec.getJobMode() == null) {
             throw new HttpStatusException(Status.BAD_REQUEST, "The jobSpec must have a jobMode");
         }
+    }
+    
+    List<PropositionDefinition> getUserPropositionDefinitions() throws PhenotypeHandlingException, ClientException{
+        List<PropositionDefinition> propositionList;
+                List<Phenotype> phenotypeList;
+                phenotypeList = this.phenotypeClient.getUserPhenotypes(false);
+                this.converterVisitor.setAllCustomPhenotypes(phenotypeList);
+                PropositionDefinitionCollector collector
+                    = PropositionDefinitionCollector.getInstance(
+						this.converterVisitor, phenotypeList);
+                propositionList = collector.getUserPropDefs();
+                  
+		return propositionList;
     }
 
 }
