@@ -43,7 +43,6 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.util.AbstractNodeVisitor;
 import java.util.Date;
 import org.eurekaclinical.eureka.client.comm.BinaryOperator;
 import org.eurekaclinical.eureka.client.comm.Cohort;
-import org.eurekaclinical.eureka.client.comm.Literal;
 import org.eurekaclinical.eureka.client.comm.UnaryOperator;
 import org.eurekaclinical.eureka.client.comm.Node;
 import java.util.HashMap;
@@ -53,12 +52,12 @@ import java.util.Map;
 import java.util.Set;
 import org.arp.javautil.collections.Collections;
 import org.eurekaclinical.eureka.client.comm.BinaryOperator.Op;
-import static org.neo4j.ext.udc.UdcSettings.interval;
+import org.eurekaclinical.eureka.client.comm.Literal;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.dest.keyloader.Criteria;
-import org.protempa.dest.keyloader.CriteriaEvaluateException;
-import org.protempa.dest.keyloader.CriteriaInitException;
+import org.protempa.criteria.Criteria;
+import org.protempa.criteria.CriteriaEvaluateException;
+import org.protempa.criteria.CriteriaInitException;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Context;
@@ -69,6 +68,8 @@ import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.interval.AbsoluteTimeIntervalFactory;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.Relation;
+import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 
 /**
@@ -77,57 +78,57 @@ import org.protempa.proposition.visitor.AbstractPropositionVisitor;
  */
 class CohortCriteria implements Criteria {
 
-	private final Cohort cohort;
-	private final Map<String, List<String>> cache;
-	private final String[] propIdsSpecified;
+    private final Cohort cohort;
+    private final Map<String, List<String>> cache;
+    private final String[] propIdsSpecified;
 
-	CohortCriteria(Cohort cohort) {
-		assert cohort != null : "cohort cannot be null";
-		this.cohort = cohort;
-		this.cache = new HashMap<>();
-		CollectLiteralNamesNodeVisitor v = new CollectLiteralNamesNodeVisitor();
-		this.cohort.getNode().accept(v);
-		Set<String> literalNames = v.getLiteralNames();
-		this.propIdsSpecified = literalNames.toArray(new String[literalNames.size()]);
-	}
-
-	@Override
-	public void init(final KnowledgeSource knowledgeSource) throws CriteriaInitException {
-		GetChildrenNodeVisitor nodeVisitorImpl = new GetChildrenNodeVisitor(knowledgeSource);
-		this.cohort.getNode().accept(nodeVisitorImpl);
-		if (nodeVisitorImpl.exception != null) {
-			throw new CriteriaInitException(nodeVisitorImpl.exception);
-		}
-	}
-
-	@Override
-	public boolean evaluate(List<Proposition> propositions) throws CriteriaEvaluateException {
-		Map<String, List<Proposition>> propMap = new HashMap<>();
-		for (Proposition prop : propositions) {
-			List<String> get = this.cache.get(prop.getId());
-			if (get != null) {
-				for (String literalName : get) {
-					Collections.putList(propMap, literalName, prop);
-				}
-			}
-		}
-		return evaluate(this.cohort.getNode(), propMap);
-	}
-	
-	private boolean evaluate(Node node, Map<String, List<Proposition>> propMap) {
-		if (node instanceof UnaryOperator) {
-			return evaluateUnaryOperator((UnaryOperator) node, propMap);
-		} else if (node instanceof BinaryOperator) {
-			return evaluateBinaryOperator((BinaryOperator) node, propMap);
-		} else if (node instanceof Literal) {
-			return evaluateLiteral((Literal) node, propMap);
-		} else {
-			throw new AssertionError("Unexpected node type " + node.getClass().getName());
-		}
+    CohortCriteria(Cohort cohort) {
+        assert cohort != null : "cohort cannot be null";
+        this.cohort = cohort;
+        this.cache = new HashMap<>();
+        CollectLiteralNamesNodeVisitor v = new CollectLiteralNamesNodeVisitor();
+        this.cohort.getNode().accept(v);
+        Set<String> literalNames = v.getLiteralNames();
+        this.propIdsSpecified = literalNames.toArray(new String[literalNames.size()]);
     }
-	
+
+    @Override
+    public void init(final KnowledgeSource knowledgeSource) throws CriteriaInitException {
+        GetChildrenNodeVisitor nodeVisitorImpl = new GetChildrenNodeVisitor(knowledgeSource);
+        this.cohort.getNode().accept(nodeVisitorImpl);
+        if (nodeVisitorImpl.exception != null) {
+            throw new CriteriaInitException(nodeVisitorImpl.exception);
+        }
+    }
+
+    @Override
+    public boolean evaluate(List<Proposition> propositions) throws CriteriaEvaluateException {
+        Map<String, List<Proposition>> propMap = new HashMap<>();
+        for (Proposition prop : propositions) {
+            List<String> get = this.cache.get(prop.getId());
+            if (get != null) {
+                for (String literalName : get) {
+                    Collections.putList(propMap, literalName, prop);
+                }
+            }
+        }
+        return evaluate(this.cohort.getNode(), propMap);
+    }
+
+    private boolean evaluate(Node node, Map<String, List<Proposition>> propMap) {
+        if (node instanceof UnaryOperator) {
+            return evaluateUnaryOperator((UnaryOperator) node, propMap);
+        } else if (node instanceof BinaryOperator) {
+            return evaluateBinaryOperator((BinaryOperator) node, propMap);
+        } else if (node instanceof Literal) {
+            return evaluateLiteral((Literal) node, propMap);
+        } else {
+            throw new AssertionError("Unexpected node type " + node.getClass().getName());
+        }
+    }
+
     private boolean evaluateUnaryOperator(UnaryOperator unaryOperator, Map<String, List<Proposition>> propMap) {
-		UnaryOperator.Op op = unaryOperator.getOp();
+        UnaryOperator.Op op = unaryOperator.getOp();
         switch (op) {
             case NOT:
                 return !evaluate(unaryOperator.getNode(), propMap);
@@ -135,11 +136,11 @@ class CohortCriteria implements Criteria {
                 throw new AssertionError("Invalid op " + op);
         }
     }
-	
+
     private boolean evaluateBinaryOperator(BinaryOperator binaryOperator, Map<String, List<Proposition>> propMap) {
-		Node leftNode = binaryOperator.getLeftNode();
-		Node rightNode = binaryOperator.getRightNode();
-		Op op = binaryOperator.getOp();
+        Node leftNode = binaryOperator.getLeftNode();
+        Node rightNode = binaryOperator.getRightNode();
+        Op op = binaryOperator.getOp();
         switch (op) {
             case AND:
                 return evaluate(leftNode, propMap) && evaluate(rightNode, propMap);
@@ -149,42 +150,44 @@ class CohortCriteria implements Criteria {
                 throw new AssertionError("Invalid op " + op);
         }
     }
-	
-	private boolean evaluateLiteral(Literal literal, Map<String, List<Proposition>> propMap) {
+
+    private boolean evaluateLiteral(Literal literal, Map<String, List<Proposition>> propMap) {
         List<Proposition> props = propMap.get(literal.getName());
-		Date start = literal.getStart();
-		Date finish = literal.getFinish();
-		Interval interval = null;
         if (props != null && !props.isEmpty()) {
-            if ((start != null || finish != null)) {
-                interval
-                        = new AbsoluteTimeIntervalFactory().getInstance(
-                                start, null,
-                                finish, null);
-            }
-            if (interval != null) {
-                LiteralEvaluatePropositionVisitor v
-                        = new LiteralEvaluatePropositionVisitor(interval);
-                for (Proposition prop : props) {
-                    prop.accept(v);
-                    if (v.evaluate()) {
-                        return true;
-                    }
+            LiteralEvaluatePropositionVisitor v
+                    = new LiteralEvaluatePropositionVisitor(literal);
+            for (Proposition prop : props) {
+                prop.accept(v);
+                if (v.evaluate()) {
+                    return true;
                 }
-            } else {
-                return true;
             }
         }
         return false;
     }
 
-    private class LiteralEvaluatePropositionVisitor extends AbstractPropositionVisitor {
+    private static class LiteralEvaluatePropositionVisitor extends AbstractPropositionVisitor {
 
         private boolean result;
-		private final Interval interval;
+        private final Interval interval;
+        private final String propertyName;
+        private final ValueComparator propertyValueComparator;
+        private final Value propertyValue;
 
-        LiteralEvaluatePropositionVisitor(Interval interval) {
-			this.interval = interval;
+        LiteralEvaluatePropositionVisitor(Literal literal) {
+            Date start = literal.getStart();
+            Date finish = literal.getFinish();
+            if (start != null || finish != null) {
+                this.interval
+                        = new AbsoluteTimeIntervalFactory().getInstance(
+                                start, null,
+                                finish, null);
+            } else {
+                this.interval = null;
+            }
+            this.propertyName = literal.getPropertyName();
+            this.propertyValueComparator = literal.getPropertyValueComparator();
+            this.propertyValue = literal.getPropertyValue();
         }
 
         boolean evaluate() {
@@ -193,115 +196,128 @@ class CohortCriteria implements Criteria {
 
         @Override
         public void visit(Context context) {
-            handleTemporalProposition(context);
+            this.result = handleProperty(context) && handleTemporalProposition(context);
         }
 
         @Override
         public void visit(Constant constant) {
-            this.result = true;
+            this.result = handleProperty(constant);
         }
 
         @Override
         public void visit(PrimitiveParameter primitiveParameter) {
-            handleTemporalProposition(primitiveParameter);
+            this.result = handleProperty(primitiveParameter) && handleTemporalProposition(primitiveParameter);
         }
 
         @Override
         public void visit(Event event) {
-            handleTemporalProposition(event);
+            this.result = handleProperty(event) && handleTemporalProposition(event);
         }
 
         @Override
         public void visit(AbstractParameter abstractParameter) {
-            handleTemporalProposition(abstractParameter);
+            this.result = handleProperty(abstractParameter) && handleTemporalProposition(abstractParameter);
         }
 
-        private void handleTemporalProposition(TemporalProposition tempProp) {
-            Interval tempPropIval = tempProp.getInterval();
-            this.result = Relation.CONTAINS_OR_EQUALS.hasRelation(interval, tempPropIval);
+        private boolean handleProperty(Proposition prop) {
+            if (this.propertyName != null) {
+                Value property = prop.getProperty(this.propertyName);
+                return this.propertyValueComparator.compare(property, this.propertyValue);
+            } else {
+                return true;
+            }
+        }
+
+        private boolean handleTemporalProposition(TemporalProposition tempProp) {
+            if (this.interval != null) {
+                Interval tempPropIval = tempProp.getInterval();
+                return Relation.CONTAINS_OR_EQUALS.hasRelation(interval, tempPropIval);
+            } else {
+                return true;
+            }
         }
 
     }
-	
-	@Override
-	public String[] getPropositionIdsSpecified() {
-		return this.propIdsSpecified;
-	}
 
-	private class GetChildrenNodeVisitor extends AbstractNodeVisitor {
+    @Override
+    public String[] getPropositionIdsSpecified() {
+        return this.propIdsSpecified;
+    }
 
-		private final KnowledgeSource knowledgeSource;
-		private KnowledgeSourceReadException exception;
+    private class GetChildrenNodeVisitor extends AbstractNodeVisitor {
 
-		public GetChildrenNodeVisitor(KnowledgeSource knowledgeSource) {
-			this.knowledgeSource = knowledgeSource;
-		}
+        private final KnowledgeSource knowledgeSource;
+        private KnowledgeSourceReadException exception;
 
-		@Override
-		public void visit(Literal literal) {
-			try {
-				Set<String> propIds = this.knowledgeSource.collectPropIdDescendantsUsingAllNarrower(false, literal.getName());
-				for (String propId : propIds) {
-					Collections.putList(cache, propId, literal.getName());
-				}
-			} catch (KnowledgeSourceReadException ex) {
-				this.exception = ex;
-			}
-		}
+        public GetChildrenNodeVisitor(KnowledgeSource knowledgeSource) {
+            this.knowledgeSource = knowledgeSource;
+        }
 
-		@Override
-		public void visit(UnaryOperator unaryOperator) {
-			if (this.exception == null) {
-				GetChildrenNodeVisitor v = new GetChildrenNodeVisitor(this.knowledgeSource);
-				unaryOperator.getNode().accept(v);
-			}
-		}
+        @Override
+        public void visit(Literal literal) {
+            try {
+                Set<String> propIds = this.knowledgeSource.collectPropIdDescendantsUsingAllNarrower(false, literal.getName());
+                for (String propId : propIds) {
+                    Collections.putList(cache, propId, literal.getName());
+                }
+            } catch (KnowledgeSourceReadException ex) {
+                this.exception = ex;
+            }
+        }
 
-		@Override
-		public void visit(BinaryOperator binaryOperator) {
-			if (this.exception == null) {
-				GetChildrenNodeVisitor v = new GetChildrenNodeVisitor(this.knowledgeSource);
-				binaryOperator.getLeftNode().accept(v);
-				binaryOperator.getRightNode().accept(v);
-			}
-		}
+        @Override
+        public void visit(UnaryOperator unaryOperator) {
+            if (this.exception == null) {
+                GetChildrenNodeVisitor v = new GetChildrenNodeVisitor(this.knowledgeSource);
+                unaryOperator.getNode().accept(v);
+            }
+        }
 
-	}
+        @Override
+        public void visit(BinaryOperator binaryOperator) {
+            if (this.exception == null) {
+                GetChildrenNodeVisitor v = new GetChildrenNodeVisitor(this.knowledgeSource);
+                binaryOperator.getLeftNode().accept(v);
+                binaryOperator.getRightNode().accept(v);
+            }
+        }
 
-	private class CollectLiteralNamesNodeVisitor extends AbstractNodeVisitor {
+    }
 
-		private final Set<String> literalNames;
+    private class CollectLiteralNamesNodeVisitor extends AbstractNodeVisitor {
 
-		public CollectLiteralNamesNodeVisitor() {
-			this.literalNames = new HashSet<String>();
-		}
+        private final Set<String> literalNames;
 
-		@Override
-		public void visit(Literal literal) {
-			this.literalNames.add(literal.getName());
-		}
+        public CollectLiteralNamesNodeVisitor() {
+            this.literalNames = new HashSet<>();
+        }
 
-		@Override
-		public void visit(UnaryOperator unaryOperator) {
-			CollectLiteralNamesNodeVisitor v = new CollectLiteralNamesNodeVisitor();
-			unaryOperator.getNode().accept(v);
-			this.literalNames.addAll(v.getLiteralNames());
-		}
+        @Override
+        public void visit(Literal literal) {
+            this.literalNames.add(literal.getName());
+        }
 
-		@Override
-		public void visit(BinaryOperator binaryOperator) {
-			CollectLiteralNamesNodeVisitor v = new CollectLiteralNamesNodeVisitor();
-			binaryOperator.getLeftNode().accept(v);
-			this.literalNames.addAll(v.getLiteralNames());
-			v = new CollectLiteralNamesNodeVisitor();
-			binaryOperator.getRightNode().accept(v);
-			this.literalNames.addAll(v.getLiteralNames());
-		}
+        @Override
+        public void visit(UnaryOperator unaryOperator) {
+            CollectLiteralNamesNodeVisitor v = new CollectLiteralNamesNodeVisitor();
+            unaryOperator.getNode().accept(v);
+            this.literalNames.addAll(v.getLiteralNames());
+        }
 
-		public Set<String> getLiteralNames() {
-			return this.literalNames;
-		}
+        @Override
+        public void visit(BinaryOperator binaryOperator) {
+            CollectLiteralNamesNodeVisitor v = new CollectLiteralNamesNodeVisitor();
+            binaryOperator.getLeftNode().accept(v);
+            this.literalNames.addAll(v.getLiteralNames());
+            v = new CollectLiteralNamesNodeVisitor();
+            binaryOperator.getRightNode().accept(v);
+            this.literalNames.addAll(v.getLiteralNames());
+        }
 
-	}
+        public Set<String> getLiteralNames() {
+            return this.literalNames;
+        }
+
+    }
 
 }

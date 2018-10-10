@@ -39,8 +39,8 @@
  */
 package edu.emory.cci.aiw.cvrg.eureka.etl.job;
 
-import com.google.inject.Injector;
 import com.google.inject.persist.Transactional;
+import com.google.inject.persist.UnitOfWork;
 import java.util.List;
 
 import org.protempa.PropositionDefinition;
@@ -59,24 +59,27 @@ import java.util.Collections;
 import org.protempa.backend.Configuration;
 import java.util.Date;
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 public class Task implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Task.class);
-    private final ETL etl;
     private Long jobId;
     private List<PropositionDefinition> propositionDefinitions;
     private List<String> propIdsToShow;
     private Filter filter;
     private Configuration prompts;
+    private final Provider<JobDao> jobDaoProvider;
     private JobDao jobDao;
 
-    @Inject
-    private Injector injector;
+    private final ETL etl;
+    private final UnitOfWork unitOfWork;
 
     @Inject
-    Task(ETL inEtl) {
-        this.etl = inEtl;
+    Task(UnitOfWork inUnitOfWork, Provider<JobDao> inJobDaoProvider, ETL inETL) {
+        this.unitOfWork = inUnitOfWork;
+        this.jobDaoProvider = inJobDaoProvider;
+        this.etl = inETL;
         this.propIdsToShow = Collections.emptyList();
         this.propositionDefinitions = Collections.emptyList();
     }
@@ -131,8 +134,9 @@ public class Task implements Runnable {
 
     @Override
     public void run() {
-        this.jobDao = this.injector.getInstance(JobDao.class);
         try {
+            this.unitOfWork.begin();
+            this.jobDao = this.jobDaoProvider.get();
             storeProcessingStartedEvent();
             PropositionDefinition[] propDefArray
                     = new PropositionDefinition[this.getPropositionDefinitions()
@@ -150,11 +154,13 @@ public class Task implements Runnable {
             } finally {
                 storeJobFinishedWithErrorsEvent();
             }
+        } finally {
+            this.unitOfWork.end();
         }
     }
 
     @Transactional
-    void storeJobFinishedWithErrorsEvent() {
+    public void storeJobFinishedWithErrorsEvent() {
         JobEntity myJob = this.jobDao.retrieve(this.jobId);
         Date now = new Date();
         myJob.setFinished(now);
@@ -170,7 +176,7 @@ public class Task implements Runnable {
     }
 
     @Transactional
-    void storeProcessingFinishedWithoutErrorEvent() {
+    public void storeProcessingFinishedWithoutErrorEvent() {
         JobEntity myJob = this.jobDao.retrieve(this.jobId);
         JobEventEntity completedJobEvent = new JobEventEntity();
         Date now = new Date();
@@ -187,15 +193,12 @@ public class Task implements Runnable {
         this.jobDao.update(myJob);
     }
 
-    @Transactional
     void doRunJob(PropositionDefinition[] propDefArray, String[] propIdsToShowArray) throws EtlException {
-        JobEntity myJob = this.jobDao.retrieve(this.jobId);
-        this.etl.run(myJob, propDefArray, propIdsToShowArray, this.filter, this.prompts);
-        this.jobDao.update(myJob);
+        this.etl.run(this.jobDao, this.jobId, propDefArray, propIdsToShowArray, this.filter, this.prompts);
     }
 
     @Transactional
-    void storeProcessingStartedEvent() {
+    public void storeProcessingStartedEvent() {
         JobEntity myJob = this.jobDao.retrieve(this.jobId);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Just got job {} from user {}",
@@ -211,7 +214,7 @@ public class Task implements Runnable {
     }
 
     @Transactional
-    private void handleError(Throwable e) {
+    public void handleError(Throwable e) {
         JobEntity job = this.jobDao.retrieve(this.jobId);
         LOGGER.error("Job " + job.getId() + " for user "
                 + job.getUser().getUsername() + " failed: " + e.getMessage(), e);

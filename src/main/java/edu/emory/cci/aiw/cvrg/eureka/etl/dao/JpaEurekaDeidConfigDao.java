@@ -56,122 +56,122 @@ import javax.persistence.PersistenceException;
  */
 public class JpaEurekaDeidConfigDao implements EurekaDeidConfigDao {
 
-	private static final int MAX_OFFSET_SECONDS = 364 * 24 * 60 * 60;
+    private static final int MAX_OFFSET_SECONDS = 364 * 24 * 60 * 60;
 
-	private final Random random;
-	private final Provider<EntityManager> entityManagerProvider;
-	private EntityTransaction transaction;
-	private int count;
-	private EntityManager entityManager;
-	private final DeidPerPatientParamsDao deidPerPatientParamsDao;
+    private final Random random;
+    private final Provider<EntityManager> entityManagerProvider;
+    private EntityTransaction transaction;
+    private int count;
+    private EntityManager entityManager;
+    private final DeidPerPatientParamsDao deidPerPatientParamsDao;
 
-	@Inject
-	JpaEurekaDeidConfigDao(Provider<EntityManager> inEntityManagerProvider) {
-		this.random = new SecureRandom();
-		this.random.setSeed(System.currentTimeMillis());
-		this.entityManagerProvider = inEntityManagerProvider;
-		this.deidPerPatientParamsDao = new JpaDeidPerPatientParamsDao(this.entityManagerProvider);
-	}
+    @Inject
+    JpaEurekaDeidConfigDao(Provider<EntityManager> inEntityManagerProvider) {
+        this.random = new SecureRandom();
+        this.random.setSeed(System.currentTimeMillis());
+        this.entityManagerProvider = inEntityManagerProvider;
+        this.deidPerPatientParamsDao = new JpaDeidPerPatientParamsDao(this.entityManagerProvider);
+    }
 
-	@Override
-	public Integer getOffset(String inKeyId, DestinationEntity inDestination) {
-		DeidPerPatientParams deidPerPatientParams = getOrCreatePatientParams(inKeyId, inDestination);
-		Integer offset = deidPerPatientParams.getOffset();
-		if (offset == null) {
-			int offsetInSeconds = this.random.nextInt(MAX_OFFSET_SECONDS);
-			if (!this.random.nextBoolean()) {
-				offsetInSeconds = offsetInSeconds * -1;
-			}
-			beginTx();
-			deidPerPatientParams.setOffset(offsetInSeconds);
-			try {
-				this.deidPerPatientParamsDao.update(deidPerPatientParams);
-				endTx();
-			} catch (PersistenceException ex) {
-				try {
-					rollbackTx();
-				} catch (PersistenceException ignored) {
-				}
-				throw ex;
-			}
-			offset = offsetInSeconds;
-		}
+    @Override
+    public Integer getOffset(String inKeyId, DestinationEntity inDestination) {
+        DeidPerPatientParams deidPerPatientParams = getOrCreatePatientParams(inKeyId, inDestination);
+        Integer offset = deidPerPatientParams.getOffset();
+        if (offset == null) {
+            int offsetInSeconds = this.random.nextInt(MAX_OFFSET_SECONDS);
+            if (!this.random.nextBoolean()) {
+                offsetInSeconds = offsetInSeconds * -1;
+            }
+            beginTx();
+            deidPerPatientParams.setOffset(offsetInSeconds);
+            try {
+                this.deidPerPatientParamsDao.update(deidPerPatientParams);
+                endTx();
+            } catch (PersistenceException ex) {
+                try {
+                    rollbackTx();
+                } catch (PersistenceException ignored) {
+                }
+                throw ex;
+            }
+            offset = offsetInSeconds;
+        }
 
-		return offset;
-	}
+        return offset;
+    }
 
-	@Override
-	public DeidPerPatientParams getOrCreatePatientParams(String inKeyId, DestinationEntity inDestination) {
-		DeidPerPatientParams offset = this.deidPerPatientParamsDao.getByKeyId(inKeyId);
-		if (offset == null) {
-			beginTx();
-			try {
-				offset = new DeidPerPatientParams();
-				offset.setKeyId(inKeyId);
-				offset.setDestination(inDestination);
-				this.deidPerPatientParamsDao.create(offset);
-				endTx();
-			} catch (PersistenceException ex) {
-				try {
-					rollbackTx();
-				} catch (PersistenceException ignored) {
-				}
-				throw ex;
-			}
-		}
+    @Override
+    public DeidPerPatientParams getOrCreatePatientParams(String inKeyId, DestinationEntity inDestination) {
+        DeidPerPatientParams offset = this.deidPerPatientParamsDao.getByKeyId(inKeyId);
+        if (offset == null) {
+            beginTx();
+            try {
+                offset = new DeidPerPatientParams();
+                offset.setKeyId(inKeyId);
+                offset.setDestination(inDestination);
+                this.deidPerPatientParamsDao.create(offset);
+                endTx();
+            } catch (PersistenceException ex) {
+                try {
+                    rollbackTx();
+                } catch (PersistenceException ignored) {
+                }
+                throw ex;
+            }
+        }
 
-		return offset;
-	}
+        return offset;
+    }
 
-	@Override
-	public void update(DeidPerPatientParams inDeidPerPatientParams) {
-		beginTx();
-		try {
-			this.deidPerPatientParamsDao.update(inDeidPerPatientParams);
-			endTx();
-		} catch (PersistenceException ex) {
-			try {
-				rollbackTx();
-			} catch (PersistenceException ignored) {
-			}
-			throw ex;
-		}
-	}
+    @Override
+    public void update(DeidPerPatientParams inDeidPerPatientParams) {
+        beginTx();
+        try {
+            this.deidPerPatientParamsDao.update(inDeidPerPatientParams);
+            endTx();
+        } catch (PersistenceException ex) {
+            try {
+                rollbackTx();
+            } catch (PersistenceException ignored) {
+            }
+            throw ex;
+        }
+    }
 
-	@Override
-	public Random getRandom() {
-		return this.random;
-	}
+    @Override
+    public Random getRandom() {
+        return this.random;
+    }
 
-	@Override
-	public void close() throws IOException {
-		if (this.transaction.isActive()) {
-			this.transaction.commit();
-		}
-		this.entityManager = null;
-	}
+    @Override
+    public void close() throws IOException {
+        if (this.transaction.isActive()) {
+            this.transaction.commit();
+        }
+        this.entityManager = null;
+    }
 
-	private void beginTx() {
-		if (this.entityManager == null) {
-			this.entityManager = this.entityManagerProvider.get();
-			this.transaction = this.entityManager.getTransaction();
-		}
-		if (!this.transaction.isActive()) {
-			++this.count;
-			this.transaction.begin();
-		}
-	}
+    private void beginTx() {
+        if (this.entityManager == null) {
+            this.entityManager = this.entityManagerProvider.get();
+            this.transaction = this.entityManager.getTransaction();
+        }
+        if (!this.transaction.isActive()) {
+            ++this.count;
+            this.transaction.begin();
+        }
+    }
 
-	private void endTx() {
-		if (this.count % 1000 == 0) {
-			this.transaction.commit();
-		}
-	}
+    private void endTx() {
+        if (this.count % 1000 == 0) {
+            this.transaction.commit();
+        }
+    }
 
-	private void rollbackTx() {
-		if (this.transaction.isActive()) {
-			this.transaction.rollback();
-		}
-	}
+    private void rollbackTx() {
+        if (this.transaction.isActive()) {
+            this.transaction.rollback();
+        }
+    }
 
 }

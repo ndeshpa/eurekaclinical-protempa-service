@@ -68,249 +68,259 @@ import org.eurekaclinical.standardapis.entity.HistoricalEntity;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class DestinationEntity implements ConfigEntity, HistoricalEntity<Long> {
 
-	@Id
-	@SequenceGenerator(name = "DEST_SEQ_GENERATOR", sequenceName = "DEST_SEQ",
-			allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,
-			generator = "DEST_SEQ_GENERATOR")
-	private Long id;
+    @Id
+    @SequenceGenerator(name = "DEST_SEQ_GENERATOR", sequenceName = "DEST_SEQ",
+            allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "DEST_SEQ_GENERATOR")
+    private Long id;
 
-	@Column(nullable = false, unique = true)
-	private String name;
+    @Column(nullable = false, unique = true)
+    private String name;
 
-	@Lob
-	private String description;
+    @Lob
+    private String description;
 
-	@Temporal(javax.persistence.TemporalType.TIMESTAMP)
-	@Column(name = "created_at")
-	private Date createdAt;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Column(name = "created_at")
+    private Date createdAt;
 
-	@Temporal(javax.persistence.TemporalType.TIMESTAMP)
-	@Column(name = "effective_at")
-	private Date effectiveAt;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Column(name = "effective_at")
+    private Date effectiveAt;
 
-	@Temporal(javax.persistence.TemporalType.TIMESTAMP)
-	@Column(name = "expired_at")
-	private Date expiredAt;
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Column(name = "expired_at")
+    private Date expiredAt;
 
-	@ManyToOne
-	private AuthorizedUserEntity owner;
+    @ManyToOne
+    private AuthorizedUserEntity owner;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
-	private List<DestinationGroupMembership> groups;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
+    private List<DestinationGroupMembership> groups;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
-	private List<LinkEntity> links;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
+    private List<LinkEntity> links;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
-	private List<DeidPerPatientParams> offsets;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "destination")
+    private List<DeidPerPatientParams> offsets;
 
-	private boolean deidentificationEnabled;
+    private boolean deidentificationEnabled;
 
-	@ManyToOne
-	private EncryptionAlgorithm encryptionAlgorithm;
+    @ManyToOne
+    private EncryptionAlgorithm encryptionAlgorithm;
 
-	private String outputName;
+    private String outputName;
 
-	private String outputType;
+    private String outputType;
 
-	public DestinationEntity() {
-		this.outputType = MediaType.APPLICATION_OCTET_STREAM;
-		this.groups = new ArrayList<>();
-		this.offsets = new ArrayList<>();
-		this.links = new ArrayList<>();
-	}
+    public DestinationEntity() {
+        this.outputType = MediaType.APPLICATION_OCTET_STREAM;
+        this.groups = new ArrayList<>();
+        this.offsets = new ArrayList<>();
+        this.links = new ArrayList<>();
+    }
 
-	public Long getId() {
-		return id;
-	}
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	@Override
-	public AuthorizedUserEntity getOwner() {
-		return owner;
-	}
+    @Override
+    public AuthorizedUserEntity getOwner() {
+        return owner;
+    }
 
-	@Override
-	public void setOwner(AuthorizedUserEntity owner) {
-		this.owner = owner;
-	}
+    @Override
+    public void setOwner(AuthorizedUserEntity inOwner) {
+        if (this.owner != inOwner) {
+            if (this.owner != null) {
+                this.owner.removeDestination(this);
+            }
+            this.owner = inOwner;
+            if (this.owner != null) {
+                this.owner.addDestination(this);
+            }
+        }
+    }
 
-	public List<DestinationGroupMembership> getGroups() {
-		return new ArrayList<>(groups);
-	}
+    public List<DestinationGroupMembership> getGroups() {
+        return new ArrayList<>(groups);
+    }
 
-	public void setGroups(List<DestinationGroupMembership> inGroups) {
-		if (inGroups == null) {
-			this.groups = new ArrayList<>();
-		} else {
-			this.groups = new ArrayList<>(inGroups);
-			for (DestinationGroupMembership group : inGroups) {
-				group.setDestination(this);
-			}
-		}
-	}
-	
-	public void addGroup(DestinationGroupMembership inGroup) {
-		if (!this.groups.contains(inGroup)) {
-			this.groups.add(inGroup);
-			inGroup.setDestination(this);
-		}
-	}
+    public void setGroups(List<DestinationGroupMembership> inGroups) {
+        if (inGroups == null) {
+            this.groups = new ArrayList<>();
+        } else {
+            this.groups = new ArrayList<>(inGroups);
+            for (DestinationGroupMembership group : inGroups) {
+                group.setDestination(this);
+            }
+        }
+    }
 
-	public void removeGroup(DestinationGroupMembership inGroup) {
-		if (this.groups.remove(inGroup)) {
-			inGroup.setDestination(null);
-		}
-	}
-	
-	public List<LinkEntity> getLinks() {
-		return new ArrayList<>(links);
-	}
+    public void addGroup(DestinationGroupMembership inGroup) {
+        if (!this.groups.contains(inGroup)) {
+            this.groups.add(inGroup);
+            inGroup.setDestination(this);
+        }
+    }
 
-	public void setLinks(List<LinkEntity> inLinks) {
-		if (inLinks == null) {
-			this.links = new ArrayList<>();
-		} else {
-			this.links = new ArrayList<>(inLinks);
-			for (LinkEntity group : inLinks) {
-				group.setDestination(this);
-			}
-		}
-	}
-	
-	public void addLink(LinkEntity inLink) {
-		if (!this.links.contains(inLink)) {
-			this.links.add(inLink);
-			inLink.setDestination(this);
-		}
-	}
-	
-	public void removeLink(LinkEntity inLink) {
-		if (this.links.remove(inLink)) {
-			inLink.setDestination(null);
-		}
-	}
+    public void removeGroup(DestinationGroupMembership inGroup) {
+        if (this.groups.remove(inGroup)) {
+            inGroup.setDestination(null);
+        }
+    }
 
-	@Override
-	public Date getCreatedAt() {
-		return createdAt;
-	}
+    public List<LinkEntity> getLinks() {
+        return new ArrayList<>(links);
+    }
 
-	@Override
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
+    public void setLinks(List<LinkEntity> inLinks) {
+        if (inLinks == null) {
+            this.links = new ArrayList<>();
+        } else {
+            this.links = new ArrayList<>(inLinks);
+            for (LinkEntity group : inLinks) {
+                group.setDestination(this);
+            }
+        }
+    }
 
-	@Override
-	public Date getEffectiveAt() {
-		return effectiveAt;
-	}
+    public void addLink(LinkEntity inLink) {
+        if (!this.links.contains(inLink)) {
+            this.links.add(inLink);
+            inLink.setDestination(this);
+        }
+    }
 
-	@Override
-	public void setEffectiveAt(Date effectiveAt) {
-		this.effectiveAt = effectiveAt;
-	}
+    public void removeLink(LinkEntity inLink) {
+        if (this.links.remove(inLink)) {
+            inLink.setDestination(null);
+        }
+    }
 
-	@Override
-	public Date getExpiredAt() {
-		return expiredAt;
-	}
+    @Override
+    public Date getCreatedAt() {
+        return createdAt;
+    }
 
-	@Override
-	public void setExpiredAt(Date expiredAt) {
-		this.expiredAt = expiredAt;
-	}
+    @Override
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
 
-	public List<DeidPerPatientParams> getOffsets() {
-		return new ArrayList<>(offsets);
-	}
+    @Override
+    public Date getEffectiveAt() {
+        return effectiveAt;
+    }
 
-	public void setOffsets(List<DeidPerPatientParams> inOffsets) {
-		if (inOffsets == null) {
-			this.offsets = new ArrayList<>();
-		} else {
-			this.offsets = new ArrayList<>(inOffsets);
-			for (DeidPerPatientParams offset : this.offsets) {
-				offset.setDestination(this);
-			}
-		}
-	}
-	
-	public void addOffset(DeidPerPatientParams inOffset) {
-		if (!this.offsets.contains(inOffset)) {
-			this.offsets.add(inOffset);
-			inOffset.setDestination(this);
-		}
-	}
-	
-	public void removeOffset(DeidPerPatientParams inOffset) {
-		if (this.offsets.remove(inOffset)) {
-			inOffset.setDestination(null);
-		}
-	}
+    @Override
+    public void setEffectiveAt(Date effectiveAt) {
+        this.effectiveAt = effectiveAt;
+    }
 
-	public void setDeidentificationEnabled(boolean enabled) {
-		this.deidentificationEnabled = enabled;
-	}
+    @Override
+    public Date getExpiredAt() {
+        return expiredAt;
+    }
 
-	public boolean isDeidentificationEnabled() {
-		return this.deidentificationEnabled;
-	}
+    @Override
+    public void setExpiredAt(Date expiredAt) {
+        this.expiredAt = expiredAt;
+    }
 
-	public EncryptionAlgorithm getEncryptionAlgorithm() {
-		return encryptionAlgorithm;
-	}
+    public List<DeidPerPatientParams> getOffsets() {
+        return new ArrayList<>(offsets);
+    }
 
-	public void setEncryptionAlgorithm(EncryptionAlgorithm encryptionAlgorithm) {
-		this.encryptionAlgorithm = encryptionAlgorithm;
-	}
+    public void setOffsets(List<DeidPerPatientParams> inOffsets) {
+        if (inOffsets == null) {
+            this.offsets = new ArrayList<>();
+        } else {
+            this.offsets = new ArrayList<>(inOffsets);
+            for (DeidPerPatientParams offset : this.offsets) {
+                offset.setDestination(this);
+            }
+        }
+    }
 
-	public String getOutputName() {
-		return this.outputName;
-	}
+    public void addOffset(DeidPerPatientParams inOffset) {
+        if (!this.offsets.contains(inOffset)) {
+            this.offsets.add(inOffset);
+            inOffset.setDestination(this);
+        }
+    }
 
-	public void setOutputName(String outputName) {
-		this.outputName = outputName;
-	}
+    public void removeOffset(DeidPerPatientParams inOffset) {
+        if (this.offsets.remove(inOffset)) {
+            inOffset.setDestination(null);
+        }
+    }
 
-	public String getOutputType() {
-		return outputType;
-	}
+    public void setDeidentificationEnabled(boolean enabled) {
+        this.deidentificationEnabled = enabled;
+    }
 
-	public void setOutputType(String outputType) {
-		if (outputType == null) {
-			this.outputType = MediaType.APPLICATION_OCTET_STREAM;
-		} else {
-			this.outputType = outputType;
-		}
-	}
+    public boolean isDeidentificationEnabled() {
+        return this.deidentificationEnabled;
+    }
 
-	public abstract boolean isGetStatisticsSupported();
+    public EncryptionAlgorithm getEncryptionAlgorithm() {
+        return encryptionAlgorithm;
+    }
 
-	public abstract boolean isAllowingQueryPropositionIds();
+    public void setEncryptionAlgorithm(EncryptionAlgorithm encryptionAlgorithm) {
+        this.encryptionAlgorithm = encryptionAlgorithm;
+    }
 
-	public abstract void accept(DestinationEntityVisitor visitor);
+    public String getOutputName() {
+        return this.outputName;
+    }
+
+    public void setOutputName(String outputName) {
+        this.outputName = outputName;
+    }
+
+    public String getOutputType() {
+        return outputType;
+    }
+
+    public void setOutputType(String outputType) {
+        if (outputType == null) {
+            this.outputType = MediaType.APPLICATION_OCTET_STREAM;
+        } else {
+            this.outputType = outputType;
+        }
+    }
+
+    public abstract boolean isGetStatisticsSupported();
+
+    public abstract boolean isAllowingQueryPropositionIds();
+
+    public abstract void accept(DestinationEntityVisitor visitor);
 
 }

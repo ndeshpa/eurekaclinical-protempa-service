@@ -41,6 +41,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.config;
  */
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.servlet.SessionScoped;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
@@ -57,17 +58,27 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.SourceConfigDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EurekaDeidConfigDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPoolIdDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaEncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaEurekaDeidConfigDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaIdPoolDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaIdPoolIdDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaJobModeDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaLinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaRoleDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaUserTemplateDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ProtempaServiceRoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity;
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
+import org.eurekaclinical.standardapis.dao.RoleDao;
 import org.eurekaclinical.standardapis.dao.UserDao;
+import org.eurekaclinical.standardapis.dao.UserTemplateDao;
 import org.eurekaclinical.standardapis.entity.RoleEntity;
 import org.eurekaclinical.standardapis.entity.UserEntity;
 
@@ -76,15 +87,18 @@ import org.eurekaclinical.standardapis.entity.UserEntity;
  */
 public class AppModule extends AbstractModule {
 
-    AppModule() {
+    PhenotypeClientProvider phenotypeClientProvider;
+    AppModule(PhenotypeClientProvider inPhenotypeClientProvider) {
+        this.phenotypeClientProvider = inPhenotypeClientProvider;
     }
 
     @Override
     protected void configure() {
-        bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {
-        }).to(JpaEtlUserDao.class);
         bind(AuthorizedUserDao.class).to(JpaEtlUserDao.class);
-        bind(RoleDao.class).to(JpaRoleDao.class);
+        bind(ProtempaServiceRoleDao.class).to(JpaRoleDao.class);
+        bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
+        bind(new TypeLiteral<RoleDao<AuthorizedRoleEntity>>() {}).to(JpaRoleDao.class);
+        bind(new TypeLiteral<UserTemplateDao<AuthorizedRoleEntity, UserTemplateEntity>>() {}).to(JpaUserTemplateDao.class);
         bind(JobDao.class).to(JpaJobDao.class);
         bind(JobEventDao.class).to(JpaJobEventDao.class);
         bind(EtlGroupDao.class).to(JpaEtlGroupDao.class);
@@ -96,5 +110,8 @@ public class AppModule extends AbstractModule {
         bind(LinkDao.class).to(JpaLinkDao.class);
         bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
         bind(JobModeDao.class).to(JpaJobModeDao.class);
+        bind(IdPoolIdDao.class).to(JpaIdPoolIdDao.class);
+        bind(EurekaClinicalPhenotypeClient.class).toProvider(this.phenotypeClientProvider);
+        bind(IdPoolDao.class).to(JpaIdPoolDao.class);
     }
 }

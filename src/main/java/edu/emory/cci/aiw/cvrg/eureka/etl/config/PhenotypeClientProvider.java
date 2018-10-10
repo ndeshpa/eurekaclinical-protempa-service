@@ -1,10 +1,15 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
+package edu.emory.cci.aiw.cvrg.eureka.etl.config;
+
+
+
+import com.google.inject.Provider;
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 
 /*-
  * #%L
- * Eureka Protempa ETL
+ * Eureka WebApp
  * %%
- * Copyright (C) 2012 - 2016 Emory University
+ * Copyright (C) 2012 - 2017 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,33 +44,22 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.protempa.dest.table.TableColumnSpec;
 
 /**
  *
  * @author Andrew Post
  */
-class TableColumnSpecWrapper {
+public class PhenotypeClientProvider implements Provider<EurekaClinicalPhenotypeClient> {
 
-    private final TableColumnSpec tableColumnSpec;
-    private final String propId;
-    
-    TableColumnSpecWrapper(TableColumnSpec tableColumnSpec) {
-        this(null, tableColumnSpec);
-    }
+	private final String phenotypeUrl;
 
-    TableColumnSpecWrapper(String propId, TableColumnSpec tableColumnSpec) {
-        assert tableColumnSpec != null : "tableColumnSpec cannot be null";
-        this.tableColumnSpec = tableColumnSpec;
-        this.propId = propId;
-    }
-
-    String getPropId() {
-        return this.propId;
-    }
-
-    TableColumnSpec getTableColumnSpec() {
-        return this.tableColumnSpec;
-    }
+	public PhenotypeClientProvider(String inPhenotypeUrl) {
+		this.phenotypeUrl = inPhenotypeUrl;
+	}
+	
+	@Override
+	public EurekaClinicalPhenotypeClient get() {
+		return new EurekaClinicalPhenotypeClient(this.phenotypeUrl);
+	}
 
 }

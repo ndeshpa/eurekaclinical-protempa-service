@@ -39,7 +39,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -59,54 +59,85 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "sourceconfigs")
 public class SourceConfigEntity implements ConfigEntity {
-	@Id
-	@SequenceGenerator(name = "SOURCECONFIG_SEQ_GENERATOR", sequenceName = "SOURCECONFIG_SEQ",
-	allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,
-	generator = "SOURCECONFIG_SEQ_GENERATOR")
-	private Long id;
-	
-	@Column(nullable = false, unique = true)
-	private String name;
-	
-	@ManyToOne
-	private AuthorizedUserEntity owner;
-	
-	@OneToMany(cascade = CascadeType.ALL, mappedBy="sourceConfig")
-	private List<SourceConfigGroupMembership> groups;
 
-	public Long getId() {
-		return id;
-	}
+    @Id
+    @SequenceGenerator(name = "SOURCECONFIG_SEQ_GENERATOR", sequenceName = "SOURCECONFIG_SEQ",
+            allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "SOURCECONFIG_SEQ_GENERATOR")
+    private Long id;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Column(nullable = false, unique = true)
+    private String name;
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @ManyToOne
+    private AuthorizedUserEntity owner;
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public AuthorizedUserEntity getOwner() {
-		return owner;
-	}
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sourceConfig")
+    private List<SourceConfigGroupMembership> groups;
 
-	public void setOwner(AuthorizedUserEntity owner) {
-		this.owner = owner;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public List<SourceConfigGroupMembership> getGroups() {
-		return groups;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setGroups(List<SourceConfigGroupMembership> groups) {
-		this.groups = groups;
-	}
-	
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public AuthorizedUserEntity getOwner() {
+        return owner;
+    }
+
+    @Override
+    public void setOwner(AuthorizedUserEntity inOwner) {
+        if (this.owner != inOwner) {
+            if (this.owner != null) {
+                this.owner.removeSourceConfig(this);
+            }
+            this.owner = inOwner;
+            if (this.owner != null) {
+                this.owner.addSourceConfig(this);
+            }
+        }
+    }
+
+    public List<SourceConfigGroupMembership> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<SourceConfigGroupMembership> inGroups) {
+        if (inGroups == null) {
+            this.groups = new ArrayList<>();
+        } else {
+            this.groups = new ArrayList<>(inGroups);
+            for (SourceConfigGroupMembership group : inGroups) {
+                group.setSourceConfig(this);
+            }
+        }
+    }
+    
+    public void addGroup(SourceConfigGroupMembership inGroup) {
+        if (!this.groups.contains(inGroup)) {
+            this.groups.add(inGroup);
+            inGroup.setSourceConfig(this);
+        }
+    }
+
+    public void removeGroup(SourceConfigGroupMembership inGroup) {
+        if (this.groups.remove(inGroup)) {
+            inGroup.setSourceConfig(null);
+        }
+    }
+
 }

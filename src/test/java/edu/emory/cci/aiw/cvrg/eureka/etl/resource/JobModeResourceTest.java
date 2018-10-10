@@ -40,13 +40,10 @@
 package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
 import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.ws.rs.core.MediaType;
 import java.util.List;
-import org.eurekaclinical.eureka.client.comm.Job;
 import org.eurekaclinical.eureka.client.comm.JobMode;
 
 /**

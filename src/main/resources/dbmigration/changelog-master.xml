@@ -961,9 +961,7 @@
             <column name="NAME" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="DESCRIPTION" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
             <column name="RANK" type="INT">
                 <constraints nullable="false"/>
             </column>
@@ -1033,8 +1031,110 @@
                                  constraintName="FK_JOBS_JOBMODE" 
                                  deferrable="false" initiallyDeferred="false" 
                                  onDelete="RESTRICT" referencedColumnNames="ID" 
-                                 referencedTableName="JOB_MODES" 
-                                 referencesUniqueColumn="false"/>
+                                 referencedTableName="JOB_MODES"/>
 
+    </changeSet>
+    <changeSet author="arpost" id="1361552652236-49">
+        <createTable tableName="ID_POOLS">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ID_POOL_PK"/>
+            </column>
+            <column name="OWNER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+        </createTable>
+        <createSequence sequenceName="ID_POOL_SEQ"/>
+        <addForeignKeyConstraint baseTableName="ID_POOLS" 
+                                 baseColumnNames="OWNER_ID" 
+                                 constraintName="FK_IDPOOL_OWNERID" 
+                                 referencedTableName="USERS" 
+                                 referencedColumnNames="ID"/>
+        <addUniqueConstraint tableName="ID_POOLS" columnNames="OWNER_ID,NAME" 
+                             constraintName="UNIQ_IDPOOL_OWNERID_NAME"/>
+        <createTable tableName="ID_POOL_IDS">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ID_POOL_ID_PK"/>
+            </column>
+            <column name="FROMID" type="VARCHAR(255)"/>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="IDPOOL_ID" type="BIGINT"/>
+        </createTable>
+        <createSequence sequenceName="ID_POOL_ID_SEQ"/>
+        <createIndex indexName="IDX_ID_POOL_ID_FROMID" tableName="ID_POOL_IDS">
+            <column name="FROMID" type="VARCHAR(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="IDPOOL_ID" 
+                                 baseTableName="ID_POOL_IDS" 
+                                 constraintName="FK_IDPOOLID_IDPOOL" 
+                                 deferrable="false" initiallyDeferred="false" 
+                                 onDelete="CASCADE" referencedColumnNames="ID" 
+                                 referencedTableName="ID_POOLS"/>
+        <addUniqueConstraint tableName="ID_POOL_IDS" columnNames="FROMID,IDPOOL_ID" 
+                             constraintName="UNIQ_IDPOOLID_FROMID"/>
+        <addColumn tableName="TF_DEST_TABLECOLUMNS">
+            <column name="IDPOOL_ID" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="IDPOOL_ID" 
+                                 baseTableName="TF_DEST_TABLECOLUMNS" 
+                                 constraintName="FK_TFDESTTC_IDPOOL" 
+                                 deferrable="false" initiallyDeferred="false" 
+                                 onDelete="SET NULL" referencedColumnNames="ID" 
+                                 referencedTableName="ID_POOLS"/>
+    </changeSet>
+    <changeSet author="arpost" id="1361552652236-50">
+        <createTable tableName="USERTEMPLATES">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"
+                             primaryKeyName="UT_PK" />
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"
+                             uniqueConstraintName="UT_NAME_UNIQ" />
+            </column>
+            <column name="AUTOAUTHORIZE" type="BOOLEAN">
+                <constraints nullable="false" />
+            </column>
+            <column name="CRITERIA" type="VARCHAR(255)" />
+        </createTable>
+
+        <createSequence sequenceName="UT_SEQ" />
+
+        <createTable tableName="USERTEMPLATE_ROLE">
+            <column name="USERTEMPLATE_ID" type="BIGINT">
+                <constraints nullable="false"  />
+            </column>
+            <column name="ROLE_ID" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="UT_ROLE_ROLES_FK" referencedColumnNames="ID"
+                             referencedTableName="ROLES" />
+            </column>
+        </createTable>
+         <addForeignKeyConstraint baseColumnNames="USERTEMPLATE_ID" 
+                                 baseTableName="USERTEMPLATE_ROLE"
+                                 constraintName="UT_ROLE_USERTEMPLATES_FK"
+                                 deferrable="false" initiallyDeferred="false"
+                                 onDelete="CASCADE" referencedColumnNames="ID"
+                                 referencedTableName="USERTEMPLATES"/>
+    </changeSet>
+    <changeSet id="1361552652236-51" author="dileep">
+        <insert tableName="USERTEMPLATES">
+            <column name="ID" valueSequenceNext="UT_SEQ"/>
+            <column name="NAME" value="Auto Authorize"/>
+            <column name="AUTOAUTHORIZE" valueBoolean="true"/>
+            <column name="CRITERIA"/>
+        </insert>
+        <insert tableName="USERTEMPLATE_ROLE">
+            <column name="USERTEMPLATE_ID" valueSequenceCurrent="UT_SEQ"/>
+            <column name="ROLE_ID" valueComputed="(select id from roles where name='researcher')"/>
+        </insert>
+        <rollback>
+            <delete tableName="USERTEMPLATES">
+                <where>NAME='Auto Authorize'</where>
+            </delete>
+        </rollback>
     </changeSet>
 </databaseChangeLog>

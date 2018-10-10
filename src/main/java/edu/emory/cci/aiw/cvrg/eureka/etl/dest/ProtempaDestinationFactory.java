@@ -39,10 +39,9 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.protempa.dest.keyloader.KeyLoaderDestination;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.persist.Transactional;
+import com.google.inject.persist.UnitOfWork;
+import org.protempa.dest.key.KeyLoaderDestination;
 
 import org.eurekaclinical.eureka.client.comm.Cohort;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
@@ -61,6 +60,10 @@ import edu.emory.cci.aiw.neo4jetl.Neo4jDestination;
 import org.protempa.dest.DestinationInitException;
 import org.protempa.dest.deid.DeidentifiedDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DeidPerPatientParamsDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.protempa.query.QueryMode;
 
 /**
@@ -74,49 +77,60 @@ public class ProtempaDestinationFactory {
     private final DestinationDao destinationDao;
     private final DeidPerPatientParamsDao deidPerPatientParamsDao;
     private final EurekaDeidConfigFactory eurekaDeidConfigFactory;
+    private final Provider<ETLIdPoolDao> idPoolDaoProvider;
+    private final UnitOfWork unitOfWork;
 
     @Inject
-    public ProtempaDestinationFactory(DestinationDao inDestinationDao, DeidPerPatientParamsDao inDeidPerPatientParamsDao, EtlProperties etlProperties, EurekaDeidConfigFactory inEurekaDeidConfigFactory) {
+    public ProtempaDestinationFactory(DestinationDao inDestinationDao, 
+            DeidPerPatientParamsDao inDeidPerPatientParamsDao, 
+            Provider<ETLIdPoolDao> inIdPoolDaoProvider,
+            EtlProperties etlProperties, 
+            EurekaDeidConfigFactory inEurekaDeidConfigFactory,
+            UnitOfWork inUnitOfWork) {
         this.destinationDao = inDestinationDao;
         this.deidPerPatientParamsDao = inDeidPerPatientParamsDao;
         this.etlProperties = etlProperties;
         this.eurekaDeidConfigFactory = inEurekaDeidConfigFactory;
+        this.idPoolDaoProvider = inIdPoolDaoProvider;
+        this.unitOfWork = inUnitOfWork;
     }
 
+    @Transactional
     public org.protempa.dest.Destination getInstance(Long destId, QueryMode queryMode) throws DestinationInitException {
         DestinationEntity dest = this.destinationDao.retrieve(destId);
         return getInstance(dest, queryMode);
     }
 
+    @Transactional
     public org.protempa.dest.Destination getInstance(DestinationEntity dest, QueryMode queryMode) throws DestinationInitException {
-        org.protempa.dest.Destination result;
+        org.protempa.dest.Destination actualDest;
         try {
             if (dest instanceof I2B2DestinationEntity) {
-                result = new I2b2Destination(new EurekaI2b2Configuration((I2B2DestinationEntity) dest, this.etlProperties));
+                actualDest = new I2b2Destination(new EurekaI2b2Configuration((I2B2DestinationEntity) dest, this.etlProperties));
             } else if (dest instanceof CohortDestinationEntity) {
                 CohortEntity cohortEntity = ((CohortDestinationEntity) dest).getCohort();
                 Cohort cohort = cohortEntity.toCohort();
-                result = new KeyLoaderDestination(dest.getName(), new CohortCriteria(cohort));
+                actualDest = new KeyLoaderDestination(dest.getName(), new CohortCriteria(cohort));
             } else if (dest instanceof Neo4jDestinationEntity) {
-                result = new Neo4jDestination(new EurekaNeo4jConfiguration((Neo4jDestinationEntity) dest));
+                actualDest = new Neo4jDestination(new EurekaNeo4jConfiguration((Neo4jDestinationEntity) dest));
             } else if (dest instanceof PatientSetExtractorDestinationEntity) {
-                result = new PatientSetExtractorDestination(this.etlProperties, (PatientSetExtractorDestinationEntity) dest);
+                actualDest = new PatientSetExtractorDestination(this.etlProperties, (PatientSetExtractorDestinationEntity) dest);
             } else if (dest instanceof PatientSetSenderDestinationEntity) {
-                result = new PatientSetSenderDestination(this.etlProperties, (PatientSetSenderDestinationEntity) dest);
+                actualDest = new PatientSetSenderDestination(this.etlProperties, (PatientSetSenderDestinationEntity) dest);
             } else if (dest instanceof TabularFileDestinationEntity) {
-                result = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest);
+                actualDest = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest, this.idPoolDaoProvider);
             } else {
                 throw new AssertionError("Invalid destination entity type " + dest.getClass());
             }
 
             if (dest.isDeidentificationEnabled()) {
                 if (queryMode == QueryMode.REPLACE) {
-                    this.deidPerPatientParamsDao.deleteAll(dest);
+                        this.deidPerPatientParamsDao.deleteAll(dest);
                 }
                 EurekaDeidConfig deidConfig = this.eurekaDeidConfigFactory.getInstance(dest);
-                return new DeidentifiedDestination(result, deidConfig);
+                return new DestinationWithUnitOfWork(new DeidentifiedDestination(actualDest, deidConfig), this.unitOfWork);
             } else {
-                return result;
+                return new DestinationWithUnitOfWork(actualDest, this.unitOfWork);
             }
         } catch (ConfigurationInitException ex) {
             throw new DestinationInitException(ex);

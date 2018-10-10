@@ -55,31 +55,31 @@ import org.eurekaclinical.common.config.InjectorSupport;
  */
 public class ContextTestListener extends GuiceServletContextListener {
 
-	private InjectorSupport injectorSupport;
+    private InjectorSupport injectorSupport;
 
-	@Override
-	protected Injector getInjector() {
-		/**
-		 * This is called by super's contextInitialized.
-		 * 
-		 * Must be created here in order for the modules to be initialized
-		 * correctly.
-		 */
-		if (this.injectorSupport == null) {
-			this.injectorSupport = new InjectorSupport(
-				new Module[]{
-					new AppTestModule(),
-					new ServletTestModule()
-				},
-				Stage.DEVELOPMENT);
-		}
-		return this.injectorSupport.getInjector();
-	}
+    @Override
+    protected Injector getInjector() {
+        /**
+         * This is called by super's contextInitialized.
+         *
+         * Must be created here in order for the modules to be initialized
+         * correctly.
+         */
+        if (this.injectorSupport == null) {
+            this.injectorSupport = new InjectorSupport(
+                    new Module[]{
+                        new AppTestModule(),
+                        new ServletTestModule()
+                    },
+                    Stage.DEVELOPMENT);
+        }
+        return this.injectorSupport.getInjector();
+    }
 
-	@Override
-	public void contextDestroyed(ServletContextEvent inServletContextEvent) {
-		super.contextDestroyed(inServletContextEvent);
-		TaskManager taskManager = this.injectorSupport.getInjector().getInstance(TaskManager.class);
-		taskManager.shutdown();
-	}
+    @Override
+    public void contextDestroyed(ServletContextEvent inServletContextEvent) {
+        super.contextDestroyed(inServletContextEvent);
+        TaskManager taskManager = this.injectorSupport.getInjector().getInstance(TaskManager.class);
+        taskManager.shutdown();
+    }
 }

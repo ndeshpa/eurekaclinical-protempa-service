@@ -39,8 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -79,7 +77,11 @@ public class TabularFileDestinationTableColumnEntity {
     private Long rank;
 
     private String path;
-
+    
+    @ManyToOne
+    @JoinColumn(name = "idpool_id")
+    private IdPoolEntity idPool;
+    
     @ManyToOne
     @JoinColumn(name = "tabularfiledestinations_id", nullable = false)
     private TabularFileDestinationEntity destination;
@@ -158,4 +160,12 @@ public class TabularFileDestinationTableColumnEntity {
         return this.destination;
     }
 
+    public IdPoolEntity getIdPool() {
+        return idPool;
+    }
+
+    public void setIdPool(IdPoolEntity idPool) {
+        this.idPool = idPool;
+    }
+    
 }

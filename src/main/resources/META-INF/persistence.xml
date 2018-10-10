@@ -79,13 +79,15 @@
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.MessageDigestEncryptionAlgorithm</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationIdPoolIdEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity</class>
     <properties>
-      <!-- Disable the second-level cache -->
-      <property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheProvider"/>
+      <property name="hibernate.jdbc.batch_size" value="1000"/>
+      <property name="hibernate.jdbc.fetch_size" value="1000"/>
+      <property name="hibernate.order_inserts" value="true"/>
+      <property name="hibernate.order_updates" value="true"/>
       <property name="hibernate.hbm2ddl.auto" value="validate"/>
-      <!--   <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect" />  -->
-      <!-- Default is false for backwards compatibility. Should be used on all
-            new projects -->
       <property name="hibernate.id.new_generator_mappings" value="true"/>
     </properties>
   </persistence-unit>

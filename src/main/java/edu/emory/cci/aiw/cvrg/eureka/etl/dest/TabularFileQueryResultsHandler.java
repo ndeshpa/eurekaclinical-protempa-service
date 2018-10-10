@@ -42,21 +42,25 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ETLIdPoolDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.IdPool;
+import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.arp.javautil.arrays.Arrays;
+import org.arp.javautil.collections.Collections;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
@@ -70,10 +74,10 @@ import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 import org.protempa.dest.table.ConstantColumnSpec;
 import org.protempa.dest.table.FileTabularWriter;
 import org.protempa.dest.table.QuoteModel;
-import org.protempa.dest.table.TableColumnSpec;
 import org.protempa.dest.table.TabularWriterException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.NominalValue;
 import org.protempa.query.Query;
 import org.protempa.query.QueryMode;
 import org.slf4j.Logger;
@@ -94,10 +98,15 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     private final KnowledgeSource knowledgeSource;
     private final char delimiter;
     private KnowledgeSourceCache ksCache;
-    private Map<String, Map<Long, List<TableColumnSpec>>> rowRankToColumn;
+    private Map<String, Map<Long, List<FileTableColumnSpecWrapper>>> rowRankToColumnByTableName;
     private final Query query;
+    private final Provider<ETLIdPoolDao> idPoolDaoProvider;
+    private ETLIdPoolDao idPoolDao;
 
-    TabularFileQueryResultsHandler(Query query, TabularFileDestinationEntity inTabularFileDestinationEntity, EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource) {
+    TabularFileQueryResultsHandler(Query query,
+            TabularFileDestinationEntity inTabularFileDestinationEntity,
+            EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource,
+            Provider<ETLIdPoolDao> inIdPoolDaoProvider) {
         assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
         this.etlProperties = inEtlProperties;
         this.config = inTabularFileDestinationEntity;
@@ -110,8 +119,9 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         }
         this.writers = new HashMap<>();
         this.rowPropositionIdMap = new HashMap<>();
-        this.rowRankToColumn = new HashMap<>();
+        this.rowRankToColumnByTableName = new HashMap<>();
         this.query = query;
+        this.idPoolDaoProvider = inIdPoolDaoProvider;
     }
 
     @Override
@@ -120,9 +130,17 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
     @Override
     public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
+        this.idPoolDao = this.idPoolDaoProvider.get();
+        try {
+            this.idPoolDao.start();
+        } catch (PoolException ex) {
+            throw new QueryResultsHandlerProcessingException("Start query results handler", ex);
+        }
         createWriters();
         mapColumnSpecsToColumnNames(cache);
-        writeHeaders();
+        if (this.query.getQueryMode() == QueryMode.REPLACE) {
+            writeHeaders();
+        }
 
         try {
             this.ksCache = new KnowledgeSourceCacheFactory().getInstance(this.knowledgeSource, cache, true);
@@ -140,45 +158,67 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
             LOGGER.debug("Data for keyId {}: {}", new Object[]{keyId, propositions});
         }
 
-        for (Map.Entry<String, Map<Long, List<TableColumnSpec>>> me : this.rowRankToColumn.entrySet()) {
-            String tableName = me.getKey();
-            Map<Long, List<TableColumnSpec>> columnSpecGroups = me.getValue();
-            for (Map.Entry<Long, List<TableColumnSpec>> me2 : columnSpecGroups.entrySet()) {
-                List<TableColumnSpec> columnSpecs = me2.getValue();
+        Map<String, List<Proposition>> collect = new HashMap<>();
+        for (Proposition prop : propositions) {
+            Collections.putList(collect, prop.getId(), prop);
+        }
+
+        for (Map.Entry<String, Map<Long, List<FileTableColumnSpecWrapper>>> tableNameToRowNumToColumnSpecs : this.rowRankToColumnByTableName.entrySet()) {
+            String tableName = tableNameToRowNumToColumnSpecs.getKey();
+            Map<Long, List<FileTableColumnSpecWrapper>> rowNumToColumnSpecs = tableNameToRowNumToColumnSpecs.getValue();
+            for (Map.Entry<Long, List<FileTableColumnSpecWrapper>> rowNumToColumnSpec : rowNumToColumnSpecs.entrySet()) {
+                List<FileTableColumnSpecWrapper> columnSpecs = rowNumToColumnSpec.getValue();
                 int n = columnSpecs.size();
                 FileTabularWriter writer = this.writers.get(tableName);
-                Map<Long, Set<String>> get = this.rowPropositionIdMap.get(tableName);
-                if (get != null) {
-                    Set<String> rowPropIds = get.get(me2.getKey());
+                Map<Long, Set<String>> rowPropIdValue = this.rowPropositionIdMap.get(tableName);
+                if (rowPropIdValue != null) {
+                    Set<String> rowPropIds = rowPropIdValue.get(rowNumToColumnSpec.getKey());
                     if (rowPropIds != null) {
-                        for (Proposition prop : propositions) {
-                            if (rowPropIds.contains(prop.getId())) {
+                        Iterator<Map.Entry<String, List<Proposition>>> itr = collect.entrySet().stream().filter(me -> rowPropIds.contains(me.getKey())).iterator();
+                        for (; itr.hasNext();) {
+                            for (Proposition prop : itr.next().getValue()) {
                                 try {
                                     for (int i = 0; i < n; i++) {
-                                        TableColumnSpec columnSpec = columnSpecs.get(i);
-                                        columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, writer);
+                                        FileTableColumnSpecWrapper columnSpecWrapper = columnSpecs.get(i);
+                                        TabularWriterWithPool pool = columnSpecWrapper.getFileTabularWriterWithPool();
+                                        pool.setTabularWriter(writer);
+                                        columnSpecWrapper.getTableColumnSpec().columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, pool);
+                                        pool.setTabularWriter(null);
                                     }
                                     writer.newRow();
                                 } catch (TabularWriterException ex) {
-                                    throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
+                                    throw new QueryResultsHandlerProcessingException("Could not write row", ex);
                                 }
                             }
                         }
                     }
                 }
             }
-
         }
     }
 
     @Override
     public void finish() throws QueryResultsHandlerProcessingException {
+        try {
+            this.idPoolDao.finish();
+        } catch (PoolException ex) {
+            throw new QueryResultsHandlerProcessingException("Error finishing up", ex);
+        }
     }
 
     @Override
     public void close() throws QueryResultsHandlerCloseException {
         QueryResultsHandlerCloseException exception = null;
         exception = closeWriters(exception);
+        try {
+            this.idPoolDao.close();
+        } catch (Exception ex) {
+            if (exception != null) {
+                exception.addSuppressed(ex);
+            } else {
+                exception = new QueryResultsHandlerCloseException(ex);
+            }
+        }
         if (exception != null) {
             throw exception;
         }
@@ -203,13 +243,13 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     }
 
     private void writeHeaders() throws AssertionError, QueryResultsHandlerProcessingException {
-        for (Map.Entry<String, Map<Long, List<TableColumnSpec>>> me : this.rowRankToColumn.entrySet()) {
+        for (Map.Entry<String, Map<Long, List<FileTableColumnSpecWrapper>>> me : this.rowRankToColumnByTableName.entrySet()) {
             List<String> columnNames = new ArrayList<>();
-            Iterator<List<TableColumnSpec>> iterator = me.getValue().values().iterator();
+            Iterator<List<FileTableColumnSpecWrapper>> iterator = me.getValue().values().iterator();
             if (iterator.hasNext()) {
-                for (TableColumnSpec columnSpec : iterator.next()) {
+                for (FileTableColumnSpecWrapper columnSpec : iterator.next()) {
                     try {
-                        Arrays.addAll(columnNames, columnSpec.columnNames(this.knowledgeSource));
+                        Arrays.addAll(columnNames, columnSpec.getTableColumnSpec().columnNames(this.knowledgeSource));
                     } catch (KnowledgeSourceReadException ex) {
                         throw new AssertionError("Should never happen");
                     }
@@ -218,7 +258,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
             FileTabularWriter writer = this.writers.get(me.getKey());
             try {
                 for (String columnName : columnNames) {
-                    writer.writeString(columnName);
+                    writer.writeNominal(NominalValue.getInstance(columnName));
                 }
                 writer.newRow();
             } catch (TabularWriterException ex) {
@@ -228,45 +268,36 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
     }
 
     private void mapColumnSpecsToColumnNames(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
-        List<TabularFileDestinationTableColumnEntity> tableColumns = this.config.getTableColumns();
-        Collections.sort(tableColumns, (TabularFileDestinationTableColumnEntity o1, TabularFileDestinationTableColumnEntity o2) -> {
-            int rowRankCompare = o1.getRowRank().compareTo(o2.getRowRank());
-            if (rowRankCompare != 0) {
-                return rowRankCompare;
-            } else {
-                return o1.getRank().compareTo(o2.getRowRank());
-            }
-        });
-        this.rowRankToColumn = new HashMap<>();
+        this.rowRankToColumnByTableName = new HashMap<>();
         for (TabularFileDestinationTableColumnEntity tableColumn : this.config.getTableColumns()) {
             String tableName = tableColumn.getTableName();
-            Map<Long, List<TableColumnSpec>> value = rowRankToColumn.get(tableName);
-            if (value == null) {
-                value = new HashMap<>();
-                rowRankToColumn.put(tableName, value);
+            Map<Long, List<FileTableColumnSpecWrapper>> rowRankToTableColumnSpecs = this.rowRankToColumnByTableName.get(tableName);
+            if (rowRankToTableColumnSpecs == null) {
+                rowRankToTableColumnSpecs = new HashMap<>();
+                this.rowRankToColumnByTableName.put(tableName, rowRankToTableColumnSpecs);
             }
-            String format = tableColumn.getFormat();
+
+            IdPool idPool = idPoolDao != null ? idPoolDao.toIdPool(tableColumn.getIdPool()) : null;
             TableColumnSpecFormat linksFormat
-                    = new TableColumnSpecFormat(tableColumn.getColumnName(), format != null ? new SimpleDateFormat(format) : null);
+                    = new TableColumnSpecFormat(tableColumn.getColumnName(), tableColumn.getFormat(), idPool);
             try {
-                TableColumnSpecWrapper tableColumnSpecWrapper = toTableColumnSpec(tableColumn, linksFormat);
+                FileTableColumnSpecWrapper tableColumnSpecWrapper = newTableColumnSpec(tableColumn, linksFormat, idPool);
                 String pid = tableColumnSpecWrapper.getPropId();
                 if (pid != null) {
                     Long rowRank = tableColumn.getRowRank();
-                    Map<Long, Set<String>> get = this.rowPropositionIdMap.get(tableName);
-                    if (get == null) {
-                        get = new HashMap<>();
-                        this.rowPropositionIdMap.put(tableName, get);
+                    Map<Long, Set<String>> rowToPropIds = this.rowPropositionIdMap.get(tableName);
+                    if (rowToPropIds == null) {
+                        rowToPropIds = new HashMap<>();
+                        this.rowPropositionIdMap.put(tableName, rowToPropIds);
                     }
                     for (String propId : cache.collectPropIdDescendantsUsingInverseIsA(pid)) {
-                        org.arp.javautil.collections.Collections.putSet(get, rowRank, propId);
+                        org.arp.javautil.collections.Collections.putSet(rowToPropIds, rowRank, propId);
                     }
                 }
-                org.arp.javautil.collections.Collections.putList(value, tableColumn.getRowRank(), tableColumnSpecWrapper.getTableColumnSpec());
+                org.arp.javautil.collections.Collections.putList(rowRankToTableColumnSpecs, tableColumn.getRowRank(), tableColumnSpecWrapper);
             } catch (QueryException | ParseException ex) {
                 throw new QueryResultsHandlerProcessingException(ex);
             }
-
         }
 
         LOGGER.debug("Row concepts: {}", this.rowPropositionIdMap);
@@ -301,14 +332,16 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
         }
     }
 
-    private static TableColumnSpecWrapper toTableColumnSpec(
+    private static FileTableColumnSpecWrapper newTableColumnSpec(
             TabularFileDestinationTableColumnEntity tableColumn,
-            TableColumnSpecFormat linksFormat) throws ParseException {
+            TableColumnSpecFormat linksFormat, IdPool pool) throws ParseException {
         String path = tableColumn.getPath();
         if (path != null) {
-            return (TableColumnSpecWrapper) linksFormat.parseObject(path);
+            return (FileTableColumnSpecWrapper) linksFormat.parseObject(path);
         } else {
-            return new TableColumnSpecWrapper(new ConstantColumnSpec(tableColumn.getColumnName(), null));
+            return new FileTableColumnSpecWrapper(null,
+                    new ConstantColumnSpec(tableColumn.getColumnName(), null),
+                    new TabularWriterWithPool(pool));
         }
     }
 
