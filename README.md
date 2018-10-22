@@ -6,6 +6,9 @@ It provides backend services for managing phenotypes, cohorts and running phenot
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/eurekaclinical-protempa-service)
 
+## Version 2.1
+Support reading/writing data from/to an Oracle 12c database.
+
 ## Version 2.0
 Basic support for id generation for tabular files.
 New data processing modes for managing phenotypes.
