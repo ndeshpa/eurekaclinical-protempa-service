@@ -118,7 +118,7 @@ import org.protempa.proposition.interval.Interval;
 import org.protempa.query.QueryMode;
 
 @Path("/protected/jobs")
-@RolesAllowed({"researcher"})
+//@RolesAllowed({"researcher"})
 @Consumes(MediaType.APPLICATION_JSON)
 public class JobResource {
 
