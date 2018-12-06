@@ -297,9 +297,6 @@ Return:
 ##### GET `/api/protected/jobs/status?jobId=jobId&userId=userId&state=foo&from=bar&to=baz`
 Gets an array of all Jobs for the current user, optionally filtered by job id, user id, state (status) and/or date range (from date, to date).
 
-##### GET `/api/protected/jobs/{jobId}/stats[/{key}]`
-Gets a Statistics object for the specified Job, optionally constraining the results to statistics about the concept or phenotype with the specified key.
-
 ##### GET `/api/protected/jobs/latest`
 Gets the most recently submitted Job for the user.
 
