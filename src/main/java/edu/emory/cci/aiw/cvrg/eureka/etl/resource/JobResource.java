@@ -168,7 +168,7 @@ public class JobResource {
                 null);
         List<Job> jobs = new ArrayList<>();
         List<JobEntity> jobEntities;
-        if (order == null) {
+        if (order == null || order.equals("asc")) {
             jobEntities = this.jobDao.getWithFilter(jobFilter);
         } else if (order.equals("desc")) {
             jobEntities = this.jobDao.getWithFilterDesc(jobFilter);
