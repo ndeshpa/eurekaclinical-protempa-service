@@ -291,19 +291,6 @@ public class JobResource {
     @Transactional
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @RolesAllowed({"admin"})
-    @Path("/status")
-    public List<Job> getJobStatus(@QueryParam("filter") JobFilter inFilter) {
-        List<Job> jobs = new ArrayList<>();
-        for (JobEntity jobEntity : this.jobDao.getWithFilter(inFilter)) {
-            jobs.add(jobEntity.toJob());
-        }
-        return jobs;
-    }
-
-    @Transactional
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/latest")
     public List<Job> getLatestJob(@Context HttpServletRequest request) {
         List<Job> jobs = new ArrayList<>();
