@@ -1,6 +1,6 @@
 /*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
  * Copyright (C) 2012 - 2013 Emory University
  * %%
@@ -37,34 +37,26 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
+package edu.emory.cci.aiw.cvrg.eureka.etl.finder;
 
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
-import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
+import org.protempa.PropositionDefinition;
 
 /**
- *
+ * Interface for accessing sources of proposition definitions.
+ * 
  * @author hrathod
+ * @param <K> proposition id objects.
  */
-public class JobResourceTest extends AbstractEtlResourceTest {
-
-    /**
-     * Test if all the jobs added by the Setup class are returned properly,
-     * using a null Filter.
-     */
-    @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
-    }
-
+public interface PropositionRetriever<K> {
+	/**
+	 * Retrieves a proposition definition with the specified id and for the
+	 * specified user.
+	 * 
+	 * @param sourceConfigId the source config id of interest.
+	 * @param inKey the proposition id of interest.
+	 * @return the proposition definition of interest, or <code>null</code> if 
+	 * not found.
+	 */
+	PropositionDefinition retrieve (String sourceConfigId, K inKey)
+			throws PropositionFindException;
 }

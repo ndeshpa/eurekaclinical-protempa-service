@@ -1,6 +1,6 @@
 /*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
  * Copyright (C) 2012 - 2013 Emory University
  * %%
@@ -37,34 +37,35 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
+package edu.emory.cci.aiw.cvrg.eureka.etl.util;
 
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
-import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
- *
+ * Provide string related methods.
+ * 
  * @author hrathod
+ * 
  */
-public class JobResourceTest extends AbstractEtlResourceTest {
+public class StringUtil {
 
-    /**
-     * Test if all the jobs added by the Setup class are returned properly,
-     * using a null Filter.
-     */
-    @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
-    }
-
+	/**
+	 * Create an MD5 hash from the given string.
+	 * 
+	 * @param inData the data string to be hashed.
+	 * @return A hash of the input data string.
+	 * @throws NoSuchAlgorithmException If the hashing algorithm can not be
+	 *             found.
+	 */
+	public static String md5(final String inData)
+			throws NoSuchAlgorithmException {
+		StringBuilder hexBuilder = new StringBuilder();
+		MessageDigest digest = MessageDigest.getInstance("MD5");
+		digest.update(inData.getBytes());
+		for (byte b : digest.digest()) {
+			hexBuilder.append(Integer.toHexString(b & 0x00FF));
+		}
+		return hexBuilder.toString();
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
  * Copyright (C) 2012 - 2013 Emory University
  * %%
@@ -37,34 +37,36 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
+package edu.emory.cci.aiw.cvrg.eureka.etl.finder;
 
 import java.util.List;
+import javax.inject.Inject;
 
-import javax.ws.rs.core.MediaType;
+import org.protempa.PropositionDefinition;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.eurekaclinical.eureka.client.comm.SystemPhenotype;
 
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
-import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
+public class SystemPropositionFinder extends AbstractPropositionFinder<String> {
+	private final SystemPropositionRetriever retriever;
 
-/**
- *
- * @author hrathod
- */
-public class JobResourceTest extends AbstractEtlResourceTest {
-
-    /**
-     * Test if all the jobs added by the Setup class are returned properly,
-     * using a null Filter.
-     */
-    @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
-    }
+	@Inject
+	public SystemPropositionFinder(SystemPropositionRetriever inRetriever) {
+		super(inRetriever);
+		this.retriever = inRetriever;
+	}
+	
+	/**
+	 * Finds all of the system elements given by the keys for the given user
+	 * 
+	 * @param sourceConfigId the ID of the source config to use for the look-up
+	 * @param inKeys the keys of the system elements to look up
+	 * @param withChildren whether to find the given system elements' children as well
+	 * @return a {@link List} of {@link SystemPhenotype}s
+	 * @throws PropositionFindException
+	 */
+	public List<PropositionDefinition> findAll(
+	        String sourceConfigId, List<String> inKeys, Boolean withChildren) throws PropositionFindException {
+		return this.retriever.retrieveAll(sourceConfigId, inKeys, withChildren);
+	}
 
 }

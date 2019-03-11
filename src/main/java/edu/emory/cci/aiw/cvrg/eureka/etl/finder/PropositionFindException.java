@@ -1,6 +1,6 @@
 /*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
  * Copyright (C) 2012 - 2013 Emory University
  * %%
@@ -37,34 +37,28 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
-
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
-import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
+package edu.emory.cci.aiw.cvrg.eureka.etl.finder;
 
 /**
- *
- * @author hrathod
+ * Represents errors in retrieving proposition definitions.
+ * 
+ * @author Andrew Post
  */
-public class JobResourceTest extends AbstractEtlResourceTest {
+public class PropositionFindException extends Exception {
 
-    /**
-     * Test if all the jobs added by the Setup class are returned properly,
-     * using a null Filter.
-     */
-    @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
-    }
+	public PropositionFindException() {
+	}
 
+	public PropositionFindException(String string) {
+		super(string);
+	}
+
+	public PropositionFindException(String string, Throwable thrwbl) {
+		super(string, thrwbl);
+	}
+
+	public PropositionFindException(Throwable thrwbl) {
+		super(thrwbl);
+	}
+	
 }
