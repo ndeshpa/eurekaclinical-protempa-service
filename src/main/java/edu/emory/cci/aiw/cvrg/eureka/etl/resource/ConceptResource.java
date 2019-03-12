@@ -184,14 +184,17 @@ public class ConceptResource {
 		}
 
 		try {
-			List<PropositionDefinition> definitions = conceptResourceByConfigId.getPropositionsInTheOntologyBySearchKey(
-					scps.get(0).getId(), inSearchKey);
-
+                    List<PropositionDefinition> definitions = this.finder.findAll(
+					scps.get(0).getId(),
+					this.etlProperties.getDefaultSystemPropositions(),
+					Boolean.FALSE);
+            
 			for (PropositionDefinition definition : definitions) {
-
-				SystemPhenotype phenotype = PropositionUtil.toSystemPhenotype(
-						scps.get(0).getId(), definition, true, this.finder);
-				result.add(phenotype);
+                                if (definition.getDisplayName().equalsIgnoreCase(inSearchKey)){
+                                    SystemPhenotype phenotype = PropositionUtil.toSystemPhenotype(
+                                    scps.get(0).getId(), definition, true, this.finder);
+                                    result.add(phenotype);
+                                }
 			}
 			LOGGER.info("returning search results list of size"
 					+ definitions.size());
