@@ -1,10 +1,11 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AOUParticipantDestinationEntity;
 /*
  * #%L
- * Eureka Common
+ * Eureka Protempa ETL
  * %%
- * Copyright (C) 2012 - 2014 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,23 +40,39 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
+import edu.emory.cci.aiw.i2b2etl.dest.config.Database;
+import edu.emory.cci.aiw.i2b2etl.dest.config.DatabaseSpec;
 
 /**
  *
- * @author Andrew Post
+ * @author Nita
  */
-public interface DestinationEntityVisitor {
-	void visit(CohortDestinationEntity cohortDestination);
-	
-	void visit(I2B2DestinationEntity i2b2Destination);
-	
-	void visit(Neo4jDestinationEntity neo4jDestination);
-	
-	void visit(PatientSetExtractorDestinationEntity patientSetExtractorDestination);
-	
-	void visit(PatientSetSenderDestinationEntity patientSetSenderDestination);
-	
-	void visit(TabularFileDestinationEntity tabularFileDestinationEntity);
-	
-	void visit(AOUParticipantDestinationEntity aouParticipantDestination);
+class AOUDatabase implements Database {
+
+	private final DatabaseSpec dataSpec;
+
+	AOUDatabase(AOUParticipantDestinationEntity entity) {
+		DatabaseSpecFactory databaseSpecFactory = new DatabaseSpecFactory();
+		
+		String dataConnect = entity.getDataConnect();
+		String dataUser = entity.getDataUser();
+		String dataPassword = entity.getDataPassword();
+		if (dataConnect != null) {
+			this.dataSpec = databaseSpecFactory.getInstance(dataConnect, dataUser, dataPassword);
+		} else {
+			this.dataSpec = null;
+		}
+	}
+
+	@Override
+	public DatabaseSpec getDataSpec() {
+		return this.dataSpec;
+	}
+
+    @Override
+    public DatabaseSpec getMetadataSpec() {
+        return null;
+    }
+
 }

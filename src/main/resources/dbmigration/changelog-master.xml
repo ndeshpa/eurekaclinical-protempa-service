@@ -1137,4 +1137,64 @@
             </delete>
         </rollback>
     </changeSet>
+    <changeSet author="nita" id="1361552652236-52">
+       <createTable tableName="AOU_PARTICIPANT_DESTINATIONS">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="AP_DEST_PK"/>
+            </column>
+            <column name="ALWAYSQUOTED" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+             </column>
+             <column name="DATACONNECT" type="VARCHAR(255)"/>
+             <column name="DATAUSER" type="VARCHAR(255)"/>
+             <column name="DATAPASSWORD" type="VARCHAR(255)"/>
+       </createTable>
+       <addForeignKeyConstraint baseColumnNames="ID" baseTableName="AOU_PARTICIPANT_DESTINATIONS" constraintName="FK_AP_DEST" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="DESTINATIONS" referencesUniqueColumn="false"/>
+       <sql dbms="h2" endDelimiter=";">
+         CREATE SCHEMA COHORT_UF
+       </sql>
+       <createTable tableName="AOU_PARTICIPANTS" schemaName="COHORT_UF">
+            <column name="AOU_PARTICIPANT_ID" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="AOU_PARTICIPANTS_PK"/>
+            </column>
+            <column name="EMPI_NBR" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="AOU_PARTICIPANTS_EMPI_NBR_UNIQ"/>
+            </column>
+            <column name="PATIENT_BIRTH_DT" type="TIMESTAMP(6)">
+             <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="UF_PATIENT_KEY" schemaName="COHORT_UF">
+            <column name="AOU_PARTICIPANT_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PATIENT_KEY" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PATIENT_ID" type="VARCHAR(255)">
+             <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql dbms="h2" endDelimiter=";">
+          CREATE SCHEMA EHCVW
+        </sql>
+        <createTable tableName="LKP_PATIENT" schemaName="EHCVW">
+            <column name="PATIENT_KEY" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PATIENT_ID" type="VARCHAR(255)">
+             <constraints nullable="false"/>
+            </column>
+             <column name="EMPI_NBR" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PATIENT_BIRTH_DT" type="TIMESTAMP(6)">
+             <constraints nullable="false"/>
+            </column>
+            <column name="CURRENT_RECORD_IND" type="BIGINT">
+             <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sqlFile path="EHC_PatientKeysInsert.sql" relativeToChangelogFile="true"/>
+     </changeSet>
 </databaseChangeLog>

@@ -1,5 +1,6 @@
 package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
+import org.eurekaclinical.protempa.client.comm.EtlAouParticipantDestination;
 /*
  * #%L
  * Eureka Protempa ETL
@@ -49,6 +50,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationGroupMembership;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.EtlGroup;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AOUParticipantDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
@@ -200,6 +202,20 @@ public final class Destinations {
 		}
 		return result;
 	}
+	
+	   public List<EtlAouParticipantDestination> getAllAouParticipant() {
+	        List<EtlAouParticipantDestination> result = new ArrayList<>();
+	        AOUParticipantDestinationsDTOExtractor extractor
+	                = new AOUParticipantDestinationsDTOExtractor(this.etlUser, this.groupDao);
+	        for (AOUParticipantDestinationEntity configEntity
+	                : this.destinationDao.getCurrentAOUParticipantDestinations()) {
+	            EtlAouParticipantDestination dto = extractor.extractDTO(configEntity);
+	            if (dto != null) {
+	                result.add(dto);
+	            }
+	        }
+	        return result;
+	    }
 
 	/**
 	 * Gets the specified source extractDTO. If it does not exist or the current

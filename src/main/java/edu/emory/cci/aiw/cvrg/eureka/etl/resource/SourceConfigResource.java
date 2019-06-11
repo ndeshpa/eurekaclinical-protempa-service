@@ -63,7 +63,7 @@ import org.eurekaclinical.common.auth.AuthorizedUserSupport;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
 @Transactional
-@Path("/protected/sourceconfigs")
+@Path("/protected/sourceconfig")
 @RolesAllowed({"researcher"})
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

@@ -41,6 +41,8 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  */
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AOUParticipantDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity_;
@@ -90,9 +92,14 @@ public class JpaDestinationDao extends HistoricalGenericDao<DestinationEntity, L
 		return getDatabaseSupport().getCurrent(PatientSetSenderDestinationEntity.class);
 	}
 
-	@Override
-	public List<TabularFileDestinationEntity> getCurrentTabularFileDestinations() {
-		return getDatabaseSupport().getCurrent(TabularFileDestinationEntity.class);
-	}
+    @Override
+    public List<TabularFileDestinationEntity> getCurrentTabularFileDestinations() {
+        return getDatabaseSupport().getCurrent(TabularFileDestinationEntity.class);
+    }
+
+    @Override
+    public List<AOUParticipantDestinationEntity> getCurrentAOUParticipantDestinations() {
+        return getDatabaseSupport().getCurrent(AOUParticipantDestinationEntity.class);
+    }
 
 }

@@ -46,6 +46,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AOUParticipantDestinationEntity;
 import java.util.List;
 import org.eurekaclinical.standardapis.dao.HistoricalDaoWithUniqueName;
 
@@ -64,4 +65,6 @@ public interface DestinationDao extends HistoricalDaoWithUniqueName<Long, Destin
 	List<PatientSetSenderDestinationEntity> getCurrentPatientSetSenderDestinations();
 	
 	List<TabularFileDestinationEntity> getCurrentTabularFileDestinations();
+	
+	List<AOUParticipantDestinationEntity> getCurrentAOUParticipantDestinations();
 }

@@ -253,4 +253,72 @@
 			<column name="OWNER_ID" valueNumeric="1"/>
 		</insert>
 	</changeSet>
+    <changeSet id="4" author="ndeshpa">
+    <insert tableName="DESTINATIONS">
+            <column name="ID" valueSequenceNext="DEST_SEQ"/>
+            <column name="OWNER_ID" valueComputed="(SELECT ID FROM USERS WHERE username='superuser')" />
+            <column name="DESCRIPTION" value="Load Patient Set"/>  
+            <column name="CREATED_AT" valueDate="2018-12-03T17:27:00"/>
+            <column name="EFFECTIVE_AT" valueDate="2018-12-03T17:27:00"/>
+            <column name="EXPIRED_AT" valueDate="2025-12-03T17:27:00"/>
+            <column name="NAME" value="Load Patient Set"/>
+            <column name="KEYALGORITHM" value=""/>
+            <column name="DEIDENTIFICATIONENABLED" valueBoolean="false"/>
+            <column name="ENCRYPTIONALGORITHM_ID" valueNumeric="1"/>        
+            <!-- column name="UPDATED_AT" valueDate="2018-12-03T17:27:00"/-->
+            <column name="OUTPUTNAME" value="OUTPUT"/>
+            <column name="OUTPUTTYPE" value="application/octet-stream"/>
+        </insert>
+        <insert tableName="GROUPS">
+            <column name="ID" valueSequenceNext="GROUPS_SEQ" />
+            <column name="NAME" value="AllOfUs"/>
+        </insert>
+        <insert  tableName="DESTINATIONS_GROUPS">
+            <column name="ID" valueSequenceNext="DEST_GRP_SEQ" />
+            <column name="GROUPEXECUTE" valueBoolean="true"/>
+            <column name="GROUPREAD" valueBoolean="true"/>
+            <column name="GROUPWRITE" valueBoolean="true"/>
+            <column name="DESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ" />
+            <column name="GROUPS_ID" valueSequenceCurrent="GROUPS_SEQ" />
+        </insert>
+        <insert tableName="DEST_LINKS">
+            <column name="ID" valueSequenceNext="DEST_LINK_SEQ"/>
+            <column name="DESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ" />
+            <column name="URL" value="http://www.google.com"/>
+            <column name="DISPLAYNAME" value="All of Us Link"/>
+        </insert>
+        <insert tableName="DEID_PER_PATIENT_PARAMS">
+            <column name="ID" valueSequenceNext="DEID_PER_PT_PARAMS_SEQ"/>
+            <column name="DESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ" />
+            <column name="KEYID" value="PMID"/>
+            <column name="SALT" value=""/>
+            <column name="DTOFFSET" valueNumeric="0"/>
+            <column name="CIPHERKEY" value=""/>
+        </insert>
+        <insert tableName="SOURCECONFIGS">
+            <column name="ID" valueSequenceNext="SOURCECONFIG_SEQ"/>
+            <column name="NAME" value="Patient Set"/>
+            <column name="OWNER_ID" valueComputed="(SELECT ID FROM USERS WHERE username='superuser')" />
+        </insert>
+        <insert tableName="SOURCECONFIGS_GROUPS">
+            <column name="ID" valueSequenceNext="SC_GRP_SEQ" />
+            <column name="GROUPEXECUTE" valueBoolean="true"/>
+            <column name="GROUPREAD" valueBoolean="true" />
+            <column name="GROUPWRITE" valueBoolean="true" />
+            <column name="GROUPS_ID" valueSequenceCurrent="GROUPS_SEQ" />
+            <column name="SOURCECONFIGS_ID" valueSequenceCurrent="SOURCECONFIG_SEQ"/>
+        </insert>
+        <insert tableName="USERS_DESTINATIONS">
+            <column name="USERS_ID" valueComputed="(SELECT ID FROM USERS WHERE username='superuser')" />
+            <column name="DESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ" />
+        </insert>
+        <insert tableName="USERS_GROUPS">
+            <column name="USERS_ID" valueComputed="(SELECT ID FROM USERS WHERE username='superuser')" />
+            <column name="GROUPS_ID" valueSequenceCurrent="GROUPS_SEQ" />
+        </insert>
+        <insert tableName="USERS_SOURCECONFIGS">
+            <column name="USERS_ID" valueComputed="(SELECT ID FROM USERS WHERE username='superuser')" />
+            <column name="SOURCECONFIGS_ID" valueSequenceCurrent="SOURCECONFIG_SEQ"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

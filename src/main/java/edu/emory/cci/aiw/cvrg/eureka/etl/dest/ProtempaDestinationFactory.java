@@ -44,6 +44,8 @@ import com.google.inject.persist.UnitOfWork;
 import org.protempa.dest.key.KeyLoaderDestination;
 
 import org.eurekaclinical.eureka.client.comm.Cohort;
+
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AOUParticipantDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
@@ -119,6 +121,8 @@ public class ProtempaDestinationFactory {
                 actualDest = new PatientSetSenderDestination(this.etlProperties, (PatientSetSenderDestinationEntity) dest);
             } else if (dest instanceof TabularFileDestinationEntity) {
                 actualDest = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest, this.idPoolDaoProvider);
+            } else if (dest instanceof AOUParticipantDestinationEntity) {
+                actualDest = new AOUParticipantDestination(new EurekaAOUConfiguration((AOUParticipantDestinationEntity) dest, this.etlProperties));
             } else {
                 throw new AssertionError("Invalid destination entity type " + dest.getClass());
             }

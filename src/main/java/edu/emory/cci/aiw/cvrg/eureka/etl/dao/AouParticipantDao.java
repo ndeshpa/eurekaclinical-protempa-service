@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
 
-/*
+/*-
  * #%L
- * Eureka Common
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2014 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -40,22 +40,38 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * #L%
  */
 
+
+import java.util.List;
+
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobEntity;
+import org.eurekaclinical.eureka.client.comm.JobFilter;
+import org.eurekaclinical.standardapis.dao.Dao;
+
 /**
+ * A data access object interface to retrieve and store information about
+ * Protempa ETL jobs.
  *
- * @author Andrew Post
+ * @author Nita
+ *
  */
-public interface DestinationEntityVisitor {
-	void visit(CohortDestinationEntity cohortDestination);
-	
-	void visit(I2B2DestinationEntity i2b2Destination);
-	
-	void visit(Neo4jDestinationEntity neo4jDestination);
-	
-	void visit(PatientSetExtractorDestinationEntity patientSetExtractorDestination);
-	
-	void visit(PatientSetSenderDestinationEntity patientSetSenderDestination);
-	
-	void visit(TabularFileDestinationEntity tabularFileDestinationEntity);
-	
-	void visit(AOUParticipantDestinationEntity aouParticipantDestination);
+public interface AouParticipantDao extends Dao<JobEntity, Long> {
+
+    /**
+     * Gets a list of jobs that meet the given filter criteria.
+     *
+     * @param jobFilter The filter criteria.
+     * @return A list of jobs that meet the filter criteria.
+     */
+    List<JobEntity> getWithFilter(JobFilter jobFilter);
+
+    List<JobEntity> getWithFilterDesc(JobFilter jobFilter);
+
+    List<JobEntity> getLatestWithFilter(JobFilter jobFilter);
+    
+    void startTransaction();
+    
+    void commitTransaction();
+    
+    void rollbackTransaction();
+
 }

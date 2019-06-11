@@ -63,6 +63,7 @@
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.AOUParticipantDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.LiteralEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.NodeEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationConceptSpecEntity</class>

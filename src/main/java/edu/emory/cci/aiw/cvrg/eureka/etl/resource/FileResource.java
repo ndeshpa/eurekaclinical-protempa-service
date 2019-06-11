@@ -106,6 +106,7 @@ public class FileResource {
             @DefaultValue("1") @FormDataParam("flowTotalChunks") int totalChunks) {
         AuthorizedUserEntity user = this.authenticationSupport.getUser(req);
         SourceConfigs sources = new SourceConfigs(this.etlProperties, user, this.sourceConfigDao, this.groupDao);
+        String uploadedFileName = "";
         try {
             SourceConfig sourceConfig = sources.getOne(sourceConfigId);
             if (sourceConfig == null || !sourceConfig.isExecute()) {
@@ -119,7 +120,11 @@ public class FileResource {
                 File[] partialFiles = tempDir.listFiles();
                 if (partialFiles.length == totalChunks) {
                     Arrays.sort(partialFiles, fileComparator);
-                    try (OutputStream out = new FileOutputStream(new File(uploadedDir, fileDetail.getFileName()))) {
+                    if(sourceConfigId.equals("Patient Set")) 
+                        uploadedFileName = "PatientSet" + fileDetail.getFileName().substring(fileDetail.getFileName().indexOf('.'));
+                    else 
+                        uploadedFileName = fileDetail.getFileName();
+                    try (OutputStream out = new FileOutputStream(new File(uploadedDir, uploadedFileName))) {
                         for (int i = 0; i < totalChunks; i++) {
                             FileUtils.copyFile(partialFiles[i], out);
                         }

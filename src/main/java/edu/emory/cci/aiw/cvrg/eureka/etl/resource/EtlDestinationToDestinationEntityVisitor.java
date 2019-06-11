@@ -1,5 +1,6 @@
 package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
+import org.eurekaclinical.protempa.client.comm.EtlAouParticipantDestination;
 /*-
  * #%L
  * Eureka Protempa ETL
@@ -140,6 +141,11 @@ public class EtlDestinationToDestinationEntityVisitor implements EtlDestinationV
 
     @Override
     public void visit(EtlTabularFileDestination etlTabularFileDestination) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    public void visit(EtlAouParticipantDestination etlAouParticipantDestination) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

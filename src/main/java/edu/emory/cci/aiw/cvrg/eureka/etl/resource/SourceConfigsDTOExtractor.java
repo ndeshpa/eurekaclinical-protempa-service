@@ -46,6 +46,7 @@ import org.eurekaclinical.eureka.client.comm.SourceConfigOption;
 import org.eurekaclinical.eureka.client.comm.UriSourceConfigOption;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.SourceConfigEntity;
+import edu.emory.cci.aiw.dsb.aou.TextPlainDsbPropertyValidator;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EurekaProtempaConfigurations;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
@@ -174,7 +175,13 @@ class SourceConfigsDTOExtractor extends ConfigsDTOExtractor<SourceConfig, Source
 				FileBackendPropertyValidator fileValidator = (FileBackendPropertyValidator) validator;
 				fileOption.setAcceptedMimetypes(fileValidator.getAcceptedMimetypes());
 				option = fileOption;
-			} else if (validator instanceof UriBackendPropertyValidator) {
+			}  else if (validator instanceof TextPlainDsbPropertyValidator) {
+			    FileSourceConfigOption fileOption = new FileSourceConfigOption();
+			    TextPlainDsbPropertyValidator fileValidator = (TextPlainDsbPropertyValidator) validator;
+                fileOption.setAcceptedMimetypes(fileValidator.getAcceptedMimetypes());
+                option = fileOption;
+			}
+			else if (validator instanceof UriBackendPropertyValidator) {
 				option = new UriSourceConfigOption();
 			} else {
 				option = new DefaultSourceConfigOption();

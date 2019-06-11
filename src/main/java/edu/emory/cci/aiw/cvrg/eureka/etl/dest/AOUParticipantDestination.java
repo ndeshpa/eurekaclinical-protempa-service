@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 
-/*
+/*-
  * #%L
- * Eureka Common
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2014 Emory University
+ * Copyright (C) 2012 - 2019 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -40,22 +40,36 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * #L%
  */
 
+
+import java.util.List;
+
+import org.protempa.DataSource;
+import org.protempa.KnowledgeSource;
+import org.protempa.ProtempaEventListener;
+import org.protempa.dest.AbstractDestination;
+import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.query.Query;
+
+import edu.emory.cci.aiw.i2b2etl.dest.config.Configuration;
+
 /**
- *
- * @author Andrew Post
+ * Protempa destination for saving aou participant files.
+ * 
+ * @author Nita
  */
-public interface DestinationEntityVisitor {
-	void visit(CohortDestinationEntity cohortDestination);
-	
-	void visit(I2B2DestinationEntity i2b2Destination);
-	
-	void visit(Neo4jDestinationEntity neo4jDestination);
-	
-	void visit(PatientSetExtractorDestinationEntity patientSetExtractorDestination);
-	
-	void visit(PatientSetSenderDestinationEntity patientSetSenderDestination);
-	
-	void visit(TabularFileDestinationEntity tabularFileDestinationEntity);
-	
-	void visit(AOUParticipantDestinationEntity aouParticipantDestination);
+public class AOUParticipantDestination extends AbstractDestination {
+
+    private final Configuration config;
+    
+
+    public AOUParticipantDestination(Configuration inConfig) {
+        this.config = inConfig;
+    }
+
+    @Override
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
+        return new AOUParticipantQueryResultsHandler(query, dataSource, this.config, knowledgeSource);
+    }
+
 }

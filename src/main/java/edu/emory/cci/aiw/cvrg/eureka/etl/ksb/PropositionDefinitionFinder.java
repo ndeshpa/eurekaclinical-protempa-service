@@ -89,6 +89,7 @@ public class PropositionDefinitionFinder implements AutoCloseable {
 			SourceFactory sf = new SourceFactory(configurations, configId);
 			this.knowledgeSource = sf.newKnowledgeSourceInstance();
 			this.defaultProps = new HashSet<>(this.etlProperties.getDefaultSystemPropositions());
+			LOGGER.info("default props: " + this.defaultProps.size());
 			LOGGER.debug("Done: configurations, source factory, and knowledge source created");
 		} catch (IOException | ConfigurationsNotFoundException | BackendInitializationException | BackendNewInstanceException | ConfigurationsLoadException | InvalidConfigurationException | BackendProviderSpecLoaderException ex) {
 			throw new PropositionFinderException(ex);
@@ -97,7 +98,11 @@ public class PropositionDefinitionFinder implements AutoCloseable {
 
 	public List<PropositionDefinition> findAll(Collection<String> propIds) throws PropositionFinderException {
 		try {
-			return this.knowledgeSource.readPropositionDefinitions(propIds.toArray(new String[propIds.size()]));
+		    LOGGER.info("knowledgesource type: " + this.knowledgeSource.getClass().getName());
+		    if(propIds == null || propIds.size() == 0)
+		        return this.knowledgeSource.readPropositionDefinitions(this.defaultProps.toArray(new String[this.defaultProps.size()]));
+		    else
+		        return this.knowledgeSource.readPropositionDefinitions(propIds.toArray(new String[propIds.size()]));
 		} catch (KnowledgeSourceReadException e) {
 			throw new PropositionFinderException(e);
 		}
