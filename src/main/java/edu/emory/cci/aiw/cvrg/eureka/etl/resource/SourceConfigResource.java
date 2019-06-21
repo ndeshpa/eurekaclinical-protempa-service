@@ -41,6 +41,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
+import com.sun.jersey.api.client.ClientResponse;
 
 import org.eurekaclinical.eureka.client.comm.SourceConfig;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
@@ -48,6 +49,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.SourceConfigDao;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -59,7 +61,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
+import org.arp.javautil.string.StringUtil;
 import org.eurekaclinical.common.auth.AuthorizedUserSupport;
+import org.eurekaclinical.eureka.client.comm.FileSourceConfigOption;
+import org.eurekaclinical.eureka.client.comm.SourceConfigOption;
+import org.eurekaclinical.eureka.client.comm.SourceConfigParams;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
 @Transactional
@@ -103,5 +109,74 @@ public class SourceConfigResource {
         AuthorizedUserEntity user = this.authenticationSupport.getUser(req);
         SourceConfigs sourceConfigs = new SourceConfigs(this.etlProperties, user, this.sourceConfigDao, this.groupDao);
         return sourceConfigs.getAll();
+    }
+    
+    @GET
+    @Path("/parameters/list")
+    public List<SourceConfigParams> getParamsList(@Context HttpServletRequest req) {
+            List<SourceConfigParams> result = new ArrayList<>();
+
+            for (SourceConfig config : this.getAll(req)) {
+                    result.add(toParams(config));
+            }
+
+            return result;
+    }
+
+    @GET
+    @Path("/parameters/{id}")
+    public SourceConfigParams getParams(@Context HttpServletRequest req, @PathParam("id") String inId) {
+            return toParams(this.getSource(req, inId));
+    }
+
+    private static SourceConfigParams toParams(SourceConfig config) {
+            SourceConfigParams params = new SourceConfigParams();
+            params.setId(config.getId());
+            String displayName = config.getDisplayName();
+            if (StringUtil.getEmptyOrNull(displayName)) {
+                    displayName = config.getId();
+            }
+            params.setName(displayName);
+            List<SourceConfigParams.Upload> uploads = new ArrayList<>();
+            for (SourceConfig.Section section : config.getDataSourceBackends()) {
+                    SourceConfigParams.Upload upload = null;
+                    String sourceId = null;
+                    String sampleUrl = null;
+                    for (SourceConfigOption option : section.getOptions()) {
+                            if (option instanceof FileSourceConfigOption) {
+                                    upload = new SourceConfigParams.Upload();
+                                    upload.setName(section.getDisplayName());
+                                    upload.setAcceptedMimetypes(((FileSourceConfigOption) option).getAcceptedMimetypes());
+                                    if (sourceId != null) {
+                                            upload.setSourceId(sourceId);
+                                    }
+                                    if (sampleUrl != null) {
+                                            upload.setSampleUrl(sampleUrl);
+                                    }
+                                    upload.setRequired(option.isRequired());
+                            } else if (option.getName().equals("dataFileDirectoryName")) {
+                                    Object val = option.getValue();
+                                    if (val != null) {
+                                            sourceId = val.toString();
+                                            if (upload != null) {
+                                                    upload.setSourceId(sourceId);
+                                            }
+                                    }
+                            } else if (option.getName().equals("sampleUrl")) {
+                                    Object val = option.getValue();
+                                    if (val != null) {
+                                            sampleUrl = val.toString();
+                                            if (upload != null) {
+                                                    upload.setSampleUrl(sampleUrl);
+                                            }
+                                    }
+                            }
+                    }
+                    if (upload != null) {
+                            uploads.add(upload);
+                    }
+            }
+            params.setUploads(uploads.toArray(new SourceConfigParams.Upload[uploads.size()]));
+            return params;
     }
 }

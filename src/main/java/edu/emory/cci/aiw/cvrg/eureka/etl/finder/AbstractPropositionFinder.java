@@ -1,6 +1,6 @@
 /*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
  * Copyright (C) 2012 - 2013 Emory University
  * %%
@@ -37,34 +37,37 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
+package edu.emory.cci.aiw.cvrg.eureka.etl.finder;
 
-import java.util.List;
+import org.protempa.PropositionDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.MediaType;
+public abstract class AbstractPropositionFinder<K> implements PropositionFinder<K> {
 
-import org.junit.Assert;
-import org.junit.Test;
+	private static Logger LOGGER = LoggerFactory.getLogger(AbstractPropositionFinder.class);
+	private final PropositionRetriever<K> retriever;
 
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
-import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
+	protected AbstractPropositionFinder(PropositionRetriever<K> inRetriever) {
+		this.retriever = inRetriever;
+	}
 
-/**
- *
- * @author hrathod
- */
-public class JobResourceTest extends AbstractEtlResourceTest {
-
-    /**
-     * Test if all the jobs added by the Setup class are returned properly,
-     * using a null Filter.
-     */
-    @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
-    }
+	/**
+	 * Retrieves a proposition definition from the {@link PropositionRetriever}
+	 * specified in this object's constructor.
+	 *
+	 * @param sourceConfigId the source configuration ID
+	 * @param inKey a proposition key.
+	 * @return the proposition definition, or <code>null</code> if there is no
+	 * proposition definition with the specified key for the specified user.
+	 *
+	 * @throws PropositionFindException if an error occurred looking for the
+	 * proposition definition.
+	 */
+	@Override
+	public PropositionDefinition find(String sourceConfigId, K inKey)
+			throws PropositionFindException {
+		return this.retriever.retrieve(sourceConfigId, inKey);
+	}
 
 }

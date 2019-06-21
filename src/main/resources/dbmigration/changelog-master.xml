@@ -1105,7 +1105,9 @@
 
         <createTable tableName="USERTEMPLATE_ROLE">
             <column name="USERTEMPLATE_ID" type="BIGINT">
-                <constraints nullable="false"  />
+                <constraints nullable="false" 
+                             foreignKeyName="UT_ROLE_USERTEMPLATES_FK"
+                             referencedColumnNames="ID" referencedTableName="USERTEMPLATES" />
             </column>
             <column name="ROLE_ID" type="BIGINT">
                 <constraints nullable="false"
@@ -1113,12 +1115,6 @@
                              referencedTableName="ROLES" />
             </column>
         </createTable>
-         <addForeignKeyConstraint baseColumnNames="USERTEMPLATE_ID" 
-                                 baseTableName="USERTEMPLATE_ROLE"
-                                 constraintName="UT_ROLE_USERTEMPLATES_FK"
-                                 deferrable="false" initiallyDeferred="false"
-                                 onDelete="CASCADE" referencedColumnNames="ID"
-                                 referencedTableName="USERTEMPLATES"/>
     </changeSet>
     <changeSet id="1361552652236-51" author="dileep">
         <insert tableName="USERTEMPLATES">

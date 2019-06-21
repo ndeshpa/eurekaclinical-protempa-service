@@ -1,3 +1,4 @@
+
 /*
  * #%L
  * Eureka Protempa ETL
@@ -45,6 +46,9 @@ import org.eurekaclinical.eureka.client.comm.DestinationType;
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.ConversionSupport;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.DestinationToEtlDestinationVisitor;
+import edu.emory.cci.aiw.cvrg.eureka.etl.conversion.EtlDestinationToDestinationVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
@@ -67,6 +71,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.eurekaclinical.common.auth.AuthorizedUserSupport;
+import org.eurekaclinical.eureka.client.comm.Destination;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
 @Transactional
@@ -81,74 +86,103 @@ public class DestinationResource {
     private final AuthorizedUserSupport<AuthorizedUserEntity, AuthorizedUserDao, ?> authenticationSupport;
     private final EtlGroupDao groupDao;
     private final EtlDestinationToDestinationEntityVisitor destToDestEntityVisitor;
+    private final ConversionSupport conversionSupport;
 
     @Inject
-    public DestinationResource(EtlProperties inEtlProperties, AuthorizedUserDao inEtlUserDao, DestinationDao inDestinationDao, EtlGroupDao inGroupDao, EtlDestinationToDestinationEntityVisitor inDestToDestEntityVisitor) {
+    public DestinationResource(EtlProperties inEtlProperties, AuthorizedUserDao inEtlUserDao, DestinationDao inDestinationDao, EtlGroupDao inGroupDao, EtlDestinationToDestinationEntityVisitor inDestToDestEntityVisitor, ConversionSupport inConversionSupport) {
         this.etlProperties = inEtlProperties;
         this.userDao = inEtlUserDao;
         this.destinationDao = inDestinationDao;
         this.authenticationSupport = new AuthorizedUserSupport<>(this.userDao);
         this.groupDao = inGroupDao;
         this.destToDestEntityVisitor = inDestToDestEntityVisitor;
+        this.conversionSupport = inConversionSupport;
     }
 
     @POST
-    public Response create(@Context HttpServletRequest request, EtlDestination etlDestination) {
+    public Response create(@Context HttpServletRequest request, Destination inDestination) {
         AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
         Destinations destinations = new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao, this.destToDestEntityVisitor);
+        DestinationToEtlDestinationVisitor v
+                        = new DestinationToEtlDestinationVisitor(this.conversionSupport);
+        inDestination.accept(v);
+        EtlDestination etlDestination = v.getEtlDestination();
         Long destId = destinations.create(etlDestination);
         return Response.created(URI.create("/" + destId)).build();
     }
 
     @PUT
-    public void update(@Context HttpServletRequest request, EtlDestination etlDestination) {
+    public void update(@Context HttpServletRequest request, Destination inDestination) {
         AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
+        DestinationToEtlDestinationVisitor v
+				= new DestinationToEtlDestinationVisitor(this.conversionSupport);
+        inDestination.accept(v);
+        EtlDestination etlDestination = v.getEtlDestination();
         new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao, this.destToDestEntityVisitor).update(etlDestination);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    public List<Destination> getAll(
+            @Context HttpServletRequest request,
+            @QueryParam("type") DestinationType type) {
+        AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
+        Destinations destinations = new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao, this.destToDestEntityVisitor);
+        List<? extends EtlDestination> etlDestinations;
+        if (type == null) {
+            etlDestinations= destinations.getAll();
+        }
+        else {
+            switch (type) {
+                case I2B2:
+                    etlDestinations = new ArrayList<>(destinations.getAllI2B2s());
+                    break;
+                case COHORT:
+                    etlDestinations = new ArrayList<>(destinations.getAllCohorts());
+                    break;
+                case PATIENT_SET_EXTRACTOR:
+                    etlDestinations = new ArrayList<>(destinations.getAllPatientSetExtractors());
+                    break;
+                case PATIENT_SET_SENDER:
+                    etlDestinations = new ArrayList<>(destinations.getAllPatientSetSenders());
+                    break;
+                case TABULAR_FILE:
+                    etlDestinations = new ArrayList<>(destinations.getAllTabularFiles());
+                    break;
+                default:
+                    throw new AssertionError("Unexpected destination type " + type);
+            }
+        }
+        
+        List<Destination> result;
+        result = new ArrayList<>(etlDestinations.size());
+        EtlDestinationToDestinationVisitor v
+                        = new EtlDestinationToDestinationVisitor(this.conversionSupport);
+        for (EtlDestination etlDest : etlDestinations) {
+                etlDest.accept(v);
+                result.add(v.getDestination());
+        }
+        return result;
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{destId}")
-    public EtlDestination getDestination(
+    public Destination getDestination(
             @Context HttpServletRequest request,
             @PathParam("destId") String destId) {
         AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
         EtlDestination result
                 = new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao, this.destToDestEntityVisitor).getOne(destId);
+        EtlDestinationToDestinationVisitor v
+				= new EtlDestinationToDestinationVisitor(this.conversionSupport);
         if (result != null) {
-            return result;
+            result.accept(v);
+            return v.getDestination();
         } else {
             throw new HttpStatusException(Status.NOT_FOUND);
         }
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<EtlDestination> getAll(
-            @Context HttpServletRequest request,
-            @QueryParam("type") DestinationType type) {
-        AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
-        Destinations destinations = new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao, this.destToDestEntityVisitor);
-        if (type == null) {
-            return destinations.getAll();
-        }
-        switch (type) {
-            case I2B2:
-                return new ArrayList<>(destinations.getAllI2B2s());
-            case COHORT:
-                return new ArrayList<>(destinations.getAllCohorts());
-            case PATIENT_SET_EXTRACTOR:
-                return new ArrayList<>(destinations.getAllPatientSetExtractors());
-            case PATIENT_SET_SENDER:
-                return new ArrayList<>(destinations.getAllPatientSetSenders());
-            case TABULAR_FILE:
-                return new ArrayList<>(destinations.getAllTabularFiles());
-            case AOU_PARTICIPANT:
-                return new ArrayList<>(destinations.getAllAouParticipant());
-            default:
-                throw new AssertionError("Unexpected destination type " + type);
-        }
-    }
+    }    
 
     @DELETE
     @Path("/{destId}")

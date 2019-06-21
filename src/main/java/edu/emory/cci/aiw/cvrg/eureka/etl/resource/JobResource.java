@@ -118,7 +118,7 @@ import org.protempa.proposition.interval.Interval;
 import org.protempa.query.QueryMode;
 
 @Path("/protected/jobs")
-@RolesAllowed({"researcher"})
+//@RolesAllowed({"researcher"})
 @Consumes(MediaType.APPLICATION_JSON)
 public class JobResource {
 
@@ -168,7 +168,7 @@ public class JobResource {
                 null);
         List<Job> jobs = new ArrayList<>();
         List<JobEntity> jobEntities;
-        if (order == null) {
+        if (order == null || order.equals("asc")) {
             jobEntities = this.jobDao.getWithFilter(jobFilter);
         } else if (order.equals("desc")) {
             jobEntities = this.jobDao.getWithFilterDesc(jobFilter);
@@ -289,19 +289,6 @@ public class JobResource {
      
 
         return Response.created(URI.create("/" + jobId)).build();
-    }
-
-    @Transactional
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @RolesAllowed({"admin"})
-    @Path("/status")
-    public List<Job> getJobStatus(@QueryParam("filter") JobFilter inFilter) {
-        List<Job> jobs = new ArrayList<>();
-        for (JobEntity jobEntity : this.jobDao.getWithFilter(inFilter)) {
-            jobs.add(jobEntity.toJob());
-        }
-        return jobs;
     }
 
     @Transactional

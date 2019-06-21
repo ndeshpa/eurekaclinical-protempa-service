@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eurekaclinical</groupId>
     <artifactId>eurekaclinical-protempa-service</artifactId>
-    <version>2.1-Alpha-3-SNAPSHOT</version>
+    <version>3.0-Alpha-3-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Eureka! Clinical Protempa Service</name>
     <description>Eureka Protempa ETL is the backend data processing layer of
@@ -26,7 +26,9 @@
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <commons-codec-version>1.4</commons-codec-version>
         <eurekaclinical-ontology-version>2.0.2</eurekaclinical-ontology-version>
-        <eurekaclinical-protempa-client-version>3.0-Alpha-3-SNAPSHOT</eurekaclinical-protempa-client-version>
+
+        <eurekaclinical-protempa-client-version>3.0-Alpha-3</eurekaclinical-protempa-client-version>
+
         <eurekaclinical-patient-set-client-version>2.0</eurekaclinical-patient-set-client-version>
         <eurekaclinical-phenotype-client-version>1.0-Alpha-1</eurekaclinical-phenotype-client-version>
         <eureka-client-version>5.0-Alpha-5-SNAPSHOT</eureka-client-version>
