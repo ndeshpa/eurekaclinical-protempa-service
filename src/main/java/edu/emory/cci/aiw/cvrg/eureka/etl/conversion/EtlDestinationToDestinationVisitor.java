@@ -52,8 +52,10 @@ import org.eurekaclinical.eureka.client.comm.PatientListDestination;
 import org.eurekaclinical.eureka.client.comm.PatientSetSenderDestination;
 import org.eurekaclinical.eureka.client.comm.TableColumn;
 import org.eurekaclinical.eureka.client.comm.TabularFileDestination;
+import org.eurekaclinical.eureka.client.comm.AOUParticipantDestination;
 
 import org.eurekaclinical.protempa.client.comm.AbstractEtlDestinationVisitor;
+import org.eurekaclinical.protempa.client.comm.EtlAouParticipantDestination;
 import org.eurekaclinical.protempa.client.comm.EtlCohortDestination;
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import org.eurekaclinical.protempa.client.comm.EtlI2B2Destination;
@@ -183,6 +185,13 @@ public class EtlDestinationToDestinationVisitor extends AbstractEtlDestinationVi
     public void visit(EtlPatientListDestination etlPatientListDestination) {
         PatientListDestination result = new PatientListDestination();
         visitCommon(etlPatientListDestination, result);
+        this.destination = result;
+    }
+    
+    @Override
+    public void visit(EtlAouParticipantDestination etlAouParticipantDestination) {
+        AOUParticipantDestination result = new AOUParticipantDestination();
+        visitCommon(etlAouParticipantDestination, result);
         this.destination = result;
     }
 
