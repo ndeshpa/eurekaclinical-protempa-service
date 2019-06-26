@@ -205,6 +205,43 @@ public class ConceptResource {
 		}
 
 	}
+        
+        @POST
+	@Path("/propsearch")
+	public List<SystemPhenotype> getSystemPhenotypesBySearchKeyPost(
+			@Context HttpServletRequest req, @FormParam("searchKey") String inSearchKey) {
+		LOGGER.info("Searching system phenotype tree for the searchKey {}",
+				inSearchKey);
+		List<SystemPhenotype> result = new ArrayList<>();
+		List<SourceConfigParams> scps = this.sourceConfigResource
+				.getParamsList(req);
+		if (scps.isEmpty()) {
+			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
+					"No source configs");
+		}
+
+		try {
+                    List<PropositionDefinition> definitions = this.finder.findAll(
+					scps.get(0).getId(),
+					this.etlProperties.getDefaultSystemPropositions(),
+					Boolean.FALSE);
+            
+			for (PropositionDefinition definition : definitions) {
+                                if (definition.getDisplayName().equalsIgnoreCase(inSearchKey)){
+                                    SystemPhenotype phenotype = PropositionUtil.toSystemPhenotype(
+                                    scps.get(0).getId(), definition, true, this.finder);
+                                    result.add(phenotype);
+                                }
+			}
+			LOGGER.info("returning search results list of size"
+					+ definitions.size());
+			return result;
+		}catch (PropositionFindException e) {
+			throw new HttpStatusException(
+					Response.Status.INTERNAL_SERVER_ERROR, e);
+		}
+
+	}
 	
 	private List<SystemPhenotype> getSystemPhenotypesCommon(HttpServletRequest req, List<String> inKeys, boolean inSummarize) throws HttpStatusException {
 		LOGGER.info("Finding system phenotype {}", inKeys);
