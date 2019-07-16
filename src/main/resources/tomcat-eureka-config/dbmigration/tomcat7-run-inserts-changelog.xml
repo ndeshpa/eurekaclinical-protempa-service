@@ -320,5 +320,47 @@
             <column name="USERS_ID" valueComputed="(SELECT ID FROM USERS WHERE username='superuser')" />
             <column name="SOURCECONFIGS_ID" valueSequenceCurrent="SOURCECONFIG_SEQ"/>
         </insert>
+        <insert tableName="DESTINATIONS">
+            <column name="ID" valueSequenceNext="DEST_SEQ"/>
+            <column name="OWNER_ID" valueComputed="(SELECT ID FROM USERS WHERE username='actuser')" />
+            <column name="DESCRIPTION" value="The QA i2b2 data schema for the ACT project."/>  
+            <column name="CREATED_AT" valueDate="2019-06-20T17:27:00"/>
+            <column name="EFFECTIVE_AT" valueDate="2019-06-20T17:27:00"/>
+            <column name="EXPIRED_AT" valueDate="2025-12-03T17:27:00"/>
+            <column name="NAME" value="ACT i2b2 QA"/>
+            <column name="KEYALGORITHM" value=""/>
+            <column name="DEIDENTIFICATIONENABLED" valueBoolean="false"/>
+            <column name="ENCRYPTIONALGORITHM_ID" valueNumeric=""/>        
+            <column name="OUTPUTNAME" value=""/>
+            <column name="OUTPUTTYPE" value="application/octet-stream"/>
+        </insert>
+        <insert tableName="I2B2_DEST_CONCEPTSPECS">
+            <column name="ID" valueSequenceNext="I2B2_CS_SEQ"/>
+            <column name="I2B2DESTINATIONS_ID" valueComputed="(SELECT ID FROM DESTINATIONS WHERE OWNER_ID=(SELECT ID FROM USERS WHERE username='actuser') AND NAME='ACT i2b2 QA')"/>
+            <column name="PROPOSITION" value="HCPCS:HCPCS Procedures"/>
+            <column name="I2B2DESTVALUETYPECDS_ID" valueNumeric="3"/>
+            <column name="ALREADYLOADED" valueNumeric="1"/>
+        </insert>
+        <insert tableName="I2B2_DEST_CONCEPTSPECS">
+            <column name="ID" valueSequenceNext="I2B2_CS_SEQ"/>
+            <column name="I2B2DESTINATIONS_ID" valueComputed="(SELECT ID FROM DESTINATIONS WHERE OWNER_ID=(SELECT ID FROM USERS WHERE username='actuser') AND NAME='ACT i2b2 QA')"/>
+            <column name="PROPOSITION" value="CPT4:CPT4 Procedures"/>
+            <column name="I2B2DESTVALUETYPECDS_ID" valueNumeric="3"/>
+            <column name="ALREADYLOADED" valueNumeric="1"/>
+        </insert>
+        <insert tableName="I2B2_DEST_DATASPECS">
+            <column name="ID" valueSequenceNext="I2B2_DS_SEQ"/>
+            <column name="I2B2DESTINATIONS_ID" valueComputed="(SELECT ID FROM DESTINATIONS WHERE OWNER_ID=(SELECT ID FROM USERS WHERE username='actuser') AND NAME='ACT i2b2 QA')"/>
+            <column name="NAME" value="cpt4p"/>
+            <column name="PROPERTY" value=""/>
+            <column name="REFERENCE" value="ACT_PX_CPT_2018"/>
+        </insert>
+        <insert tableName="I2B2_DEST_DATASPECS">
+            <column name="ID" valueSequenceNext="I2B2_DS_SEQ"/>
+            <column name="I2B2DESTINATIONS_ID" valueComputed="(SELECT ID FROM DESTINATIONS WHERE OWNER_ID=(SELECT ID FROM USERS WHERE username='actuser') AND NAME='ACT i2b2 QA')"/>
+            <column name="NAME" value="hcpcsp"/>
+            <column name="PROPERTY" value=""/>
+            <column name="REFERENCE" value="ACT_PX_HCPCS_2018"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>
