@@ -81,18 +81,18 @@ public class ConceptResource {
 			.getLogger(ConceptResource.class);
 	private final SystemPropositionFinder finder;
 	private final EtlProperties etlProperties;
-	private final SourceConfigResource sourceConfigResource;
+	private final SourceConfigsResource sourceConfigsResource;
         private final ConceptResourceByConfigId conceptResourceByConfigId;
 
 	
 	@Inject
 	public ConceptResource(SystemPropositionFinder inFinder,
-			SourceConfigResource inSourceConfigResource,
+			SourceConfigsResource inSourceConfigsResource,
 			EtlProperties inEtlProperties,
 			ConceptResourceByConfigId inConceptResourceByConfigId) {
 		this.finder = inFinder;
 		this.etlProperties = inEtlProperties;
-		this.sourceConfigResource = inSourceConfigResource;
+		this.sourceConfigsResource = inSourceConfigsResource;
 		this.conceptResourceByConfigId=inConceptResourceByConfigId;
 	}
 
@@ -110,7 +110,7 @@ public class ConceptResource {
 		 * for a user point to the same knowledge source backends. This will go away.
 		 */
 
-		List<SourceConfigParams> scps = this.sourceConfigResource.getParamsList(req);
+		List<SourceConfigParams> scps = this.sourceConfigsResource.getParamsList(req);
 		if (scps.isEmpty()) {
 			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "No source configs");
 		}
@@ -154,7 +154,7 @@ public class ConceptResource {
 		LOGGER.info("Searching system phenotype tree for the searchKey {}",
 				inSearchKey);
 
-		List<SourceConfigParams> scps = this.sourceConfigResource
+		List<SourceConfigParams> scps = this.sourceConfigsResource
 				.getParamsList(req);
 		if (scps.isEmpty()) {
 			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
@@ -176,7 +176,7 @@ public class ConceptResource {
 		LOGGER.info("Searching system phenotype tree for the searchKey {}",
 				inSearchKey);
 		List<SystemPhenotype> result = new ArrayList<>();
-		List<SourceConfigParams> scps = this.sourceConfigResource
+		List<SourceConfigParams> scps = this.sourceConfigsResource
 				.getParamsList(req);
 		if (scps.isEmpty()) {
 			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
@@ -213,7 +213,7 @@ public class ConceptResource {
 		LOGGER.info("Searching system phenotype tree for the searchKey {}",
 				inSearchKey);
 		List<SystemPhenotype> result = new ArrayList<>();
-		List<SourceConfigParams> scps = this.sourceConfigResource
+		List<SourceConfigParams> scps = this.sourceConfigsResource
 				.getParamsList(req);
 		if (scps.isEmpty()) {
 			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
@@ -249,7 +249,7 @@ public class ConceptResource {
 		* Hack to get an ontology source that assumes all Protempa configurations
 		* for a user point to the same knowledge source backends. This will go away.
 		*/
-		List<SourceConfigParams> scps = this.sourceConfigResource.getParamsList(req);
+		List<SourceConfigParams> scps = this.sourceConfigsResource.getParamsList(req);
 		if (scps.isEmpty()) {
 			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "No source configs");
 		}
@@ -275,7 +275,7 @@ public class ConceptResource {
 		* Hack to get an ontology source that assumes all Protempa configurations
 		* for a user point to the same knowledge source backends. This will go away.
 		*/
-		List<SourceConfigParams> scps = this.sourceConfigResource.getParamsList(req);
+		List<SourceConfigParams> scps = this.sourceConfigsResource.getParamsList(req);
 		if (scps.isEmpty()) {
 			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "No source configs");
 		}
