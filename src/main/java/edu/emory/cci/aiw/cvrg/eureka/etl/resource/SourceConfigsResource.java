@@ -69,11 +69,11 @@ import org.eurekaclinical.eureka.client.comm.SourceConfigParams;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
 @Transactional
-@Path("/protected/sourceconfig")
+@Path("/protected/sourceconfigs")
 @RolesAllowed({"researcher"})
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class SourceConfigResource {
+public class SourceConfigsResource {
 
     private final EtlProperties etlProperties;
     private final AuthorizedUserDao userDao;
@@ -82,7 +82,7 @@ public class SourceConfigResource {
     private final EtlGroupDao groupDao;
 
     @Inject
-    public SourceConfigResource(EtlProperties inEtlProperties, AuthorizedUserDao inUserDao, SourceConfigDao inSourceConfigDao, EtlGroupDao inGroupDao) {
+    public SourceConfigsResource(EtlProperties inEtlProperties, AuthorizedUserDao inUserDao, SourceConfigDao inSourceConfigDao, EtlGroupDao inGroupDao) {
         this.etlProperties = inEtlProperties;
         this.userDao = inUserDao;
         this.sourceConfigDao = inSourceConfigDao;
