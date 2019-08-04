@@ -767,6 +767,7 @@ URL: https://localhost:8443/eurekaclinical-protempa-service/api/protected/concep
 Returns:
 ```
 ["ICD10:Diagnoses", "ICD10:S00-T88", "ICD10:S00-S09", ...]
+```
 
 ## Building it
 See the parent project's [README.md](https://github.com/eurekaclinical/eureka/blob/master/README.md).
