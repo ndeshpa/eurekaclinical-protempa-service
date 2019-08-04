@@ -460,6 +460,131 @@ Returns nothing.
 ##### DELETE `/api/protected/destinations/{id}`
 Deletes the destination with the specified unique numerical id. Returns nothing.
 
+### `/api/protected/sourceconfig`
+Manages data source configurations.
+
+#### Role-based authorization
+Must have `researcher` role.
+
+#### Requires successful authentication
+Yes
+
+#### SourceConfig object
+Fully specifies a source configuration.
+
+Properties:
+* `id`: unique id number of the source config (set by the server on object creation, and required thereafter).
+* `displayName`: optional display name of the source config for display in user interfaces.
+* `ownerUsername`: required username of the owning user.
+* `dataSourceBackends`: an array representing sources of data:
+  * `id`: the id string of the data source backend.
+  * `options`: an array of the parameters to set:
+    * `name`: the unique name of the parameter.
+    * `displayName`: optional display name of the parameter for display in user interfaces.
+    * `required`: required boolean indicating whether the parameter must have a non-null value.
+    * `propertyType`: required data type of the parameter, one of:
+      * `STRING`
+      * `BOOLEAN`
+      * `INTEGER`
+      * `LONG`
+      * `FLOAT`
+      * `DOUBLE`
+      * `CHARACTER`
+      * `STRING_ARRAY`
+      * `DOUBLE_ARRAY`
+      * `FLOAT_ARRAY`
+      * `INTEGER_ARRAY`
+      * `LONG_ARRAY`
+      * `BOOLEAN_ARRAY`
+      * `CHARACTER_ARRAY`
+    * `prompt`: required boolean indicating whether the user should be prompted for a value for this parameter.
+    * `value`: the value of the parameter.
+* `knowledgeSourceBackends`: an array representing sources of concepts:
+  * `id`: the id string of the knowledge source backend.
+  * `displayName`: optional display name of the knowledge source backend for display in user interfaces.
+  * `options`: an array of parameters to set:
+    * `name`: required unique name of the parameter.
+    * `displayName`: optional display name of the parameter for display in user interfaces.
+    * `required`: required boolean indicating whether the parameter must have a non-null value.
+    * `propertyType`: required data type of the parameter, one of:
+      * `STRING`
+      * `BOOLEAN`
+      * `INTEGER`
+      * `LONG`
+      * `FLOAT`
+      * `DOUBLE`
+      * `CHARACTER`
+      * `STRING_ARRAY`
+      * `DOUBLE_ARRAY`
+      * `FLOAT_ARRAY`
+      * `INTEGER_ARRAY`
+      * `LONG_ARRAY`
+      * `BOOLEAN_ARRAY`
+      * `CHARACTER_ARRAY`
+    * `prompt`: required boolean indicating whether the user should be prompted for a value for this parameter.
+    * `value`: the value of the parameter.
+* `algorithmSourceBackends`: array representing sources of value processing algorithms; currently read-only.
+  * `id`: the id string of the algorithm source backend.
+  * `displayName`: optional display name of the algorithm source backend for display in user interfaces.
+  * `options`: an array of parameters to set:
+    * `name`: required unique name of the parameter.
+    * `displayName`: optional display name of the parameter for display in user interfaces.
+    * `required`: required boolean indicating whether the parameter must have a non-null value.
+    * `propertyType`: required data type of the parameter, one of:
+      * `STRING`
+      * `BOOLEAN`
+      * `INTEGER`
+      * `LONG`
+      * `FLOAT`
+      * `DOUBLE`
+      * `CHARACTER`
+      * `STRING_ARRAY`
+      * `DOUBLE_ARRAY`
+      * `FLOAT_ARRAY`
+      * `INTEGER_ARRAY`
+      * `LONG_ARRAY`
+      * `BOOLEAN_ARRAY`
+      * `CHARACTER_ARRAY`
+    * `prompt`: required boolean indicating whether the user should be prompted for a value for this parameter.
+    * `value`: the value of the parameter.
+* `read`: required boolean indicating whether the current user can read this source config.
+* `write`: required boolean indicating whether the current user can update this source config.
+* `execute`: required boolean indicating whether the current user can read data and concepts from this source config.
+
+#### Calls
+Uses status codes as specified in the [Eureka! Clinical microservice specification](https://github.com/eurekaclinical/dev-wiki/wiki/Eureka%21-Clinical-microservice-specification).
+
+##### GET /api/protected/sourceconfig
+Gets a list of the available source configurations.
+
+##### GET /api/protected/sourceconfig/{id}
+Returns the source configuration with the specified numerical unique id.
+
+##### GET /api/protected/sourceconfig/parameters/list
+Gets a list of the available source configurations' parameter names and values.
+
+###### Example:
+URL: https://localhost:8443/eurekaclinical-analytics-service/api/protected/sourceconfig/parameters/list
+
+Returns:
+```
+[
+  { "id":"Spreadsheet",
+    "name":"Spreadsheet",
+    "uploads":[
+      { "name":"Eureka Spreadsheet Data Source Backend",
+        "sourceId":null,
+        "acceptedMimetypes":["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+        "sampleUrl":"../docs/sample.xlsx",
+        "required":true}
+    ]
+  }
+]
+```
+
+##### GET /api/protected/sourceconfig/parameters/{id}
+Returns the parameter names and values for the source configuration with the specified numerical unique id.
+
 ### `/api/protected/concepts`
 System concepts provided by the system.
 
