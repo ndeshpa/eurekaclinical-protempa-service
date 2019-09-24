@@ -43,7 +43,6 @@ import com.google.inject.persist.Transactional;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
@@ -53,6 +52,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.eurekaclinical.common.comm.User;
 import org.eurekaclinical.common.resource.AbstractUserResource;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ProtempaServiceRoleDao;
 
 /**
  * RESTful end-point for {@link UserEntity} related methods.
@@ -66,7 +66,7 @@ import org.eurekaclinical.common.resource.AbstractUserResource;
 @RolesAllowed({"admin"})
 public class UserResource extends AbstractUserResource<User, AuthorizedUserEntity, AuthorizedRoleEntity> {
 
-	private final RoleDao roleDao;
+	private final ProtempaServiceRoleDao roleDao;
 	
 	/**
 	 * Create a UserResource object with a User DAO and a Role DAO.
@@ -75,7 +75,7 @@ public class UserResource extends AbstractUserResource<User, AuthorizedUserEntit
 	 * @param inRoleDao
 	 */
 	@Inject
-	public UserResource(AuthorizedUserDao inUserDao, RoleDao inRoleDao) {
+	public UserResource(AuthorizedUserDao inUserDao, ProtempaServiceRoleDao inRoleDao) {
 		super(inUserDao);
 		this.roleDao = inRoleDao;
 	}

@@ -1,8 +1,8 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+package edu.emory.cci.aiw.cvrg.eureka.etl.pool;
 
 /*-
  * #%L
- * Eureka! Clinical Protempa Service
+ * Protempa Framework
  * %%
  * Copyright (C) 2012 - 2018 Emory University
  * %%
@@ -40,28 +40,27 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * #L%
  */
 
-import edu.emory.cci.aiw.cvrg.eureka.etl.pool.Pool;
-import edu.emory.cci.aiw.cvrg.eureka.etl.pool.PoolException;
-import org.protempa.proposition.value.NumberValue;
-import org.protempa.proposition.value.Value;
+import org.protempa.ProtempaException;
 
 /**
  *
  * @author Andrew Post
  */
-public class IdPool implements Pool {
+public class PoolException extends ProtempaException {
 
-    private final Long id;
-    private final IdPoolIdDao idPoolIdDao;
-    
-    IdPool(Long inId, IdPoolIdDao inIdPoolIdDao) {
-        this.id = inId;
-        this.idPoolIdDao = inIdPoolIdDao;
+    public PoolException() {
     }
 
-    @Override
-    public Value valueFor(Value inValue) throws PoolException {
-        return NumberValue.getInstance(this.idPoolIdDao.getByPoolIdAndFromId(this.id, inValue != null ? inValue.getFormatted() : null).getId());
+    public PoolException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public PoolException(String message) {
+        super(message);
+    }
+
+    public PoolException(Throwable cause) {
+        super(cause);
     }
     
 }

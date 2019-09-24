@@ -1034,7 +1034,7 @@
                                  referencedTableName="JOB_MODES"/>
 
     </changeSet>
-    <changeSet author="arpost" id="1361552652236-48">
+    <changeSet author="arpost" id="1361552652236-49">
         <createTable tableName="ID_POOLS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ID_POOL_PK"/>
@@ -1044,31 +1044,33 @@
             </column>
             <column name="DESCRIPTION" type="VARCHAR(255)"/>
         </createTable>
+        <createSequence sequenceName="ID_POOL_SEQ"/>
         <createTable tableName="ID_POOL_IDS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ID_POOL_ID_PK"/>
             </column>
             <column name="FROMID" type="VARCHAR(255)"/>
             <column name="DESCRIPTION" type="VARCHAR(255)"/>
-            <column name="IDPOOLS_ID">
+            <column name="IDPOOL_ID" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <createSequence sequenceName="ID_POOL_ID_SEQ"/>
         <createIndex indexName="IDX_ID_POOL_ID_FROMID" tableName="ID_POOL_IDS">
             <column name="FROMID" type="VARCHAR(255)"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="IDPOOLIDS_ID" 
+        <addForeignKeyConstraint baseColumnNames="IDPOOL_ID" 
                                  baseTableName="ID_POOL_IDS" 
                                  constraintName="FK_IDPOOLID_IDPOOL" 
                                  deferrable="false" initiallyDeferred="false" 
                                  onDelete="RESTRICT" referencedColumnNames="ID" 
                                  referencedTableName="ID_POOLS"/>
         <addColumn tableName="TF_DEST_TABLECOLUMNS">
-            <column name="IDPOOLS_ID" type="BIGINT" defaultValueNumeric="1">
+            <column name="IDPOOL_ID" type="BIGINT" defaultValueNumeric="1">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
-        <addForeignKeyConstraint baseColumnNames="IDPOOLS_ID" 
+        <addForeignKeyConstraint baseColumnNames="IDPOOL_ID" 
                                  baseTableName="TF_DEST_TABLECOLUMNS" 
                                  constraintName="FK_TFDESTTC_IDPOOL" 
                                  deferrable="false" initiallyDeferred="false" 

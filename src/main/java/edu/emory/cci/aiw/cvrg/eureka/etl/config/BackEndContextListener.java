@@ -48,7 +48,6 @@ import com.google.inject.servlet.GuiceServletContextListener;
 
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
 import org.eurekaclinical.common.config.InjectorSupport;
-import org.eurekaclinical.common.config.ProxyingServiceServletModule;
 import org.eurekaclinical.common.config.ServiceServletModule;
 
 /**
@@ -80,8 +79,9 @@ public class BackEndContextListener extends GuiceServletContextListener {
 	protected Injector getInjector() {
 		this.injector = new InjectorSupport(
 				new Module[]{
+
 					new AppModule(this.phenotypeClientProvider),
-					new ProxyingServiceServletModule(this.etlProperties, PACKAGE_NAMES),
+					new ServiceServletModule(this.etlProperties, PACKAGE_NAMES),
 					new JpaPersistModule(JPA_UNIT)
 				},
 				this.etlProperties).getInjector();

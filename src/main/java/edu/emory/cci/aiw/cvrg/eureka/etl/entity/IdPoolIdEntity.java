@@ -47,6 +47,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import org.eurekaclinical.protempa.client.comm.IdPoolId;
 
 /**
@@ -54,6 +55,7 @@ import org.eurekaclinical.protempa.client.comm.IdPoolId;
  * @author Andrew Post
  */
 @Entity
+@Table(name="id_pool_ids")
 public class IdPoolIdEntity implements org.eurekaclinical.standardapis.entity.Entity<Long> {
     @Id
     @SequenceGenerator(name = "ID_POOL_ID_SEQ_GENERATOR",
@@ -67,7 +69,7 @@ public class IdPoolIdEntity implements org.eurekaclinical.standardapis.entity.En
     private String description;
     
     @ManyToOne
-    @JoinColumn(name="idpools_id", nullable=false)
+    @JoinColumn(nullable=false)
     private IdPoolEntity idPool;
     
     @Override
