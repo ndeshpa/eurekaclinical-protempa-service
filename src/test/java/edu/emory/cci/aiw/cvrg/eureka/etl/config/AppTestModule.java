@@ -73,19 +73,16 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JpaUserTemplateDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
-<<<<<<< HEAD
 import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
-=======
+
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ProtempaServiceRoleDao;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity;
 import org.eurekaclinical.standardapis.dao.RoleDao;
 import org.eurekaclinical.standardapis.dao.UserDao;
 import org.eurekaclinical.standardapis.dao.UserTemplateDao;
 import org.eurekaclinical.standardapis.entity.RoleEntity;
 import org.eurekaclinical.standardapis.entity.UserEntity;
->>>>>>> 12255ff... Update dependencies.
+
 
 /**
  *
@@ -117,7 +114,6 @@ public class AppTestModule extends AbstractModule {
         bind(IdPoolDao.class).to(JpaIdPoolDao.class);
         bind(IdPoolIdDao.class).to(JpaIdPoolIdDao.class);
         bind(EurekaClinicalPhenotypeClient.class).toProvider(this.phenotypeClientProvider);
-        bind(new TypeLiteral<UserDao<AuthorizedUserEntity>>() {}).to(JpaEtlUserDao.class);
         bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
     }
 }
