@@ -71,6 +71,8 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ProtempaServiceRoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
+
+import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 import org.eurekaclinical.standardapis.dao.RoleDao;
 import org.eurekaclinical.standardapis.dao.UserDao;
 import org.eurekaclinical.standardapis.entity.RoleEntity;
@@ -103,6 +105,7 @@ public class AppModule extends AbstractModule {
         bind(EncryptionAlgorithmDao.class).to(JpaEncryptionAlgorithmDao.class);
         bind(JobModeDao.class).to(JpaJobModeDao.class);
         bind(IdPoolIdDao.class).to(JpaIdPoolIdDao.class);
+        bind(EurekaClinicalPhenotypeClient.class).toProvider(this.phenotypeClientProvider);
         bind(IdPoolDao.class).to(JpaIdPoolDao.class);
     }
 }
