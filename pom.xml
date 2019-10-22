@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eurekaclinical</groupId>
     <artifactId>eurekaclinical-protempa-service</artifactId>
-    <version>3.0-Alpha-5-SNAPSHOT</version>
+    <version>3.0-Alpha-6-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Eureka! Clinical Protempa Service</name>
     <description>Eureka Protempa ETL is the backend data processing layer of
@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>4-Alpha-2-SNAPSHOT</version>
+        <version>4-Alpha-2</version>
     </parent>
 	
     <properties>
@@ -25,22 +25,22 @@
         <tomcat.httpsPort>8443</tomcat.httpsPort>        
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <commons-codec-version>1.4</commons-codec-version>
-        <eurekaclinical-ontology-version>2.0.3-SNAPSHOT</eurekaclinical-ontology-version>
-        <eurekaclinical-protempa-client-version>3.0-Alpha-5-SNAPSHOT</eurekaclinical-protempa-client-version>
-        <eurekaclinical-patient-set-client-version>2.1-SNAPSHOT</eurekaclinical-patient-set-client-version>
-        <eurekaclinical-phenotype-client-version>1.0-Alpha-2-SNAPSHOT</eurekaclinical-phenotype-client-version>
-        <eureka-client-version>5.0-Alpha-5-SNAPSHOT</eureka-client-version>
-        <eurekaclinical-standard-apis-version>4.0-Alpha-4-SNAPSHOT</eurekaclinical-standard-apis-version>
-        <eurekaclinical-common-version>5.0-Alpha-5-SNAPSHOT</eurekaclinical-common-version>
-        <aiw-i2b2-etl-version>4.1-SNAPSHOT</aiw-i2b2-etl-version>
-        <aiw-neo4j-etl-version>4.1-SNAPSHOT</aiw-neo4j-etl-version>
-        <protempa-version>5.1-Beta-2-SNAPSHOT</protempa-version>
+        <eurekaclinical-ontology-version>2.0.3</eurekaclinical-ontology-version>
+        <eurekaclinical-protempa-client-version>3.0-Alpha-5</eurekaclinical-protempa-client-version>
+        <eurekaclinical-patient-set-client-version>2.2</eurekaclinical-patient-set-client-version>
+        <eurekaclinical-phenotype-client-version>1.0-Alpha-2</eurekaclinical-phenotype-client-version>
+        <eureka-client-version>5.0-Alpha-6</eureka-client-version>
+        <eurekaclinical-standard-apis-version>4.0-Alpha-4</eurekaclinical-standard-apis-version>
+        <eurekaclinical-common-version>5.0-Alpha-5</eurekaclinical-common-version>
+        <aiw-i2b2-etl-version>4.1</aiw-i2b2-etl-version>
+        <aiw-neo4j-etl-version>4.1</aiw-neo4j-etl-version>
+        <protempa-version>5.1-Beta-2</protempa-version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <cas-mock-version>2.2-SNAPSHOT</cas-mock-version>
+        <cas-mock-version>2.2</cas-mock-version>
         <poi-version>3.9</poi-version>
-        <javautil-version>4.3-SNAPSHOT</javautil-version>
+        <javautil-version>4.3</javautil-version>
         <tomcat.httpsPort>8443</tomcat.httpsPort>
-        <datastore-version>3.1-SNAPSHOT</datastore-version>
+        <datastore-version>3.1</datastore-version>
     </properties>
 	
     <scm>
