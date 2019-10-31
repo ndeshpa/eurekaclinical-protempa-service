@@ -43,11 +43,11 @@ import javax.ws.rs.Path;
 import com.google.inject.persist.Transactional;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
 
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.RoleDao;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import org.eurekaclinical.common.comm.Role;
 import org.eurekaclinical.common.resource.AbstractRoleResource;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ProtempaServiceRoleDao;
 
 /**
  * A RESTful end-point for working with {@link RoleEntity} objects.
@@ -60,13 +60,13 @@ import org.eurekaclinical.common.resource.AbstractRoleResource;
 public class RoleResource extends AbstractRoleResource<AuthorizedRoleEntity, Role> {
 
     /**
-     * Create a RoleResource object with the given {@link RoleDao}
+     * Create a RoleResource object with the given {@link ProtempaServiceRoleDao}
      *
      * @param inRoleDao The RoleDao object used to work with role objects in the
      * data store.
      */
     @Inject
-    public RoleResource(RoleDao inRoleDao) {
+    public RoleResource(ProtempaServiceRoleDao inRoleDao) {
         super(inRoleDao);
     }
 

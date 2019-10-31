@@ -39,16 +39,13 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import  org.eurekaclinical.protempa.client.comm.EtlTableColumn;
-import  org.eurekaclinical.protempa.client.comm.EtlTabularFileDestination;
+import org.eurekaclinical.protempa.client.comm.EtlTableColumn;
+import org.eurekaclinical.protempa.client.comm.EtlTabularFileDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -57,47 +54,38 @@ import java.util.List;
  */
 class TabularFileDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlTabularFileDestination, TabularFileDestinationEntity> {
 
-	private static final Comparator<TabularFileDestinationTableColumnEntity> TABLE_COLUMN_COMPARATOR = new Comparator<TabularFileDestinationTableColumnEntity>() {
-		@Override
-		public int compare(TabularFileDestinationTableColumnEntity o1, TabularFileDestinationTableColumnEntity o2) {
-			return o1.getRank().compareTo(o2.getRank());
-		}
-		
-	};
-	
-	TabularFileDestinationsDTOExtractor(AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
-		super(user, inGroupDao);
-	}
+    TabularFileDestinationsDTOExtractor(AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
+        super(user, inGroupDao);
+    }
 
-	@Override
-	EtlTabularFileDestination extractDTO(Perm perm,
-			TabularFileDestinationEntity destinationEntity) {
-		EtlTabularFileDestination dest = new EtlTabularFileDestination();
-		dest.setName(destinationEntity.getName());
-		dest.setDescription(destinationEntity.getDescription());
-		dest.setId(destinationEntity.getId());
-		dest.setRead(perm.read);
-		dest.setWrite(perm.write);
-		dest.setExecute(perm.execute);
-		dest.setOwnerUserId(destinationEntity.getOwner().getId());
-		dest.setCreatedAt(destinationEntity.getCreatedAt());
-		dest.setUpdatedAt(destinationEntity.getEffectiveAt());
-		dest.setGetStatisticsSupported(destinationEntity.isGetStatisticsSupported());
-		dest.setAllowingQueryPropositionIds(destinationEntity.isAllowingQueryPropositionIds());
-		dest.setRequiredPropositionIds(new ArrayList<>(0));
-		List<EtlTableColumn> tableColumns = new ArrayList<>();
-		List<TabularFileDestinationTableColumnEntity> tableColumnEntities = destinationEntity.getTableColumns();
-		Collections.sort(tableColumnEntities, TABLE_COLUMN_COMPARATOR);
-		for (TabularFileDestinationTableColumnEntity entity : tableColumnEntities) {
-			EtlTableColumn tableColumn = new EtlTableColumn();
-			tableColumn.setTableName(entity.getTableName());
-			tableColumn.setColumnName(entity.getColumnName());
-			tableColumn.setPath(entity.getPath());
-			tableColumn.setFormat(entity.getFormat());
-			tableColumns.add(tableColumn);
-		}
-		dest.setTableColumns(tableColumns);
-		return dest;
-	}
+    @Override
+    EtlTabularFileDestination extractDTO(Perm perm,
+            TabularFileDestinationEntity destinationEntity) {
+        EtlTabularFileDestination dest = new EtlTabularFileDestination();
+        dest.setName(destinationEntity.getName());
+        dest.setDescription(destinationEntity.getDescription());
+        dest.setId(destinationEntity.getId());
+        dest.setRead(perm.read);
+        dest.setWrite(perm.write);
+        dest.setExecute(perm.execute);
+        dest.setOwnerUserId(destinationEntity.getOwner().getId());
+        dest.setCreatedAt(destinationEntity.getCreatedAt());
+        dest.setUpdatedAt(destinationEntity.getEffectiveAt());
+        dest.setGetStatisticsSupported(destinationEntity.isGetStatisticsSupported());
+        dest.setAllowingQueryPropositionIds(destinationEntity.isAllowingQueryPropositionIds());
+        dest.setRequiredPropositionIds(new ArrayList<>(0));
+        List<EtlTableColumn> tableColumns = new ArrayList<>();
+        List<TabularFileDestinationTableColumnEntity> tableColumnEntities = destinationEntity.getTableColumns();
+        for (TabularFileDestinationTableColumnEntity entity : tableColumnEntities) {
+            EtlTableColumn tableColumn = new EtlTableColumn();
+            tableColumn.setTableName(entity.getTableName());
+            tableColumn.setColumnName(entity.getColumnName());
+            tableColumn.setPath(entity.getPath());
+            tableColumn.setFormat(entity.getFormat());
+            tableColumns.add(tableColumn);
+        }
+        dest.setTableColumns(tableColumns);
+        return dest;
+    }
 
 }

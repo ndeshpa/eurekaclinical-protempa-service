@@ -1,10 +1,8 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
-
-/*-
+/*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
- * Copyright (C) 2012 - 2016 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,33 +37,27 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import org.protempa.dest.table.TableColumnSpec;
+package edu.emory.cci.aiw.cvrg.eureka.etl.finder;
+
+import org.protempa.PropositionDefinition;
 
 /**
+ * Finds proposition definitions.
  *
- * @author Andrew Post
+ * @param <K> the type of the proposition key to use in look-ups
  */
-class TableColumnSpecWrapper {
-
-    private final TableColumnSpec tableColumnSpec;
-    private final String propId;
-    
-    TableColumnSpecWrapper(TableColumnSpec tableColumnSpec) {
-        this(null, tableColumnSpec);
-    }
-
-    TableColumnSpecWrapper(String propId, TableColumnSpec tableColumnSpec) {
-        assert tableColumnSpec != null : "tableColumnSpec cannot be null";
-        this.tableColumnSpec = tableColumnSpec;
-        this.propId = propId;
-    }
-
-    String getPropId() {
-        return this.propId;
-    }
-
-    TableColumnSpec getTableColumnSpec() {
-        return this.tableColumnSpec;
-    }
+public interface PropositionFinder<K> {
+	/**
+	 * Finds the proposition definition for the given user and key.
+	 *
+	 * @param sourceConfigId source config id to use for the look-up
+	 * @param inKey    key to use for the look-up
+	 * @return a {@link PropositionDefinition} matching the user ID and key,
+	 *         if any
+	 * @throws PropositionFindException if an error occurs while performing
+	 *                                  the operation
+	 */
+	public PropositionDefinition find(String sourceConfigId, 
+									  K inKey) throws PropositionFindException;
 
 }

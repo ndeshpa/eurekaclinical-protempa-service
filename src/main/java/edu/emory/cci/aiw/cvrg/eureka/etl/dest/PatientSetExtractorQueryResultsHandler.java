@@ -44,7 +44,6 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEn
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,10 +104,12 @@ public class PatientSetExtractorQueryResultsHandler extends AbstractFileQueryRes
 
     @Override
     public void finish() throws QueryResultsHandlerProcessingException {
-        try {
-            this.jsonGenerator.finish();
-        } catch (IOException ex) {
-            throw new QueryResultsHandlerProcessingException(ex);
+        if (this.jsonGenerator != null) {
+            try {
+                this.jsonGenerator.finish();
+            } catch (IOException ex) {
+                throw new QueryResultsHandlerProcessingException(ex);
+            }
         }
     }
 

@@ -55,10 +55,10 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.NodeToNodeEntityVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EncryptionAlgorithmDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
-import java.util.Date;
 import javax.inject.Inject;
 import org.eurekaclinical.eureka.client.comm.Cohort;
 import org.eurekaclinical.eureka.client.comm.Node;
+import org.eurekaclinical.protempa.client.comm.EtlPatientListDestination;
 
 /**
  *
@@ -66,85 +66,90 @@ import org.eurekaclinical.eureka.client.comm.Node;
  */
 public class EtlDestinationToDestinationEntityVisitor implements EtlDestinationVisitor {
 
-	private DestinationEntity destinationEntity;
-	private final EtlGroupDao groupDao;
-	private final AuthorizedUserDao authUserDao;
-	private final LinkDao linkDao;
-	private final EncryptionAlgorithmDao encryptionAlgorithmDao;
+    private DestinationEntity destinationEntity;
+    private final EtlGroupDao groupDao;
+    private final AuthorizedUserDao authUserDao;
+    private final LinkDao linkDao;
+    private final EncryptionAlgorithmDao encryptionAlgorithmDao;
 
-	@Inject
-	public EtlDestinationToDestinationEntityVisitor(EncryptionAlgorithmDao inEncryptionAlgorithmDao, AuthorizedUserDao inAuthUserDao, EtlGroupDao inGroupDao, LinkDao inLinkDao) {
-		this.groupDao = inGroupDao;
-		this.authUserDao = inAuthUserDao;
-		this.linkDao = inLinkDao;
-		this.encryptionAlgorithmDao = inEncryptionAlgorithmDao;
-	}
+    @Inject
+    public EtlDestinationToDestinationEntityVisitor(EncryptionAlgorithmDao inEncryptionAlgorithmDao, AuthorizedUserDao inAuthUserDao, EtlGroupDao inGroupDao, LinkDao inLinkDao) {
+        this.groupDao = inGroupDao;
+        this.authUserDao = inAuthUserDao;
+        this.linkDao = inLinkDao;
+        this.encryptionAlgorithmDao = inEncryptionAlgorithmDao;
+    }
 
-	@Override
-	public void visit(EtlCohortDestination etlCohortDestination) {
-		CohortDestinationEntity cde = new CohortDestinationEntity();
-		visitCommon(etlCohortDestination, cde);
-		Cohort cohort = etlCohortDestination.getCohort();
-		CohortEntity cohortEntity = new CohortEntity();
-		Node node = cohort.getNode();
-		NodeToNodeEntityVisitor v = new NodeToNodeEntityVisitor();
-		node.accept(v);
-		cohortEntity.setNode(v.getNodeEntity());
-		cde.setCohort(cohortEntity);
-		this.destinationEntity = cde;
-	}
+    @Override
+    public void visit(EtlCohortDestination etlCohortDestination) {
+        CohortDestinationEntity cde = new CohortDestinationEntity();
+        visitCommon(etlCohortDestination, cde);
+        Cohort cohort = etlCohortDestination.getCohort();
+        CohortEntity cohortEntity = new CohortEntity();
+        Node node = cohort.getNode();
+        NodeToNodeEntityVisitor v = new NodeToNodeEntityVisitor();
+        node.accept(v);
+        cohortEntity.setNode(v.getNodeEntity());
+        cde.setCohort(cohortEntity);
+        this.destinationEntity = cde;
+    }
 
-	private void visitCommon(EtlDestination etlDestination, DestinationEntity destinationEntity) {
-		destinationEntity.setId(etlDestination.getId());
-		destinationEntity.setDeidentificationEnabled(false);
-		destinationEntity.setDescription(etlDestination.getDescription());
-		Long encryptionAlgorithm = null;
-		if (encryptionAlgorithm != null) {
-			destinationEntity.setEncryptionAlgorithm(this.encryptionAlgorithmDao.retrieve(encryptionAlgorithm));
-		}
-		//Long group = null;
-		//if (group != null) {
-		//	destinationEntity.setGroups(this.groupDao.retrieve(group));
-		//}
-		//destinationEntity.setGroups(this.groupDao);
-		//destinationEntity.setLinks(this.linkDao.);
-		destinationEntity.setName(etlDestination.getName());
-		//destinationEntity.setOffsets(inOffsets);
-		//destinationEntity.setOutputName(outputName);
-		//destinationEntity.setOutputType(outputType);
-		Long ownerUserId = etlDestination.getOwnerUserId();
-		if (ownerUserId != null) {
-			destinationEntity.setOwner(this.authUserDao.retrieve(ownerUserId));
-		}
-	}
+    private void visitCommon(EtlDestination etlDestination, DestinationEntity destinationEntity) {
+        destinationEntity.setId(etlDestination.getId());
+        destinationEntity.setDeidentificationEnabled(false);
+        destinationEntity.setDescription(etlDestination.getDescription());
+        Long encryptionAlgorithm = null;
+        if (encryptionAlgorithm != null) {
+            destinationEntity.setEncryptionAlgorithm(this.encryptionAlgorithmDao.retrieve(encryptionAlgorithm));
+        }
+        //Long group = null;
+        //if (group != null) {
+        //	destinationEntity.setGroups(this.groupDao.retrieve(group));
+        //}
+        //destinationEntity.setGroups(this.groupDao);
+        //destinationEntity.setLinks(this.linkDao.);
+        destinationEntity.setName(etlDestination.getName());
+        //destinationEntity.setOffsets(inOffsets);
+        //destinationEntity.setOutputName(outputName);
+        //destinationEntity.setOutputType(outputType);
+        Long ownerUserId = etlDestination.getOwnerUserId();
+        if (ownerUserId != null) {
+            destinationEntity.setOwner(this.authUserDao.retrieve(ownerUserId));
+        }
+    }
 
-	@Override
-	public void visit(EtlI2B2Destination etlI2B2Destination) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public void visit(EtlI2B2Destination etlI2B2Destination) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	@Override
-	public void visit(EtlNeo4jDestination etlNeo4jDestination) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public void visit(EtlNeo4jDestination etlNeo4jDestination) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	@Override
-	public void visit(EtlPatientSetExtractorDestination etlPatientSetExtractorDestination) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public void visit(EtlPatientSetExtractorDestination etlPatientSetExtractorDestination) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	@Override
-	public void visit(EtlPatientSetSenderDestination etlPatientSetSenderDestination) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public void visit(EtlPatientSetSenderDestination etlPatientSetSenderDestination) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	@Override
-	public void visit(EtlTabularFileDestination etlTabularFileDestination) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public void visit(EtlTabularFileDestination etlTabularFileDestination) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	public DestinationEntity getDestinationEntity() {
-		return this.destinationEntity;
-	}
+    @Override
+    public void visit(EtlPatientListDestination etlPatientListDestination) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public DestinationEntity getDestinationEntity() {
+        return this.destinationEntity;
+    }
 
 }

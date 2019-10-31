@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import java.io.File;
@@ -61,17 +60,19 @@ public abstract class AbstractFileQueryResultsHandler extends AbstractQueryResul
     private final String name;
     private final EtlProperties etlProperties;
     private final String fileName;
-	private final FileSupport fileSupport;
-    
+    private final FileSupport fileSupport;
+
     protected AbstractFileQueryResultsHandler(DestinationEntity destinationEntity, EtlProperties etlProperties) {
-		this.fileSupport = new FileSupport();
+        this.fileSupport = new FileSupport();
         this.name = destinationEntity.getName();
         this.fileName = this.fileSupport.getOutputName(destinationEntity);
         this.etlProperties = etlProperties;
     }
 
     /**
-     * Creates an output stream and calls {@link #start(java.io.OutputStream, java.util.Collection) }.
+     * Creates an output stream and calls {@link #start(java.io.OutputStream, java.util.Collection)
+     * }.
+     *
      * @param cache
      * @throws QueryResultsHandlerProcessingException if an error occurred.
      */
@@ -87,7 +88,9 @@ public abstract class AbstractFileQueryResultsHandler extends AbstractQueryResul
     }
 
     /**
-     * Calls {@link #cleanup() }, and then closes the output stream that is passed into {@link #start(java.io.OutputStream, java.util.Collection) }.
+     * Calls {@link #cleanup() }, and then closes the output stream that is
+     * passed into {@link #start(java.io.OutputStream, java.util.Collection) }.
+     *
      * @throws QueryResultsHandlerCloseException if an error occurred.
      */
     @Override
@@ -108,19 +111,19 @@ public abstract class AbstractFileQueryResultsHandler extends AbstractQueryResul
     }
 
     /**
-     * Called by {@link #start(java.util.Collection) } to given subclasses an opportunity to create
-     * resources and access the output stream.
-     * 
+     * Called by {@link #start(java.util.Collection) } to given subclasses an
+     * opportunity to create resources and access the output stream.
+     *
      * @param outputStream
      * @param cache
-     * @throws QueryResultsHandlerProcessingException 
+     * @throws QueryResultsHandlerProcessingException
      */
     protected abstract void start(OutputStream outputStream, PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException;
 
     /**
      * Called by {@link #close()} to give subclasses an opportunity to clean up
      * resources that they have created.
-     * 
+     *
      * @throws QueryResultsHandlerCloseException if an error occurred.
      */
     protected abstract void cleanup() throws QueryResultsHandlerCloseException;

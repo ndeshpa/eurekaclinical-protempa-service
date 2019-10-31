@@ -39,6 +39,7 @@
  */
 package edu.emory.cci.aiw.cvrg.eureka.etl.job;
 
+import com.google.inject.persist.Transactional;
 import org.protempa.DataSourceFailedDataValidationException;
 import org.protempa.PropositionDefinition;
 import org.protempa.Protempa;
@@ -60,11 +61,15 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EurekaProtempaConfigurations;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
+import edu.emory.cci.aiw.cvrg.eureka.etl.dao.JobDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.resource.Destinations;
 import edu.emory.cci.aiw.cvrg.eureka.etl.resource.EtlDestinationToDestinationEntityVisitor;
 import java.io.File;
 import java.io.IOException;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.inject.Inject;
 import org.eurekaclinical.eureka.client.comm.JobStatus;
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
@@ -96,31 +101,37 @@ public class ETL {
     private final ProtempaDestinationFactory protempaDestFactory;
     private final EtlGroupDao groupDao;
     private final EtlDestinationToDestinationEntityVisitor destToDestEntityVisitor;
+    private final ProtempaEventLoggerThread protempaEventLoggerThread;
 
     @Inject
     public ETL(EtlProperties inEtlProperties, DestinationDao inDestinationDao,
             EtlGroupDao inGroupDao, EtlDestinationToDestinationEntityVisitor inDestToDestEntityVisitor,
-            ProtempaDestinationFactory inProtempaDestFactory) {
+            ProtempaDestinationFactory inProtempaDestFactory,
+            ProtempaEventLoggerThread inProtempaEventLoggerThread) {
         this.etlProperties = inEtlProperties;
         this.destinationDao = inDestinationDao;
         this.protempaDestFactory = inProtempaDestFactory;
         this.groupDao = inGroupDao;
         this.destToDestEntityVisitor = inDestToDestEntityVisitor;
+        this.protempaEventLoggerThread = inProtempaEventLoggerThread;
     }
 
-    void run(JobEntity job, PropositionDefinition[] inPropositionDefinitions,
+    void run(JobDao inJobDao, Long inJobId, PropositionDefinition[] inPropositionDefinitions,
             String[] inPropIdsToShow, Filter filter,
             Configuration prompts) throws EtlException {
         assert inPropositionDefinitions != null :
                 "inPropositionDefinitions cannot be null";
-        assert job != null : "job cannot be null";
+        assert inJobDao != null : "inJobDao cannot be null";
+        JobEntity job = retrieveJob(inJobDao, inJobId);
         String databaseDirectory = DATABASE_DIR;
         if (databaseDirectory == null) {
             databaseDirectory = this.etlProperties.getDatabaseDirectory();
         }
+        BlockingQueue<JobEventEntity> jobEventQueue = new LinkedBlockingQueue<>();
+        JobEventEntity poisonPill = new JobEventEntity();
         try (Protempa protempa = getNewProtempa(job, prompts)) {
             LOGGER.debug("Validating the data source backend data for job {}", job.getId());
-            logValidationEvents(job, protempa.validateDataSourceBackendData(), null);
+            logValidationEvents(protempa.validateDataSourceBackendData(), jobEventQueue, null);
 
             EtlDestination eurekaDestination;
             org.protempa.dest.Destination protempaDestination;
@@ -136,7 +147,7 @@ public class ETL {
             } else {
                 databaseFile = null;
             }
-            
+
             QueryMode queryMode = QueryMode.valueOf(job.getJobMode().getName());
 
             protempaDestination
@@ -160,23 +171,40 @@ public class ETL {
             }
 
             Query query = protempa.buildQuery(q);
+
             protempa.addEventListener((ProtempaEvent protempaEvent) -> {
                 synchronized (job) {
                     JobEventEntity protempaEvt = new JobEventEntity();
-                    protempaEvt.setJob(job);
                     protempaEvt.setTimeStamp(protempaEvent.getTimestamp());
                     protempaEvt.setStatus(JobStatus.STARTED);
                     protempaEvt.setMessage(protempaEvent.getType() + " " + protempaEvent.getDescription());
+                    jobEventQueue.add(protempaEvt);
                 }
             });
+            this.protempaEventLoggerThread.setJobId(job.getId());
+            this.protempaEventLoggerThread.setJobEvents(jobEventQueue);
+            this.protempaEventLoggerThread.setPoisonPill(poisonPill);
+            this.protempaEventLoggerThread.start();
             LOGGER.debug("Executing Protempa query {}", q);
             protempa.execute(query, protempaDestination);
         } catch (DataSourceFailedDataValidationException ex) {
-            logValidationEvents(job, ex.getValidationEvents(), ex);
+            logValidationEvents(ex.getValidationEvents(), jobEventQueue, ex);
             throw new EtlException("ETL failed for job " + job.getId(), ex);
         } catch (Exception ex) {
             throw new EtlException("ETL failed for job " + job.getId(), ex);
+        } finally {
+            try {
+                jobEventQueue.add(poisonPill);
+                this.protempaEventLoggerThread.join();
+            } catch (InterruptedException ex) {
+                LOGGER.debug("Protempa event logger thread interrupted", ex);
+            }
         }
+    }
+
+    @Transactional
+    public JobEntity retrieveJob(JobDao jobDao, Long jobId) {
+        return jobDao.retrieve(jobId);
     }
 
     private void createDatabaseDirectory(String databaseDirectory) throws EtlException {
@@ -193,7 +221,7 @@ public class ETL {
         }
     }
 
-    private void logValidationEvents(JobEntity job, DataValidationEvent[] events, DataSourceFailedDataValidationException ex) {
+    private void logValidationEvents(DataValidationEvent[] events, Queue<JobEventEntity> jobEvents, DataSourceFailedDataValidationException ex) {
         for (DataValidationEvent event : events) {
             AbstractFileInfo fileInfo;
             JobStatus jobEventType;
@@ -209,11 +237,11 @@ public class ETL {
             fileInfo.setType(event.getType());
             fileInfo.setURI(event.getURI());
             JobEventEntity validationJobEvent = new JobEventEntity();
-            validationJobEvent.setJob(job);
             validationJobEvent.setTimeStamp(event.getTimestamp());
             validationJobEvent.setStatus(jobEventType);
             validationJobEvent.setMessage(fileInfo.toUserMessage());
             validationJobEvent.setExceptionStackTrace(collectThrowableMessages(ex));
+            jobEvents.add(validationJobEvent);
         }
     }
 

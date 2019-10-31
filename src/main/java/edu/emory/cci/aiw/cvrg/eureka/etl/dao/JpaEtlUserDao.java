@@ -39,9 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
-
 import javax.persistence.EntityManager;
 
 import com.google.inject.Provider;
@@ -51,22 +48,22 @@ import javax.inject.Inject;
 import org.eurekaclinical.standardapis.dao.AbstractJpaUserDao;
 
 /**
- * An implementation of the {@link AuthorizedUserDao} interface, backed by JPA entities
- * and queries.
+ * An implementation of the {@link AuthorizedUserDao} interface, backed by JPA
+ * entities and queries.
  *
  * @author Andrew Post
  */
 public class JpaEtlUserDao extends AbstractJpaUserDao<AuthorizedUserEntity> implements AuthorizedUserDao {
 
-	/**
-	 * Create an object with the give entity manager.
-	 *
-	 * @param inEMProvider The entity manager to be used for communication with
-	 *                     the data store.
-	 */
-	@Inject
-	public JpaEtlUserDao(Provider<EntityManager> inEMProvider) {
-		super(AuthorizedUserEntity.class, inEMProvider);
-	}
+    /**
+     * Create an object with the give entity manager.
+     *
+     * @param inEMProvider The entity manager to be used for communication with
+     * the data store.
+     */
+    @Inject
+    public JpaEtlUserDao(Provider<EntityManager> inEMProvider) {
+        super(AuthorizedUserEntity.class, inEMProvider);
+    }
 
 }

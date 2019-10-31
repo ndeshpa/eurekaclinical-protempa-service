@@ -49,12 +49,12 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedRoleEntity;
 import org.eurekaclinical.standardapis.dao.AbstractJpaRoleDao;
 
 /**
- * A {@link RoleDao} implementation, backed by JPA entities and queries.
+ * A {@link ProtempaServiceRoleDao} implementation, backed by JPA entities and queries.
  *
  * @author hrathod
  *
  */
-public class JpaRoleDao extends AbstractJpaRoleDao<AuthorizedRoleEntity> implements RoleDao {
+public class JpaRoleDao extends AbstractJpaRoleDao<AuthorizedRoleEntity> implements ProtempaServiceRoleDao {
 
 	/**
 	 * Create a new object with the given entity manager.

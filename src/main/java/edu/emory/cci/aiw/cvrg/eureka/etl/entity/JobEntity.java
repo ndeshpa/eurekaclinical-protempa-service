@@ -113,7 +113,7 @@ public class JobEntity {
     private List<JobEventEntity> jobEvents;
 
     private String name;
-    
+
     @ManyToOne
     @JoinColumn(name = "jobmodes_id", referencedColumnName = "id", nullable = false)
     private JobModeEntity jobMode;
