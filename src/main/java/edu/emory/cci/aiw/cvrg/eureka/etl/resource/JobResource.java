@@ -94,6 +94,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.common.auth.AuthorizedUserSupport;
 import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.eureka.client.comm.JobSpec.Side;
@@ -251,6 +252,7 @@ public class JobResource {
         return getJobStats(request, inJobId, null);
     }
 
+
     // Finer grained transactions in the implementation
     @POST
     public Response submit(@Context HttpServletRequest request, JobSpec jobSpec) {
@@ -340,7 +342,21 @@ public class JobResource {
         this.taskManager.queueTask(task);
         return jobEntity.getId();
     }
+  
+    public String toPropositionId(String phenotypeKey) {
+        final  String PRIMARY_PROP_ID_SUFFIX = "_PRIMARY";
+        final  String VALUE = "YES";
+        final  String VALUE_COMP = "NO";
+        final String PROP_ID_WRAPPED_SUFFIX = "_WRAPPED";
+        final String USER_KEY_PREFIX = "USER:";
 
+            if (phenotypeKey == null || !phenotypeKey.startsWith(USER_KEY_PREFIX)) {
+                    return phenotypeKey;
+            } else {
+                    return phenotypeKey + PRIMARY_PROP_ID_SUFFIX;
+            }
+    }
+    
     private static Interval.Side toProtempaSide(Side side) {
         switch (side) {
             case START:
