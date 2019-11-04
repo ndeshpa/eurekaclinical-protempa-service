@@ -1,6 +1,6 @@
 /*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
  * Copyright (C) 2012 - 2013 Emory University
  * %%
@@ -39,38 +39,39 @@
  */
 package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
-import java.util.List;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import com.google.inject.Inject;
+import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 
+import org.eurekaclinical.eureka.client.comm.SourceConfigParams;
+import org.eurekaclinical.eureka.client.comm.SystemPhenotype;
+import org.eurekaclinical.protempa.client.EurekaClinicalProtempaClient;
+
+import edu.emory.cci.aiw.cvrg.eureka.etl.finder.PropositionFindException;
+import edu.emory.cci.aiw.cvrg.eureka.etl.finder.SystemPropositionFinder;
+import edu.emory.cci.aiw.cvrg.eureka.etl.util.PropositionUtil;
 import org.protempa.PropositionDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.persist.Transactional;
-
-import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
-import edu.emory.cci.aiw.cvrg.eureka.etl.ksb.PropositionDefinitionFinder;
-import edu.emory.cci.aiw.cvrg.eureka.etl.ksb.PropositionFinderException;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
-import org.arp.javautil.arrays.Arrays;
+import javax.ws.rs.POST;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
 /**
  * @author hrathod
  */
-@Transactional
 @Path("/protected/concepts")
 @RolesAllowed({"researcher"})
 @Produces(MediaType.APPLICATION_JSON)
@@ -78,146 +79,217 @@ public class ConceptResource {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(ConceptResource.class);
+	private final SystemPropositionFinder finder;
 	private final EtlProperties etlProperties;
+	private final SourceConfigsResource sourceConfigsResource;
+        private final ConceptResourceByConfigId conceptResourceByConfigId;
 
+	
 	@Inject
-	public ConceptResource(EtlProperties inEtlProperties) {
+	public ConceptResource(SystemPropositionFinder inFinder,
+			SourceConfigsResource inSourceConfigsResource,
+			EtlProperties inEtlProperties,
+			ConceptResourceByConfigId inConceptResourceByConfigId) {
+		this.finder = inFinder;
 		this.etlProperties = inEtlProperties;
+		this.sourceConfigsResource = inSourceConfigsResource;
+		this.conceptResourceByConfigId=inConceptResourceByConfigId;
 	}
 
+	/**
+	 * Gets all of the system phenotypes for a user
+	 *
+         * @param req
+	 * @return a {@link List} of {@link SystemPhenotype}s
+	 */
 	@GET
-	@Path("/{configId}/{key}")
-	public PropositionDefinition getProposition(
-			@PathParam("configId") String inConfigId,
-			@PathParam("key") String inKey) {
-		if (this.etlProperties.getConfigDir() != null) {
-			try (PropositionDefinitionFinder propositionFinder
-					= new PropositionDefinitionFinder(
-							inConfigId, this.etlProperties)) {
-				PropositionDefinition definition = propositionFinder
-						.find(inKey);
-				if (definition != null) {
-					return definition;
-				} else {
-					throw new HttpStatusException(
-							Response.Status.NOT_FOUND,
-							"No proposition with id " + inKey);
-				}
-			} catch (PropositionFinderException e) {
-				throw new HttpStatusException(
-						Response.Status.INTERNAL_SERVER_ERROR, e);
-			}
-		} else {
-			throw new HttpStatusException(
-					Response.Status.INTERNAL_SERVER_ERROR,
-					"No Protempa configuration directory is "
-					+ "specified in application.properties. "
-					+ "Proposition finding will not work without it. "
-					+ "Please create it and try again.");
+	public List<SystemPhenotype> getAll(@Context HttpServletRequest req) {
+		List<SystemPhenotype> result = new ArrayList<>();
+		/*
+		 * Hack to get an ontology source that assumes all Protempa configurations
+		 * for a user point to the same knowledge source backends. This will go away.
+		 */
+
+		List<SourceConfigParams> scps = this.sourceConfigsResource.getParamsList(req);
+		if (scps.isEmpty()) {
+			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "No source configs");
 		}
+		try {
+			List<PropositionDefinition> definitions = this.finder.findAll(
+					scps.get(0).getId(),
+					this.etlProperties.getDefaultSystemPropositions(),
+					Boolean.FALSE);
+			if (definitions.isEmpty()) {
+				LOGGER.warn("No proposition definitions retrieved");
+			} else {
+				for (PropositionDefinition definition : definitions) {
+					SystemPhenotype phenotype = PropositionUtil.toSystemPhenotype(
+							scps.get(0).getId(), definition, true, this.finder);
+					result.add(phenotype);
+				}
+			}
+		} catch (PropositionFindException e) {
+			throw new HttpStatusException(
+					Response.Status.INTERNAL_SERVER_ERROR, e);
+		}
+		return result;
 	}
 
 	@GET
-	@Path("/{configId}")
-	public List<PropositionDefinition> getPropositionsGet(
-			@PathParam("configId") String inConfigId,
-			@QueryParam("key") List<String> inKeys,
-			@QueryParam("withChildren") String withChildren) {
-		return getPropositionsCommon(inConfigId, inKeys, withChildren);
+	@Path("/{key}")
+	public SystemPhenotype get(@Context HttpServletRequest req, @PathParam("key") String inKey, @DefaultValue("false") @QueryParam("summarize") boolean inSummarize) {
+		return getSystemPhenotypeCommon(req, inKey, inSummarize);
 	}
-
+	
 	@POST
-	@Path("/{configId}")
-	public List<PropositionDefinition> getPropositionsPost(
-			@PathParam("configId") String inConfigId,
-			@FormParam("key") List<String> inKeys,
-			@FormParam("withChildren") String withChildren) {
-		return getPropositionsCommon(inConfigId, inKeys, withChildren);
-	}
+	public List<SystemPhenotype> getPropositionsPost(@Context HttpServletRequest req, @FormParam("key") List<String> inKeys, @DefaultValue("false") @FormParam("summarize") String inSummarize) {
+		return getSystemPhenotypesCommon(req, inKeys, Boolean.parseBoolean(inSummarize));
 
-	private List<PropositionDefinition> getPropositionsCommon(String inConfigId, List<String> inKeys, String withChildren) throws HttpStatusException {
-		if (this.etlProperties.getConfigDir() != null) {
-			try (PropositionDefinitionFinder propositionFinder
-					= new PropositionDefinitionFinder(inConfigId,
-							this.etlProperties)) {
-				List<PropositionDefinition> result = propositionFinder.findAll(inKeys);
-				if (Boolean.parseBoolean(withChildren)) {
-					Set<String> narrower = new HashSet<>();
-					for (PropositionDefinition propDef : result) {
-						Arrays.addAll(narrower, propDef.getChildren());
-					}
-					result.addAll(propositionFinder.findAll(narrower));
-				}
-				return result;
-			} catch (PropositionFinderException e) {
-				throw new HttpStatusException(
-						Response.Status.INTERNAL_SERVER_ERROR, e);
-			}
-		} else {
-			throw new HttpStatusException(
-					Response.Status.INTERNAL_SERVER_ERROR,
-					"No Protempa configuration directory is "
-					+ "specified in application.properties. "
-					+ "Proposition finding will not work without it. "
-					+ "Please create it and try again.");
+	}
+	
+	@GET
+	@Path("/search/{searchKey}")
+	public List<String> searchSystemPhenotypes(
+			@Context HttpServletRequest req, @PathParam("searchKey") String inSearchKey) {
+		LOGGER.info("Searching system phenotype tree for the searchKey {}",
+				inSearchKey);
+
+		List<SourceConfigParams> scps = this.sourceConfigsResource
+				.getParamsList(req);
+		if (scps.isEmpty()) {
+			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
+					"No source configs");
 		}
+
+                List<String> searchResult = this.conceptResourceByConfigId.searchPropositionsInTheOntology(
+                        scps.get(0).getId(), inSearchKey);
+                LOGGER.info("returning search results list of size"
+                        + searchResult.size());
+                return searchResult;
+
 	}
 
 	@GET
-	@Path("/search/{sourceConfigId}/{searchKey}")
-	public List<String> searchPropositionsInTheOntology(
-			@PathParam("sourceConfigId") String inSourceConfigId,
-			@PathParam("searchKey") String inSearchKey) {
-		try {
-			LOGGER.debug("Searching for String " + inSearchKey
-					+ " in the system element tree");
-			if (this.etlProperties.getConfigDir() != null) {
-				try (PropositionDefinitionFinder propositionFinder = new PropositionDefinitionFinder(
-						inSourceConfigId, this.etlProperties)) {
-					return propositionFinder.getPropIdsBySearchKey(inSearchKey);
-				}
-			} else {
-				throw new HttpStatusException(
-						Response.Status.INTERNAL_SERVER_ERROR,
-						"No Protempa configuration directory is "
-						+ "specified in application.properties. "
-						+ "Proposition finding will not work without it. "
-						+ "Please create it and try again.");
-			}
+	@Path("/propsearch/{searchKey}")
+	public List<SystemPhenotype> getSystemPhenotypesBySearchKey(
+			@Context HttpServletRequest req, @PathParam("searchKey") String inSearchKey) {
+		LOGGER.info("Searching system phenotype tree for the searchKey {}",
+				inSearchKey);
+		List<SystemPhenotype> result = new ArrayList<>();
+		List<SourceConfigParams> scps = this.sourceConfigsResource
+				.getParamsList(req);
+		if (scps.isEmpty()) {
+			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
+					"No source configs");
+		}
 
-		} catch (PropositionFinderException e) {
+		try {
+                    List<PropositionDefinition> definitions = this.finder.findAll(
+					scps.get(0).getId(),
+					this.etlProperties.getDefaultSystemPropositions(),
+					Boolean.FALSE);
+            
+			for (PropositionDefinition definition : definitions) {
+                                if (definition.getDisplayName().equalsIgnoreCase(inSearchKey)){
+                                    SystemPhenotype phenotype = PropositionUtil.toSystemPhenotype(
+                                    scps.get(0).getId(), definition, true, this.finder);
+                                    result.add(phenotype);
+                                }
+			}
+			LOGGER.info("returning search results list of size"
+					+ definitions.size());
+			return result;
+		}catch (PropositionFindException e) {
 			throw new HttpStatusException(
 					Response.Status.INTERNAL_SERVER_ERROR, e);
 		}
 
 	}
+        
+        @POST
+	@Path("/propsearch")
+	public List<SystemPhenotype> getSystemPhenotypesBySearchKeyPost(
+			@Context HttpServletRequest req, @FormParam("searchKey") String inSearchKey) {
+		LOGGER.info("Searching system phenotype tree for the searchKey {}",
+				inSearchKey);
+		List<SystemPhenotype> result = new ArrayList<>();
+		List<SourceConfigParams> scps = this.sourceConfigsResource
+				.getParamsList(req);
+		if (scps.isEmpty()) {
+			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR,
+					"No source configs");
+		}
 
-	@GET
-	@Path("/propsearch/{sourceConfigId}/{searchKey}")
-	public List<PropositionDefinition> getPropositionsInTheOntologyBySearchKey(
-			@PathParam("sourceConfigId") String inSourceConfigId,
-			@PathParam("searchKey") String inSearchKey) {
 		try {
-			LOGGER.debug("Searching for String " + inSearchKey
-					+ " in the system element tree");
-			if (this.etlProperties.getConfigDir() != null) {
-				try (PropositionDefinitionFinder propositionFinder = new PropositionDefinitionFinder(
-						inSourceConfigId, this.etlProperties)) {
-					return propositionFinder.getPropositionDefinitionsBySearchKey(inSearchKey);
-				}
-			} else {
-				throw new HttpStatusException(
-						Response.Status.INTERNAL_SERVER_ERROR,
-						"No Protempa configuration directory is "
-						+ "specified in application.properties. "
-						+ "Proposition finding will not work without it. "
-						+ "Please create it and try again.");
+                    List<PropositionDefinition> definitions = this.finder.findAll(
+					scps.get(0).getId(),
+					this.etlProperties.getDefaultSystemPropositions(),
+					Boolean.FALSE);
+            
+			for (PropositionDefinition definition : definitions) {
+                                if (definition.getDisplayName().equalsIgnoreCase(inSearchKey)){
+                                    SystemPhenotype phenotype = PropositionUtil.toSystemPhenotype(
+                                    scps.get(0).getId(), definition, true, this.finder);
+                                    result.add(phenotype);
+                                }
 			}
-
-		} catch (PropositionFinderException e) {
+			LOGGER.info("returning search results list of size"
+					+ definitions.size());
+			return result;
+		}catch (PropositionFindException e) {
 			throw new HttpStatusException(
 					Response.Status.INTERNAL_SERVER_ERROR, e);
 		}
 
+	}
+	
+	private List<SystemPhenotype> getSystemPhenotypesCommon(HttpServletRequest req, List<String> inKeys, boolean inSummarize) throws HttpStatusException {
+		LOGGER.info("Finding system phenotype {}", inKeys);
+		/*
+		* Hack to get an ontology source that assumes all Protempa configurations
+		* for a user point to the same knowledge source backends. This will go away.
+		*/
+		List<SourceConfigParams> scps = this.sourceConfigsResource.getParamsList(req);
+		if (scps.isEmpty()) {
+			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "No source configs");
+		}
+		String sourceConfigId = scps.get(0).getId();
+		List<PropositionDefinition> definition;
+		try {
+			definition = this.finder.findAll(sourceConfigId, inKeys, Boolean.FALSE);
+			List<SystemPhenotype> result = new ArrayList<>(definition.size());
+			for (PropositionDefinition propDef : definition) {
+				result.add(PropositionUtil.toSystemPhenotype(sourceConfigId, propDef, inSummarize,
+					this.finder));
+			}
+			return result;
+		} catch (PropositionFindException ex) {
+			throw new HttpStatusException(
+					Response.Status.INTERNAL_SERVER_ERROR, ex);
+		}
+	}
+
+	private SystemPhenotype getSystemPhenotypeCommon(HttpServletRequest req, String inKey, boolean inSummarize) throws HttpStatusException {
+		LOGGER.info("Finding system phenotype {}", inKey);
+		/*
+		* Hack to get an ontology source that assumes all Protempa configurations
+		* for a user point to the same knowledge source backends. This will go away.
+		*/
+		List<SourceConfigParams> scps = this.sourceConfigsResource.getParamsList(req);
+		if (scps.isEmpty()) {
+			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "No source configs");
+		}
+		PropositionDefinition definition;
+		try {
+			definition = this.finder.find(scps.get(0).getId(), inKey);
+			if (definition == null) {
+				throw new HttpStatusException(Response.Status.NOT_FOUND);
+			}
+			return PropositionUtil.toSystemPhenotype(scps.get(0).getId(), definition, inSummarize,
+					this.finder);
+		} catch (PropositionFindException ex) {
+			throw new HttpStatusException(
+					Response.Status.INTERNAL_SERVER_ERROR, ex);
+		}
 	}
 }

@@ -1,8 +1,10 @@
+package edu.emory.cci.aiw.cvrg.eureka.etl.conversion;
+
 /*
  * #%L
- * Eureka Protempa ETL
+ * Eureka Services
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2014 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -37,34 +39,38 @@
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
-import org.eurekaclinical.eureka.client.comm.Job;
-import org.eurekaclinical.eureka.client.comm.JobFilter;
+import org.eurekaclinical.eureka.client.comm.Cohort;
 
 /**
  *
- * @author hrathod
+ * @author Andrew Post
  */
-public class JobResourceTest extends AbstractEtlResourceTest {
-
-    /**
-     * Test if all the jobs added by the Setup class are returned properly,
-     * using a null Filter.
-     */
-    @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
-    }
+class CohortConversionSupport extends ConversionSupport {
+	
+	CohortConversionSupport() {
+	}
+	
+	Cohort etlCohortToServicesCohort(Cohort etlCohort) {
+		Cohort cohort = new Cohort();
+		cohort.setId(etlCohort.getId());
+		EtlNodeToServicesNodeVisitor v = 
+				new EtlNodeToServicesNodeVisitor();
+		etlCohort.getNode().accept(v);
+		cohort.setNode(v.getNode());
+		
+		return cohort;
+	}
+	
+	Cohort servicesCohortToEtlCohort(Cohort servicesCohort) {
+		Cohort cohort = new Cohort();
+		cohort.setId(servicesCohort.getId());
+		ServicesNodeToEtlNodeVisitor v =
+				new ServicesNodeToEtlNodeVisitor();
+		servicesCohort.getNode().accept(v);
+		cohort.setNode(v.getNode());
+		
+		return cohort;
+	}
 
 }

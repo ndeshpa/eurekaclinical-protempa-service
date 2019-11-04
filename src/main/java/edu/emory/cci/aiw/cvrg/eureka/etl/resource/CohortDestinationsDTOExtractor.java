@@ -45,7 +45,6 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  *

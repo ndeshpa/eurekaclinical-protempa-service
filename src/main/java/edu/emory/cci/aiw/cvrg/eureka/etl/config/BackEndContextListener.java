@@ -48,7 +48,7 @@ import com.google.inject.servlet.GuiceServletContextListener;
 
 import edu.emory.cci.aiw.cvrg.eureka.etl.job.TaskManager;
 import org.eurekaclinical.common.config.InjectorSupport;
-import org.eurekaclinical.common.config.ServiceServletModule;
+import org.eurekaclinical.common.config.ProxyingServiceServletModule;
 
 /**
  * Loaded up on application initialization, sets up the application with Guice
@@ -62,7 +62,12 @@ public class BackEndContextListener extends GuiceServletContextListener {
 	private static final String JPA_UNIT = "backend-jpa-unit";
 	private static final String PACKAGE_NAMES = "edu.emory.cci.aiw.cvrg.eureka.etl.resource;org.eurekaclinical.protempa.client.json";
 	private final EtlProperties etlProperties = new EtlProperties();
+        private final PhenotypeClientProvider phenotypeClientProvider; 
 	private Injector injector;
+        
+        public BackEndContextListener(){
+                phenotypeClientProvider = new PhenotypeClientProvider(this.etlProperties.getPhenotypeServiceUrl());
+        }
 
 	@Override
 	public void contextInitialized(ServletContextEvent inServletContextEvent) {
@@ -74,8 +79,8 @@ public class BackEndContextListener extends GuiceServletContextListener {
 	protected Injector getInjector() {
 		this.injector = new InjectorSupport(
 				new Module[]{
-					new AppModule(),
-					new ServiceServletModule(this.etlProperties, PACKAGE_NAMES),
+					new AppModule(this.phenotypeClientProvider),
+					new ProxyingServiceServletModule(this.etlProperties, PACKAGE_NAMES),
 					new JpaPersistModule(JPA_UNIT)
 				},
 				this.etlProperties).getInjector();

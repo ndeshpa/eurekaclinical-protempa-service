@@ -81,7 +81,6 @@
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity</class>
-    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity</class>
     <properties>
       <property name="hibernate.jdbc.batch_size" value="1000"/>
       <property name="hibernate.jdbc.fetch_size" value="1000"/>
