@@ -99,7 +99,6 @@ import org.eurekaclinical.common.auth.AuthorizedUserSupport;
 import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.eureka.client.comm.JobSpec.Side;
 import org.eurekaclinical.eureka.client.comm.Phenotype;
-import org.eurekaclinical.eureka.client.comm.PhenotypeVisitor;
 import org.eurekaclinical.eureka.client.comm.exception.PhenotypeHandlingException;
 import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;

@@ -48,7 +48,6 @@
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationIdPoolIdEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.JobModeEntity</class>
-    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.UserTemplateEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.IdPoolIdEntity</class>
     <properties>
