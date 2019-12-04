@@ -44,6 +44,32 @@
         <datastore-version>[3.2,)</datastore-version>
     </properties>
 
+   <scm>
+        <developerConnection>scm:git:https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</developerConnection>
+        <connection>scm:git:https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</connection>
+        <url>https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/eurekaclinical/eurekaclinical-protempa-service/issues</url>
+    </issueManagement>
+	
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>manual</distribution>
+        </license>
+        <license>
+            <name>GNU General Public License, Version 3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
+
+
     <build>
         <finalName>eurekaclinical-protempa-service</finalName>
         <plugins>
@@ -537,3 +563,5 @@
         </dependency>
     </dependencies>
 </project>
+
+ 
