@@ -56,4 +56,6 @@ public interface DestinationEntityVisitor {
 	void visit(PatientSetSenderDestinationEntity patientSetSenderDestination);
 	
 	void visit(TabularFileDestinationEntity tabularFileDestinationEntity);
+
+	void visit(OmopDestinationEntity omopDestinationEntity);
 }

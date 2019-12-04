@@ -46,6 +46,7 @@ import org.eurekaclinical.eureka.client.comm.PhenotypeField;
 import org.eurekaclinical.eureka.client.comm.Destination;
 import org.eurekaclinical.eureka.client.comm.I2B2Destination;
 import org.eurekaclinical.eureka.client.comm.Neo4jDestination;
+import org.eurekaclinical.eureka.client.comm.OmopDestination;
 import org.eurekaclinical.eureka.client.comm.PatientSetExtractorDestination;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,7 @@ import org.eurekaclinical.protempa.client.comm.EtlCohortDestination;
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import org.eurekaclinical.protempa.client.comm.EtlI2B2Destination;
 import org.eurekaclinical.protempa.client.comm.EtlNeo4jDestination;
+import org.eurekaclinical.protempa.client.comm.EtlOmopDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientListDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetExtractorDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetSenderDestination;
@@ -187,5 +189,13 @@ public class DestinationToEtlDestinationVisitor extends AbstractDestinationVisit
         visitCommon(patientListDestination, result);
         this.etlDestination = result;
     }
+
+	@Override
+	public void visit(OmopDestination omopDestination) {
+        EtlOmopDestination result = new EtlOmopDestination();
+        visitCommon(omopDestination, result);
+        this.etlDestination = result;
+		
+	}
     
 }

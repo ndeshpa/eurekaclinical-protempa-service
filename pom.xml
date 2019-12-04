@@ -26,48 +26,23 @@
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <commons-codec-version>1.4</commons-codec-version>
         <eurekaclinical-ontology-version>2.0.4</eurekaclinical-ontology-version>
-        <eurekaclinical-protempa-client-version>3.0-Alpha-6</eurekaclinical-protempa-client-version>
-        <eurekaclinical-patient-set-client-version>2.3</eurekaclinical-patient-set-client-version>
-        <eurekaclinical-phenotype-client-version>1.0-Alpha-3</eurekaclinical-phenotype-client-version>
-        <eureka-client-version>5.0-Alpha-7</eureka-client-version>
-        <eurekaclinical-standard-apis-version>4.0-Alpha-5</eurekaclinical-standard-apis-version>
-        <eurekaclinical-common-version>5.0-Alpha-6</eurekaclinical-common-version>
-        <aiw-i2b2-etl-version>4.2</aiw-i2b2-etl-version>
-        <aiw-neo4j-etl-version>4.2</aiw-neo4j-etl-version>
-        <protempa-version>5.1-Beta-3</protempa-version>
+        <eurekaclinical-protempa-client-version>[3.0,)</eurekaclinical-protempa-client-version>
+        <eurekaclinical-patient-set-client-version>[2.4,)</eurekaclinical-patient-set-client-version>
+        <eurekaclinical-phenotype-client-version>[1.0,)</eurekaclinical-phenotype-client-version>
+        <eureka-client-version>[5.0,)</eureka-client-version>
+        <eurekaclinical-standard-apis-version>[4.0,)</eurekaclinical-standard-apis-version>
+        <eurekaclinical-common-version>[5.0,)</eurekaclinical-common-version>
+        <aiw-i2b2-etl-version>[4.4,)</aiw-i2b2-etl-version>
+        <aiw-omop-etl-version>[0.0.2,)</aiw-omop-etl-version>
+        <aiw-neo4j-etl-version>[4.3,)</aiw-neo4j-etl-version>
+        <protempa-version>[5.1,)</protempa-version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <cas-mock-version>2.3</cas-mock-version>
+        <cas-mock-version>[2.3,)</cas-mock-version>
         <poi-version>3.9</poi-version>
-        <javautil-version>4.4</javautil-version>
+        <javautil-version>[4.4,)</javautil-version>
         <tomcat.httpsPort>8443</tomcat.httpsPort>
-        <datastore-version>3.2</datastore-version>
+        <datastore-version>[3.2,)</datastore-version>
     </properties>
-	
-    <scm>
-        <developerConnection>scm:git:https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</developerConnection>
-        <connection>scm:git:https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</connection>
-        <url>https://github.com/eurekaclinical/eurekaclinical-protempa-service.git</url>
-        <tag>HEAD</tag>
-    </scm>
-
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/eurekaclinical/eurekaclinical-protempa-service/issues</url>
-    </issueManagement>
-	
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-            <distribution>manual</distribution>
-        </license>
-        <license>
-            <name>GNU General Public License, Version 3</name>
-            <url>http://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
-            <distribution>manual</distribution>
-        </license>
-    </licenses>
-
 
     <build>
         <finalName>eurekaclinical-protempa-service</finalName>
@@ -342,6 +317,26 @@
                                     <outputDirectory>${project.build.directory}/eureka-config</outputDirectory>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>copy-sql-from-aiw-omop-etl</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration> 
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.eurekaclinical</groupId>
+                                            <artifactId>aiw-omop-etl</artifactId>
+                                            <version>${aiw-omop-etl-version}</version> 
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <includes>
+                                        sql/OMOP_CDM_oracle_ddl.sql
+                                    </includes>
+                                    <outputDirectory>${project.build.directory}/eureka-config</outputDirectory>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                     <plugin>
@@ -391,6 +386,7 @@
                                         <includes>
                                             <include>eureka-config/sql/i2b2_data_tables_1_7_h2.sql</include>
                                             <include>eureka-config/sql/mock_stored_procedures_h2.sql</include>
+                                            <include>eureka-config/sql/OMOP_CDM_oracle_ddl.sql</include>
                                         </includes>
                                     </fileset>
                                     <sqlCommand />
@@ -411,6 +407,12 @@
                     <groupId>org.eurekaclinical</groupId>
                     <artifactId>aiw-i2b2-etl</artifactId>
                     <version>${aiw-i2b2-etl-version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.eurekaclinical</groupId>
+                    <artifactId>aiw-omop-etl</artifactId>
+                    <version>${aiw-omop-etl-version}</version>
                     <scope>runtime</scope>
                 </dependency>
                 <dependency>
@@ -443,6 +445,11 @@
             <groupId>org.eurekaclinical</groupId>
             <artifactId>aiw-i2b2-etl</artifactId>
             <version>${aiw-i2b2-etl-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eurekaclinical</groupId>
+            <artifactId>aiw-omop-etl</artifactId>
+            <version>${aiw-omop-etl-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
@@ -530,4 +537,3 @@
         </dependency>
     </dependencies>
 </project>
-

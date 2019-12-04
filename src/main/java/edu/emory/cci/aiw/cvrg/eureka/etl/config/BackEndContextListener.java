@@ -79,7 +79,6 @@ public class BackEndContextListener extends GuiceServletContextListener {
 	protected Injector getInjector() {
 		this.injector = new InjectorSupport(
 				new Module[]{
-
 					new AppModule(this.phenotypeClientProvider),
 					new ProxyingServiceServletModule(this.etlProperties, PACKAGE_NAMES),
 					new JpaPersistModule(JPA_UNIT)

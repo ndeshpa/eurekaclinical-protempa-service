@@ -15,6 +15,7 @@ limitations under the License.
 This project includes:
   AIW i2b2 ETL under Apache License, Version 2.0
   AIW Neo4j ETL under GNU General Public License, Version 3
+  AIW OMOP ETL under Apache License, Version 2.0
   AntLR Parser Generator under BSD License
   AOP alliance under Public Domain
   Apache Commons CLI under Apache License, Version 2.0
@@ -32,13 +33,14 @@ This project includes:
   Datastore under Apache License, Version 2.0
   dom4j under BSD License
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
+  ETL Common under Apache License, Version 2.0
   Eureka! Client under Apache License, Version 2.0
   Eureka! Clinical Common under Apache License, Version 2.0
   Eureka! Clinical Ontology Installation Files under Apache License, Version 2.0
   Eureka! Clinical Patient Set Client under Apache License, Version 2.0
   Eureka! Clinical Phenotype Client under Apache License, Version 2.0
   Eureka! Clinical Protempa Client under Apache License, Version 2.0
-  Eureka! Clinical Protempa Service under Apache License, Version 2.0 or GNU General Public License, Version 3
+  Eureka! Clinical Protempa Service under Apache License, Version 2.0
   Eureka! Clinical Standard APIs under Apache License, Version 2.0
   Google Guice - Core Library under The Apache Software License, Version 2.0
   Google Guice - Extensions - JNDI under The Apache Software License, Version 2.0

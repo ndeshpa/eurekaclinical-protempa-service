@@ -40,9 +40,9 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * #L%
  */
 
-import edu.emory.cci.aiw.i2b2etl.dest.config.DataSourceDatabaseSpec;
-import edu.emory.cci.aiw.i2b2etl.dest.config.DatabaseSpec;
-import edu.emory.cci.aiw.i2b2etl.dest.config.DriverManagerDatabaseSpec;
+import edu.emory.cci.aiw.etl.dest.config.DataSourceDatabaseSpec;
+import edu.emory.cci.aiw.etl.dest.config.DatabaseSpec;
+import edu.emory.cci.aiw.etl.dest.config.DriverManagerDatabaseSpec;
 
 /**
  * Factory for creating {@link DatabaseSpec}s. This is specific to Eureka

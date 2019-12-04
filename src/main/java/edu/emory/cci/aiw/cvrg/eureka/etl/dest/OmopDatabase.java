@@ -39,30 +39,21 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
 import edu.emory.cci.aiw.etl.dest.config.Database;
 import edu.emory.cci.aiw.etl.dest.config.DatabaseSpec;
 
 /**
  *
- * @author Andrew Post
+ * @author Nita Deshpande
  */
-class I2b2Database implements Database {
+class OmopDatabase implements Database {
 
-	private final DatabaseSpec metaSpec;
 	private final DatabaseSpec dataSpec;
 
-	I2b2Database(I2B2DestinationEntity entity) {
+	OmopDatabase(OmopDestinationEntity entity) {
 		DatabaseSpecFactory databaseSpecFactory = new DatabaseSpecFactory();
-		String metaConnect = entity.getMetaConnect();
-		String metaUser = entity.getMetaUser();
-		String metaPassword = entity.getMetaPassword();
-		if (metaConnect != null) {
-			this.metaSpec = databaseSpecFactory.getInstance(metaConnect, metaUser, metaPassword);
-		} else {
-			this.metaSpec = null;
-		}
-
+		
 		String dataConnect = entity.getDataConnect();
 		String dataUser = entity.getDataUser();
 		String dataPassword = entity.getDataPassword();
@@ -75,7 +66,7 @@ class I2b2Database implements Database {
 
 	@Override
 	public DatabaseSpec getMetadataSpec() {
-		return this.metaSpec;
+		return null;
 	}
 
 	@Override
