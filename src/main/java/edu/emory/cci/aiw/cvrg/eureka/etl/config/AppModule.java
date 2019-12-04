@@ -71,10 +71,10 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.LinkDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.ProtempaServiceRoleDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.EurekaDeidConfigFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.JpaEurekaDeidConfigFactory;
-
 import org.eurekaclinical.phenotype.client.EurekaClinicalPhenotypeClient;
 import org.eurekaclinical.standardapis.dao.RoleDao;
 import org.eurekaclinical.standardapis.dao.UserDao;
+
 import org.eurekaclinical.standardapis.entity.RoleEntity;
 import org.eurekaclinical.standardapis.entity.UserEntity;
 
@@ -84,13 +84,14 @@ import org.eurekaclinical.standardapis.entity.UserEntity;
 public class AppModule extends AbstractModule {
 
 	PhenotypeClientProvider phenotypeClientProvider;
+
     AppModule(PhenotypeClientProvider inPhenotypeClientProvider) {
         this.phenotypeClientProvider = inPhenotypeClientProvider;
     }
 
     @Override
     protected void configure() {
-    	bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
+    	  bind(new TypeLiteral<UserDao<? extends UserEntity<? extends RoleEntity>>>() {}).to(JpaEtlUserDao.class);
         bind(AuthorizedUserDao.class).to(JpaEtlUserDao.class);
         bind(ProtempaServiceRoleDao.class).to(JpaRoleDao.class);
         bind(JobDao.class).to(JpaJobDao.class);
