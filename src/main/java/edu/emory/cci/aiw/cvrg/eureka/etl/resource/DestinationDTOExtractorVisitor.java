@@ -46,6 +46,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntityVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.Neo4jDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
@@ -63,6 +64,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 	private final PatientSetExtractorDestinationsDTOExtractor patientSetExtractorExtractor;
 	private final PatientSetSenderDestinationsDTOExtractor patientSetSenderExtractor;
 	private final TabularFileDestinationsDTOExtractor tabularFileExtractor;
+	private final OmopDestinationsDTOExtractor omopExtractor;
 	private EtlDestination destDTO;
 
 	public DestinationDTOExtractorVisitor(EtlProperties inEtlProperties, AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
@@ -72,6 +74,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 		this.patientSetExtractorExtractor = new PatientSetExtractorDestinationsDTOExtractor(user, inGroupDao);
 		this.patientSetSenderExtractor = new PatientSetSenderDestinationsDTOExtractor(user, inGroupDao);
 		this.tabularFileExtractor = new TabularFileDestinationsDTOExtractor(user, inGroupDao);
+		this.omopExtractor = new OmopDestinationsDTOExtractor(user, inGroupDao);
 	}
 	
 	@Override
@@ -106,6 +109,12 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 	
 	public EtlDestination getEtlDestination() {
 		return this.destDTO;
+	}
+
+	@Override
+	public void visit(OmopDestinationEntity omopFileDestination) {
+		this.destDTO = this.omopExtractor.extractDTO(omopFileDestination);		
+
 	}
 
 }

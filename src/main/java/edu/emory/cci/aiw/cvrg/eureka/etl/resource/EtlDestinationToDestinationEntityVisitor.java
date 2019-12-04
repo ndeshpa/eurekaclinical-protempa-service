@@ -44,6 +44,7 @@ import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import org.eurekaclinical.protempa.client.comm.EtlDestinationVisitor;
 import org.eurekaclinical.protempa.client.comm.EtlI2B2Destination;
 import org.eurekaclinical.protempa.client.comm.EtlNeo4jDestination;
+import org.eurekaclinical.protempa.client.comm.EtlOmopDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetExtractorDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetSenderDestination;
 import org.eurekaclinical.protempa.client.comm.EtlTabularFileDestination;
@@ -151,5 +152,10 @@ public class EtlDestinationToDestinationEntityVisitor implements EtlDestinationV
     public DestinationEntity getDestinationEntity() {
         return this.destinationEntity;
     }
+
+	@Override
+	public void visit(EtlOmopDestination etlOmopDestination) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
 }

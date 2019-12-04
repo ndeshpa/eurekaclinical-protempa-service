@@ -1,10 +1,10 @@
 package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 
-/*
+/*-
  * #%L
- * Eureka Protempa ETL
+ * Eureka! Clinical Protempa Service
  * %%
- * Copyright (C) 2012 - 2015 Emory University
+ * Copyright (C) 2012 - 2019 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,48 +39,44 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
-import edu.emory.cci.aiw.etl.dest.config.Database;
-import edu.emory.cci.aiw.etl.dest.config.DatabaseSpec;
+
+
+import java.sql.SQLException;
+import java.util.List;
+
+import org.protempa.DataSource;
+import org.protempa.KnowledgeSource;
+import org.protempa.ProtempaEventListener;
+import org.protempa.dest.AbstractDestination;
+import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.query.Query;
+
+import edu.emory.cci.aiw.i2b2etl.dest.config.Configuration;
 
 /**
- *
- * @author Andrew Post
+ * Protempa destination for writing data to omop tables.
+ * 
+ * @author Nita Deshpande
  */
-class I2b2Database implements Database {
+public class OmopDestination extends AbstractDestination {
 
-	private final DatabaseSpec metaSpec;
-	private final DatabaseSpec dataSpec;
+    private final EurekaOmopConfiguration config;
 
-	I2b2Database(I2B2DestinationEntity entity) {
-		DatabaseSpecFactory databaseSpecFactory = new DatabaseSpecFactory();
-		String metaConnect = entity.getMetaConnect();
-		String metaUser = entity.getMetaUser();
-		String metaPassword = entity.getMetaPassword();
-		if (metaConnect != null) {
-			this.metaSpec = databaseSpecFactory.getInstance(metaConnect, metaUser, metaPassword);
-		} else {
-			this.metaSpec = null;
+    OmopDestination(Configuration config) {
+    	if (config == null) {
+            throw new IllegalArgumentException("config cannot be null");
+        }
+        this.config = (EurekaOmopConfiguration)config;
+    }
+
+    @Override
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
+        try {
+			return new OmopQueryResultsHandler(query, dataSource, knowledgeSource, this.config);
+		} catch (SQLException e) {
+			throw new QueryResultsHandlerInitException(e);
 		}
-
-		String dataConnect = entity.getDataConnect();
-		String dataUser = entity.getDataUser();
-		String dataPassword = entity.getDataPassword();
-		if (dataConnect != null) {
-			this.dataSpec = databaseSpecFactory.getInstance(dataConnect, dataUser, dataPassword);
-		} else {
-			this.dataSpec = null;
-		}
-	}
-
-	@Override
-	public DatabaseSpec getMetadataSpec() {
-		return this.metaSpec;
-	}
-
-	@Override
-	public DatabaseSpec getDataSpec() {
-		return this.dataSpec;
-	}
+    }
 
 }
