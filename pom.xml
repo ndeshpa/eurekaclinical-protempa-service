@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>4-Alpha-3</version>
+        <version>4-Alpha-4-SNAPSHOT</version>
     </parent>
 	
     <properties>
@@ -25,23 +25,23 @@
         <tomcat.httpsPort>8443</tomcat.httpsPort>        
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <commons-codec-version>1.4</commons-codec-version>
-        <eurekaclinical-ontology-version>2.0.4</eurekaclinical-ontology-version>
-        <eurekaclinical-protempa-client-version>[3.0,)</eurekaclinical-protempa-client-version>
-        <eurekaclinical-patient-set-client-version>[2.4,)</eurekaclinical-patient-set-client-version>
-        <eurekaclinical-phenotype-client-version>[1.0,)</eurekaclinical-phenotype-client-version>
-        <eureka-client-version>[5.0,)</eureka-client-version>
-        <eurekaclinical-standard-apis-version>[4.0,)</eurekaclinical-standard-apis-version>
-        <eurekaclinical-common-version>[5.0,)</eurekaclinical-common-version>
-        <aiw-i2b2-etl-version>[4.4,)</aiw-i2b2-etl-version>
-        <aiw-omop-etl-version>[0.0.2,)</aiw-omop-etl-version>
-        <aiw-neo4j-etl-version>[4.3,)</aiw-neo4j-etl-version>
-        <protempa-version>[5.1,)</protempa-version>
+        <eurekaclinical-ontology-version>2.0.5-SNAPSHOT</eurekaclinical-ontology-version>
+        <eurekaclinical-protempa-client-version>3.1-Alpha-1-SNAPSHOT</eurekaclinical-protempa-client-version>
+        <eurekaclinical-patient-set-client-version>2.5-SNAPSHOT</eurekaclinical-patient-set-client-version>
+        <eurekaclinical-phenotype-client-version>1.1-Alpha-1-SNAPSHOT</eurekaclinical-phenotype-client-version>
+        <eureka-client-version>5.1-Alpha-1-SNAPSHOT</eureka-client-version>
+        <eurekaclinical-standard-apis-version>4.1-Alpha-1-SNAPSHOT</eurekaclinical-standard-apis-version>
+        <eurekaclinical-common-version>5.1-Alpha-1-SNAPSHOT</eurekaclinical-common-version>
+        <aiw-i2b2-etl-version>4.5-SNAPSHOT</aiw-i2b2-etl-version>
+        <aiw-omop-etl-version>0.0.3-SNAPSHOT</aiw-omop-etl-version>
+        <aiw-neo4j-etl-version>4.4-SNAPSHOT</aiw-neo4j-etl-version>
+        <protempa-version>5.2-Alpha-1-SNAPSHOT</protempa-version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <cas-mock-version>[2.3,)</cas-mock-version>
-        <poi-version>3.9</poi-version>
-        <javautil-version>[4.4,)</javautil-version>
+        <cas-mock-version>2.4-SNAPSHOT</cas-mock-version>
+        <poi-version>4.1.1</poi-version>
+        <javautil-version>4.5-SNAPSHOT</javautil-version>
         <tomcat.httpsPort>8443</tomcat.httpsPort>
-        <datastore-version>[3.2,)</datastore-version>
+        <datastore-version>3.3-SNAPSHOT</datastore-version>
     </properties>
 
    <scm>
@@ -147,6 +147,23 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                 	<dependencies>
+						<dependency>
+							<groupId>com.sun.xml.bind</groupId>
+							<artifactId>jaxb-core</artifactId>
+							<version>2.3.0.1</version>
+						</dependency>
+						<dependency>
+							<groupId>javax.xml.bind</groupId>
+							<artifactId>jaxb-api</artifactId>
+							<version>2.3.1</version>
+						</dependency>
+						<dependency>
+							<groupId>com.sun.xml.bind</groupId>
+							<artifactId>jaxb-impl</artifactId>
+							<version>2.3.1</version>
+						</dependency>
+					</dependencies>
                 <configuration>
                     <systemPropertyVariables>
                         <eureka.config.dir>${project.build.directory}/test-classes/eureka-config/eureka</eureka.config.dir>
