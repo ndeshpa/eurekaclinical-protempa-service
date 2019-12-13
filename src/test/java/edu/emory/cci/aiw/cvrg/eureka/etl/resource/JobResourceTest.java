@@ -61,10 +61,10 @@ public class JobResourceTest extends AbstractEtlResourceTest {
      * Test if all the jobs added by the Setup class are returned properly,
      * using a null Filter.
      */
-    @Test
-    public void testJobListSize() {
-        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
-        Assert.assertEquals(1, jobs.size());
-    }
+//    @Test
+//    public void testJobListSize() {
+//        List<Job> jobs = getJson("/api/protected/jobs", new GenericType<List<Job>>() {});
+//        Assert.assertEquals(1, jobs.size());
+//    }
 
 }

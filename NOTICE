@@ -22,16 +22,19 @@ This project includes:
   Apache Commons CLI under Apache License, Version 2.0
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
+  Apache Commons Compress under Apache License, Version 2.0
   Apache Commons CSV under Apache License, Version 2.0
   Apache Commons Exec under Apache License, Version 2.0
   Apache Commons IO under Apache License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
   Apache Commons Logging under The Apache Software License, Version 2.0
-  Apache POI under The Apache Software License, Version 2.0
+  Apache Commons Math under Apache License, Version 2.0
+  Apache POI under Apache License, Version 2.0
   Byte Buddy (without dependencies) under Apache License, Version 2.0
   Checker Qual under GNU General Public License, version 2 (GPL2), with the classpath exception or The MIT License
   ClassMate under Apache License, Version 2.0
   ConcurrentLinkedHashMap under The Apache Software License, Version 2.0
+  curvesapi under BSD License
   Data Mapper for Jackson under The Apache Software License, Version 2.0
   Datastore under Apache License, Version 2.0
   dom4j under BSD 3-clause New License
@@ -134,9 +137,7 @@ This project includes:
   Scala Library under BSD-like
   SLF4J API Module under MIT License
   SLF4J JDK14 Binding under MIT License
-  StAX API under The Apache Software License, Version 2.0
   TXW2 Runtime under CDDL+GPL License
-  XML Commons External Components XML APIs under The Apache Software License, Version 2.0
   Xml Compatibility extensions for Jackson under The Apache Software License, Version 2.0 or GNU Lesser General Public License (LGPL), Version 2.1
   XmlBeans under The Apache Software License, Version 2.0
 
