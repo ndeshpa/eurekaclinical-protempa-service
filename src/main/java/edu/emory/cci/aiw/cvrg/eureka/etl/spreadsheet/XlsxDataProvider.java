@@ -585,16 +585,19 @@ public class XlsxDataProvider implements DataProvider {
 		String result = null;
 		if (cell != null) {
 			try {
-				int cellType = cell.getCellType();
-				if (cellType == Cell.CELL_TYPE_STRING) {
+				switch (cell.getCellType()) {
+				case STRING:
 					result = cell.getStringCellValue();
-				} else if (cellType == Cell.CELL_TYPE_NUMERIC) {
+					break;
+				case NUMERIC:
 					result = Double.toString(cell.getNumericCellValue());
-				} else if (cellType == Cell.CELL_TYPE_BOOLEAN) {
+					break;
+				case BOOLEAN:
 					result = Boolean.toString(cell.getBooleanCellValue());
-				} else {
-					throwException(sheetName, cell,
-							"Cell type must be a number, string, boolean or blank");
+					break;
+				default:
+					throwException(sheetName, cell, "Cell type must be a number, string, boolean or blank");
+					break;
 				}
 			} catch (Exception e) {
 				throwException(sheetName, cell, e.getMessage(), e);
