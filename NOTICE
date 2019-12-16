@@ -123,6 +123,8 @@ This project includes:
   Neo4j - Primitive Collections under GNU General Public License, Version 3
   Neo4j - Unsafe Access under GNU General Public License, Version 3
   Neo4j - Usage Data Collection under GNU General Public License, Version 3
+  Old JAXB Core under CDDL+GPL License
+  Old JAXB Runtime under CDDL+GPL License
   opencsv under Apache 2
   Oracle NoSQL Database Server under Apache 2
   parboiled-core under Apache 2
