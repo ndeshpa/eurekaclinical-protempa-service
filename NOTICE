@@ -16,23 +16,30 @@ This project includes:
   AIW i2b2 ETL under Apache License, Version 2.0
   AIW Neo4j ETL under GNU General Public License, Version 3
   AIW OMOP ETL under Apache License, Version 2.0
+  Animal Sniffer Annotations under MIT license
   AntLR Parser Generator under BSD License
   AOP alliance under Public Domain
   Apache Commons CLI under Apache License, Version 2.0
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
+  Apache Commons Compress under Apache License, Version 2.0
   Apache Commons CSV under Apache License, Version 2.0
   Apache Commons Exec under Apache License, Version 2.0
+  Apache Commons IO under Apache License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
-  Apache POI under The Apache Software License, Version 2.0
-  Commons IO under The Apache Software License, Version 2.0
-  Commons Logging under The Apache Software License, Version 2.0
+  Apache Commons Logging under The Apache Software License, Version 2.0
+  Apache Commons Math under Apache License, Version 2.0
+  Apache POI under Apache License, Version 2.0
+  Byte Buddy (without dependencies) under Apache License, Version 2.0
+  Checker Qual under GNU General Public License, version 2 (GPL2), with the classpath exception or The MIT License
+  ClassMate under Apache License, Version 2.0
   ConcurrentLinkedHashMap under The Apache Software License, Version 2.0
-  Core Hibernate O/RM functionality under GNU Lesser General Public License
+  curvesapi under BSD License
   Data Mapper for Jackson under The Apache Software License, Version 2.0
   Datastore under Apache License, Version 2.0
-  dom4j under BSD License
+  dom4j under BSD 3-clause New License
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
+  error-prone annotations under Apache 2.0
   ETL Common under Apache License, Version 2.0
   Eureka! Client under Apache License, Version 2.0
   Eureka! Clinical Common under Apache License, Version 2.0
@@ -42,6 +49,9 @@ This project includes:
   Eureka! Clinical Protempa Client under Apache License, Version 2.0
   Eureka! Clinical Protempa Service under Apache License, Version 2.0 or GNU General Public License, Version 3
   Eureka! Clinical Standard APIs under Apache License, Version 2.0
+  Extended StAX API under Dual license consisting of the CDDL v1.1 and GPL v2
+  fastinfoset under Apache License, Version 2.0
+  FindBugs-jsr305 under The Apache Software License, Version 2.0
   Google Guice - Core Library under The Apache Software License, Version 2.0
   Google Guice - Extensions - JNDI under The Apache Software License, Version 2.0
   Google Guice - Extensions - Persist under The Apache Software License, Version 2.0
@@ -51,24 +61,31 @@ This project includes:
   grizzly-http-server under CDDL+GPL
   grizzly-http-servlet under CDDL+GPL
   grizzly-rcm under CDDL+GPL
+  Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   H2 Database Engine under MPL 2.0 or EPL 1.0
   Hamcrest Core under New BSD License
-  Hibernate Commons Annotations under GNU Lesser General Public License
-  Hibernate JPA 2 Metamodel Generator under GNU Lesser General Public License
-  Hibernate JPA Support under GNU Lesser General Public License
+  Hibernate Commons Annotations under GNU Library General Public License v2.1 or later
+  Hibernate ORM - hibernate-core under GNU Library General Public License v2.1 or later
+  Hibernate ORM - hibernate-entitymanager under GNU Library General Public License v2.1 or later
+  Hibernate ORM - hibernate-jpamodelgen under GNU Library General Public License v2.1 or later
   HttpClient under Apache License
   HttpCore under Apache License
   ini4j under Apache 2
+  istack common utility code runtime under CDDL 1.1 or GPL2 w/ CPE
+  J2ObjC Annotations under The Apache Software License, Version 2.0
   Jackson under The Apache Software License, Version 2.0
   Jasig CAS Client for Java - Core under Apache License Version 2.0
   Java Annotation Indexer under Apache License, Version 2.0
-  Java Persistence API, Version 2.1 under Sun Binary Code License
   Java Servlet API under CDDL + GPLv2 with classpath exception
-  Java Transaction API under Common Development and Distribution License, Version 1.0
+  Java Transaction API under Common Development and Distribution License or GNU General Public License, Version 2 with the Classpath Exception
+  JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
   Javassist under MPL 1.1 or LGPL 2.1 or Apache License 2.0
   JavaUtil under Apache License, Version 2.0
   javax.inject under The Apache Software License, Version 2.0
+  javax.persistence-api under Eclipse Public License v1.0 or Eclipse Distribution License v. 1.0
   JAX-RS provider for JSON content type under The Apache Software License, Version 2.0 or GNU Lesser General Public License (LGPL), Version 2.1
+  JAXB Runtime under CDDL+GPL License
+  jaxb-api under CDDL 1.1 or GPL2 w/ CPE
   JBoss Logging 3 under Apache License, version 2.0
   Jersey Apache HTTP Client 4.x under CDDL 1.1 or GPL2 w/ CPE
   Jersey Test Framework - Core under CDDL 1.1 or GPL2 w/ CPE
@@ -85,7 +102,6 @@ This project includes:
   Jettison under Apache License, Version 2.0
   JSR-250 Common Annotations for the JavaTM Platform under COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
   jsr311-api under CDDL License
-  JTA 1.1 under The Apache Software License, Version 2.0
   JUnit under Eclipse Public License 1.0
   Lucene Core under Apache 2
   MIME streaming extension under CDDL 1.1 or GPL2 w/ CPE
@@ -107,6 +123,8 @@ This project includes:
   Neo4j - Primitive Collections under GNU General Public License, Version 3
   Neo4j - Unsafe Access under GNU General Public License, Version 3
   Neo4j - Usage Data Collection under GNU General Public License, Version 3
+  Old JAXB Core under CDDL+GPL License
+  Old JAXB Runtime under CDDL+GPL License
   opencsv under Apache 2
   Oracle NoSQL Database Server under Apache 2
   parboiled-core under Apache 2
@@ -121,8 +139,7 @@ This project includes:
   Scala Library under BSD-like
   SLF4J API Module under MIT License
   SLF4J JDK14 Binding under MIT License
-  StAX API under The Apache Software License, Version 2.0
-  XML Commons External Components XML APIs under The Apache Software License, Version 2.0
+  TXW2 Runtime under CDDL+GPL License
   Xml Compatibility extensions for Jackson under The Apache Software License, Version 2.0 or GNU Lesser General Public License (LGPL), Version 2.1
   XmlBeans under The Apache Software License, Version 2.0
 

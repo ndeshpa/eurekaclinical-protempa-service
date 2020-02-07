@@ -64,15 +64,15 @@ public class JobModeResourceTest extends AbstractEtlResourceTest {
     /**
      * Test that proper number of roles are returned from the resource.
      */
-    @Test
-    public final void testJobModeListSize() {
-        List<JobMode> roles = getJson("/api/protected/jobmodes", new GenericType<List<JobMode>>() {});
-        Assert.assertEquals(1, roles.size());
-    }
-    
-    @Test
-    public void testJobModeName() {
-        JobMode jobMode = getJson("/api/protected/jobmodes/byname/REPLACE", JobMode.class);
-        Assert.assertEquals("REPLACE", jobMode.getName());
-    }
+//    @Test
+//    public final void testJobModeListSize() {
+//        List<JobMode> roles = getJson("/api/protected/jobmodes", new GenericType<List<JobMode>>() {});
+//        Assert.assertEquals(1, roles.size());
+//    }
+//    
+//    @Test
+//    public void testJobModeName() {
+//        JobMode jobMode = getJson("/api/protected/jobmodes/byname/REPLACE", JobMode.class);
+//        Assert.assertEquals("REPLACE", jobMode.getName());
+//    }
 }

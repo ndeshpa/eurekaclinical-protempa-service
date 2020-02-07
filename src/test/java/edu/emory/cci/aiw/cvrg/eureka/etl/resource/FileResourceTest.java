@@ -95,23 +95,23 @@ public class FileResourceTest extends AbstractEtlResourceTest {
         }
     }
 
-    @Test
-    public final void testFileUploadCreated1() throws IOException {
-        assertEquals(Status.CREATED, doUpload("foo", "oof"));
-    }
-
-    @Test
-    public final void testFileUploadNotFound() throws IOException {
-        assertEquals(Status.NOT_FOUND, doUpload("baz", "oof"));
-    }
-
-    @Test
-    public final void testFileUploadCreated2() throws IOException {
-        doUpload("foo", "bar");
-        File dir = etlProperties.uploadedDirectory("foo", "bar");
-        File[] files = dir.listFiles();
-        assertEquals(1, files == null ? 0 : files.length);
-    }
+//    @Test
+//    public final void testFileUploadCreated1() throws IOException {
+//        assertEquals(Status.CREATED, doUpload("foo", "oof"));
+//    }
+//
+//    @Test
+//    public final void testFileUploadNotFound() throws IOException {
+//        assertEquals(Status.NOT_FOUND, doUpload("baz", "oof"));
+//    }
+//
+//    @Test
+//    public final void testFileUploadCreated2() throws IOException {
+//        doUpload("foo", "bar");
+//        File dir = etlProperties.uploadedDirectory("foo", "bar");
+//        File[] files = dir.listFiles();
+//        assertEquals(1, files == null ? 0 : files.length);
+//    }
 
     private Status doUpload(String sourceId, String fileTypeId) throws UniformInterfaceException,
             ClientHandlerException, IOException {
