@@ -586,13 +586,13 @@ public class XlsxDataProvider implements DataProvider {
 		if (cell != null) {
 			try {
 				switch (cell.getCellType()) {
-				case STRING:
+				case Cell.CELL_TYPE_STRING:
 					result = cell.getStringCellValue();
 					break;
-				case NUMERIC:
+				case Cell.CELL_TYPE_NUMERIC:
 					result = Double.toString(cell.getNumericCellValue());
 					break;
-				case BOOLEAN:
+				case Cell.CELL_TYPE_BOOLEAN:
 					result = Boolean.toString(cell.getBooleanCellValue());
 					break;
 				default:

@@ -47,6 +47,7 @@ import org.eurekaclinical.protempa.client.comm.EtlNeo4jDestination;
 import org.eurekaclinical.protempa.client.comm.EtlOmopDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetExtractorDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetSenderDestination;
+import org.eurekaclinical.protempa.client.comm.EtlPhenotypeSearchDestination;
 import org.eurekaclinical.protempa.client.comm.EtlTabularFileDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
@@ -155,6 +156,11 @@ public class EtlDestinationToDestinationEntityVisitor implements EtlDestinationV
 
 	@Override
 	public void visit(EtlOmopDestination etlOmopDestination) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+	
+	@Override
+	public void visit(EtlPhenotypeSearchDestination etlPhenotypeSearchDestination) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 

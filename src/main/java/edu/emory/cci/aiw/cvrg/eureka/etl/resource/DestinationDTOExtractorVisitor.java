@@ -49,6 +49,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.Neo4jDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
@@ -65,6 +66,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 	private final PatientSetSenderDestinationsDTOExtractor patientSetSenderExtractor;
 	private final TabularFileDestinationsDTOExtractor tabularFileExtractor;
 	private final OmopDestinationsDTOExtractor omopExtractor;
+	private final PhenotypeSearchDestinationsDTOExtractor phenotypeSearchExtractor;
 	private EtlDestination destDTO;
 
 	public DestinationDTOExtractorVisitor(EtlProperties inEtlProperties, AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
@@ -75,6 +77,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 		this.patientSetSenderExtractor = new PatientSetSenderDestinationsDTOExtractor(user, inGroupDao);
 		this.tabularFileExtractor = new TabularFileDestinationsDTOExtractor(user, inGroupDao);
 		this.omopExtractor = new OmopDestinationsDTOExtractor(user, inGroupDao);
+		this.phenotypeSearchExtractor = new PhenotypeSearchDestinationsDTOExtractor(user, inGroupDao);
 	}
 	
 	@Override
@@ -107,14 +110,17 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 		this.destDTO = this.tabularFileExtractor.extractDTO(tabularFileDestination);
 	}
 	
+	@Override
+	public void visit(OmopDestinationEntity omopDestination) {
+		this.destDTO = this.omopExtractor.extractDTO(omopDestination);
+	}
+	
+	@Override
+	public void visit(PhenotypeSearchDestinationEntity phenotypeSearchDestination) {
+		this.destDTO = this.phenotypeSearchExtractor.extractDTO(phenotypeSearchDestination);
+	}
 	public EtlDestination getEtlDestination() {
 		return this.destDTO;
-	}
-
-	@Override
-	public void visit(OmopDestinationEntity omopFileDestination) {
-		this.destDTO = this.omopExtractor.extractDTO(omopFileDestination);		
-
 	}
 
 }

@@ -54,6 +54,9 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.AuthorizedUserDao;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -86,6 +89,7 @@ public class DestinationResource {
     private final EtlGroupDao groupDao;
     private final EtlDestinationToDestinationEntityVisitor destToDestEntityVisitor;
     private final ConversionSupport conversionSupport;
+    private static final Logger LOGGER = Logger.getLogger(DestinationResource.class.getName());
 
     @Inject
     public DestinationResource(EtlProperties inEtlProperties, AuthorizedUserDao inEtlUserDao, DestinationDao inDestinationDao, EtlGroupDao inGroupDao, EtlDestinationToDestinationEntityVisitor inDestToDestEntityVisitor, ConversionSupport inConversionSupport) {
@@ -126,6 +130,7 @@ public class DestinationResource {
             @Context HttpServletRequest request,
             @QueryParam("type") DestinationType type) {
         AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
+        LOGGER.log(Level.FINEST, "Inside DestinationResource, user: {0}", user.getUsername());
         Destinations destinations = new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao, this.destToDestEntityVisitor);
         List<? extends EtlDestination> etlDestinations;
         if (type == null) {
@@ -148,6 +153,12 @@ public class DestinationResource {
                 case TABULAR_FILE:
                     etlDestinations = new ArrayList<>(destinations.getAllTabularFiles());
                     break;
+                case AOU_PARTICIPANT:
+                    etlDestinations = new ArrayList<>(destinations.getAllOmopDestinations());
+                    break;
+                case PHENOTYPE_SEARCH:
+                    etlDestinations = new ArrayList<>(destinations.getAllPhenotypeSearchDestinations());
+                    break;
                 default:
                     throw new AssertionError("Unexpected destination type " + type);
             }
@@ -155,6 +166,7 @@ public class DestinationResource {
         
         List<Destination> result;
         result = new ArrayList<>(etlDestinations.size());
+        LOGGER.log(Level.FINEST, "Inside DestinationResource, got ETL destinations: {0}", etlDestinations == null ? 0: etlDestinations.size());
         EtlDestinationToDestinationVisitor v
                         = new EtlDestinationToDestinationVisitor(this.conversionSupport);
         for (EtlDestination etlDest : etlDestinations) {

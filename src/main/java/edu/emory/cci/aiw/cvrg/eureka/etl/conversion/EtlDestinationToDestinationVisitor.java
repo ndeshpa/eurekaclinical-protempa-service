@@ -42,6 +42,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.conversion;
 import org.eurekaclinical.eureka.client.comm.Cohort;
 import org.eurekaclinical.eureka.client.comm.CohortDestination;
 import org.eurekaclinical.eureka.client.comm.PhenotypeField;
+import org.eurekaclinical.eureka.client.comm.PhenotypeSearchDestination;
 import org.eurekaclinical.eureka.client.comm.Destination;
 import org.eurekaclinical.eureka.client.comm.I2B2Destination;
 import org.eurekaclinical.eureka.client.comm.Neo4jDestination;
@@ -63,6 +64,7 @@ import org.eurekaclinical.protempa.client.comm.EtlOmopDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientListDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetExtractorDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetSenderDestination;
+import org.eurekaclinical.protempa.client.comm.EtlPhenotypeSearchDestination;
 import org.eurekaclinical.protempa.client.comm.EtlTableColumn;
 import org.eurekaclinical.protempa.client.comm.EtlTabularFileDestination;
 
@@ -194,6 +196,13 @@ public class EtlDestinationToDestinationVisitor extends AbstractEtlDestinationVi
 	public void visit(EtlOmopDestination etlOmopDestination) {
 		OmopDestination result = new OmopDestination();
         visitCommon(etlOmopDestination, result);
+        this.destination = result;
+	}
+	
+	@Override
+	public void visit(EtlPhenotypeSearchDestination etlPhenotypeSearchDestination) {
+		PhenotypeSearchDestination result = new PhenotypeSearchDestination();
+        visitCommon(etlPhenotypeSearchDestination, result);
         this.destination = result;
 	}
 

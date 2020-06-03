@@ -58,4 +58,6 @@ public interface DestinationEntityVisitor {
 	void visit(TabularFileDestinationEntity tabularFileDestinationEntity);
 
 	void visit(OmopDestinationEntity omopDestinationEntity);
+	
+	void visit(PhenotypeSearchDestinationEntity phenotypeSearchDestinationEntity);
 }
