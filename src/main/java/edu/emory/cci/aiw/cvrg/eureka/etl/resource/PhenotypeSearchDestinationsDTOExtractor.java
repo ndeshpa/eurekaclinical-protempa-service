@@ -1,6 +1,7 @@
 package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /*
@@ -43,27 +44,32 @@ import java.util.List;
  * #L%
  */
 import org.eurekaclinical.protempa.client.comm.EtlTableColumn;
+import org.eurekaclinical.eureka.client.comm.Link;
 import org.eurekaclinical.protempa.client.comm.EtlOmopDestination;
+import org.eurekaclinical.protempa.client.comm.EtlPhenotypeSearchDestination;
 
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.LinkEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationTableColumnEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeDestinationTableColumnEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity;
 
 /**
  *
  * @author Nita Deshpande
  */
-class OmopDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlOmopDestination, OmopDestinationEntity> {
+class PhenotypeSearchDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlPhenotypeSearchDestination, PhenotypeSearchDestinationEntity> {
 
-    OmopDestinationsDTOExtractor(AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
+    PhenotypeSearchDestinationsDTOExtractor(AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
         super(user, inGroupDao);
     }
 
     @Override
-    EtlOmopDestination extractDTO(Perm perm,
-    		OmopDestinationEntity destinationEntity) {
-    	EtlOmopDestination dest = new EtlOmopDestination();
+    EtlPhenotypeSearchDestination extractDTO(Perm perm,
+    		PhenotypeSearchDestinationEntity destinationEntity) {
+    	EtlPhenotypeSearchDestination dest = new EtlPhenotypeSearchDestination();
         dest.setName(destinationEntity.getName());
         dest.setDescription(destinationEntity.getDescription());
         dest.setId(destinationEntity.getId());
@@ -76,9 +82,17 @@ class OmopDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlOmopDesti
         dest.setGetStatisticsSupported(destinationEntity.isGetStatisticsSupported());
         dest.setAllowingQueryPropositionIds(destinationEntity.isAllowingQueryPropositionIds());
         dest.setRequiredPropositionIds(new ArrayList<>(0));
+        List<LinkEntity> linkEntities = destinationEntity.getLinks();
+    	if (linkEntities != null) {
+    		List<Link> links = new ArrayList<>(linkEntities.size());
+    		for (LinkEntity le : linkEntities) {
+    			links.add(le.toLink());
+    		}
+    		dest.setLinks(links);
+    	}
         List<EtlTableColumn> tableColumns = new ArrayList<>();
-        List<OmopDestinationTableColumnEntity> tableColumnEntities = destinationEntity.getTableColumns();
-        for (OmopDestinationTableColumnEntity entity : tableColumnEntities) {
+        List<PhenotypeDestinationTableColumnEntity> tableColumnEntities = destinationEntity.getTableColumns();
+        for (PhenotypeDestinationTableColumnEntity entity : tableColumnEntities) {
             EtlTableColumn tableColumn = new EtlTableColumn();
             tableColumn.setTableName(entity.getTableName());
             tableColumn.setColumnName(entity.getColumnName());
@@ -89,5 +103,4 @@ class OmopDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlOmopDesti
         dest.setTableColumns(tableColumns);
         return dest;
     }
-
 }

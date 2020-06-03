@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 
 /*
  * #%L
  * Eureka Protempa ETL
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -40,34 +40,48 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * #L%
  */
 
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeDestinationDataSpecEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationIntervalSide;
+import edu.emory.cci.aiw.i2b2etl.dest.config.Data;
+import edu.emory.cci.aiw.i2b2etl.dest.config.DataSpec;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import org.eurekaclinical.standardapis.dao.HistoricalDaoWithUniqueName;
+import java.util.Map;
 
 /**
  *
- * @author Andrew Post
+ * @author Nita Deshpande
  */
-public interface DestinationDao extends HistoricalDaoWithUniqueName<Long, DestinationEntity> {
-	
-	List<CohortDestinationEntity> getCurrentCohortDestinations();
+class PhenotypeData implements Data {
+	private final Map<String, DataSpec> dataSpecs;
 
-	List<I2B2DestinationEntity> getCurrentI2B2Destinations();
+	PhenotypeData(List<PhenotypeDestinationDataSpecEntity> dataSpecs) {
+		this.dataSpecs = new HashMap<>();
+		for (PhenotypeDestinationDataSpecEntity dataSpec : dataSpecs) {
+			I2B2DestinationIntervalSide start = dataSpec.getStart();
+			I2B2DestinationIntervalSide finish = dataSpec.getFinish();
+			this.dataSpecs.put(
+					dataSpec.getName(), 
+					new DataSpec(
+							dataSpec.getName(), 
+							dataSpec.getReference(), 
+							dataSpec.getProperty(), 
+							dataSpec.getConceptCodePrefix(), 
+							start != null ? start.getName() : null, 
+							finish != null ? finish.getName() : null, 
+							dataSpec.getUnits()));
+		}
+	}
+
+	@Override
+	public DataSpec get(String key) {
+		return this.dataSpecs.get(key);
+	}
+
+	@Override
+	public Collection<DataSpec> getAll() {
+		return this.dataSpecs.values();
+	}
 	
-	List<PatientSetExtractorDestinationEntity> getCurrentPatientSetExtractorDestinations();
-	
-	List<PatientSetSenderDestinationEntity> getCurrentPatientSetSenderDestinations();
-	
-	List<TabularFileDestinationEntity> getCurrentTabularFileDestinations();
-	
-	List<OmopDestinationEntity> getCurrentOmopDestinations();
-	
-	List<PhenotypeSearchDestinationEntity> getCurrentPhenotypeSearchDestinations();
 }

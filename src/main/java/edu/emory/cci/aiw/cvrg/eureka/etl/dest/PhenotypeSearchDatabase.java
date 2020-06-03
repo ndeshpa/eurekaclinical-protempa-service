@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 
 /*
  * #%L
  * Eureka Protempa ETL
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,35 +39,49 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
-import java.util.List;
-import org.eurekaclinical.standardapis.dao.HistoricalDaoWithUniqueName;
+import edu.emory.cci.aiw.etl.dest.config.Database;
+import edu.emory.cci.aiw.etl.dest.config.DatabaseSpec;
 
 /**
  *
- * @author Andrew Post
+ * @author Nita Deshpande
  */
-public interface DestinationDao extends HistoricalDaoWithUniqueName<Long, DestinationEntity> {
-	
-	List<CohortDestinationEntity> getCurrentCohortDestinations();
+class PhenotypeSearchDatabase implements Database {
 
-	List<I2B2DestinationEntity> getCurrentI2B2Destinations();
-	
-	List<PatientSetExtractorDestinationEntity> getCurrentPatientSetExtractorDestinations();
-	
-	List<PatientSetSenderDestinationEntity> getCurrentPatientSetSenderDestinations();
-	
-	List<TabularFileDestinationEntity> getCurrentTabularFileDestinations();
-	
-	List<OmopDestinationEntity> getCurrentOmopDestinations();
-	
-	List<PhenotypeSearchDestinationEntity> getCurrentPhenotypeSearchDestinations();
+	private final DatabaseSpec dataSpec;
+	private final DatabaseSpec metaSpec;
+
+	PhenotypeSearchDatabase(PhenotypeSearchDestinationEntity entity) {
+		DatabaseSpecFactory databaseSpecFactory = new DatabaseSpecFactory();
+		
+		String dataConnect = entity.getDataConnect();
+		String dataUser = entity.getDataUser();
+		String dataPassword = entity.getDataPassword();
+		if (dataConnect != null) {
+			this.dataSpec = databaseSpecFactory.getInstance(dataConnect, dataUser, dataPassword);
+		} else {
+			this.dataSpec = null;
+		}
+		String metaConnect = entity.getMetaConnect();
+		String metaUser = entity.getMetaUser();
+		String metaPassword = entity.getMetaPassword();
+		if (metaConnect != null) {
+			this.metaSpec = databaseSpecFactory.getInstance(metaConnect, metaUser, metaPassword);
+		} else {
+			this.metaSpec = null;
+		}
+	}
+
+	@Override
+	public DatabaseSpec getMetadataSpec() {
+		return this.metaSpec;
+	}
+
+	@Override
+	public DatabaseSpec getDataSpec() {
+		return this.dataSpec;
+	}
+
 }

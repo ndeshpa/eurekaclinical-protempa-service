@@ -44,15 +44,19 @@ import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import org.eurekaclinical.protempa.client.comm.EtlI2B2Destination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetExtractorDestination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetSenderDestination;
+import org.eurekaclinical.protempa.client.comm.EtlPhenotypeSearchDestination;
 import org.eurekaclinical.protempa.client.comm.EtlTabularFileDestination;
+import org.eurekaclinical.protempa.client.comm.EtlOmopDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationGroupMembership;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.EtlGroup;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
@@ -63,8 +67,9 @@ import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.Response;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -75,7 +80,7 @@ public final class Destinations {
 	/**
 	 * The class level logger.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(Destinations.class);
+	private static final Logger LOGGER = Logger.getLogger(Destinations.class.getName());
 
 	private final EtlGroupDao groupDao;
 	private final AuthorizedUserEntity etlUser;
@@ -200,6 +205,34 @@ public final class Destinations {
 		}
 		return result;
 	}
+	
+	public List<EtlOmopDestination> getAllOmopDestinations() {
+		List<EtlOmopDestination> result = new ArrayList<>();
+		OmopDestinationsDTOExtractor extractor
+				= new OmopDestinationsDTOExtractor(this.etlUser, this.groupDao);
+		for (OmopDestinationEntity configEntity
+				: this.destinationDao.getCurrentOmopDestinations()) {
+			EtlOmopDestination dto = extractor.extractDTO(configEntity);
+			if (dto != null) {
+				result.add(dto);
+			}
+		}
+		return result;
+	}
+	
+	public List<EtlPhenotypeSearchDestination> getAllPhenotypeSearchDestinations() {
+		List<EtlPhenotypeSearchDestination> result = new ArrayList<>();
+		PhenotypeSearchDestinationsDTOExtractor extractor
+				= new PhenotypeSearchDestinationsDTOExtractor(this.etlUser, this.groupDao);
+		for (PhenotypeSearchDestinationEntity configEntity
+				: this.destinationDao.getCurrentPhenotypeSearchDestinations()) {
+			EtlPhenotypeSearchDestination dto = extractor.extractDTO(configEntity);
+			if (dto != null) {
+				result.add(dto);
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * Gets the specified source extractDTO. If it does not exist or the current
@@ -236,6 +269,7 @@ public final class Destinations {
 			configEntity.accept(visitor);
 			EtlDestination dto = visitor.getEtlDestination();
 			if (dto != null) {
+				LOGGER.log(Level.FINE, "Got DTO: {0}", dto.getName());
 				result.add(dto);
 			}
 		}

@@ -52,6 +52,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.Neo4jDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
@@ -123,6 +124,8 @@ public class ProtempaDestinationFactory {
                 actualDest = new TabularFileDestination(this.etlProperties, (TabularFileDestinationEntity) dest, this.idPoolDaoProvider);
             } else if (dest instanceof OmopDestinationEntity) {
                 actualDest = new OmopDestination(new EurekaOmopConfiguration((OmopDestinationEntity) dest, this.etlProperties));
+            } else if (dest instanceof PhenotypeSearchDestinationEntity) {
+                actualDest = new PhenotypeSearchDestination(new EurekaPhenotypeSearchConfiguration((PhenotypeSearchDestinationEntity)dest, this.etlProperties));
             } else {
                 throw new AssertionError("Invalid destination entity type " + dest.getClass());
             }

@@ -62,6 +62,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.DataSource;
@@ -69,6 +70,7 @@ import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.PropositionDefinitionCache;
 import org.protempa.QueryException;
 import org.protempa.backend.dsb.DataSourceBackend;
@@ -84,8 +86,9 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
 import org.protempa.query.QueryMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
@@ -101,7 +104,7 @@ import edu.emory.cci.aiw.omopetl.util.OmopFileOutputHandler;
  */
 public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(OmopQueryResultsHandler.class);
+	private static final Logger LOGGER = Logger.getLogger(OmopQueryResultsHandler.class.getName());
 
 	private final OmopDestinationEntity omopDestinationEntity;
 	private final Map<String, String> writers;
@@ -175,10 +178,10 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 	public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
 		this.omopTableHandler = new OmopTableHandler();
 		this.omopFileOutputHandler = new OmopFileOutputHandler();
-		LOGGER.info("Created OmopTableHandler");
 		createWriters();
 		createOutputFileWriters();
 		mapColumnSpecsToColumnNames(cache);
+		LOGGER.log(Level.FINE,"Completed mapping of columnspecs to column names");
 		try {
 			this.ksCache = new KnowledgeSourceCacheFactory().getInstance(this.knowledgeSource, cache, true);
 		} catch (KnowledgeSourceReadException ex) {
@@ -268,9 +271,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 			try {
 				BufferedWriter bw = this.fileWriters.get(tableName);
 				selectStmt = this.omopFileOutputHandler.getSelectStatement(tableName);
-				LOGGER.debug("Processing For Table: " + tableName + " select: " + selectStmt);
 				header = this.omopFileOutputHandler.getHeader(tableName);
-				LOGGER.debug("Processing For Table: " + tableName + " header: " + header);						
 				bw.append(header).append('\n');
 				try(Connection conn = openDataDatabaseConnection()){
 					PreparedStatement ps = conn.prepareStatement(selectStmt);
@@ -346,7 +347,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 						org.arp.javautil.collections.Collections.putSet(rowToPropIds, rowRank, propId);
 						sb.append(rowRank).append(":").append(propId).append(";");
 					}
-					LOGGER.debug("pid: " + pid + "::" + sb.toString());
+					 LOGGER.log(Level.FINE, "tablename:{2} :: pid:{0} :: details:{1}", new Object[] {pid, sb.toString(), tableName});
 				}
 				org.arp.javautil.collections.Collections.putList(rowRankToTableColumnSpecs, tableColumn.getRowRank(),
 						tableColumnSpecWrapper);
@@ -354,13 +355,14 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 				throw new QueryResultsHandlerProcessingException(ex);
 			}
 		}
-		LOGGER.debug("Row concepts: {}", this.rowPropositionIdMap);
+		LOGGER.log(Level.WARNING, "Row concepts: {0}", this.rowPropositionIdMap);
 	}
 
 	private void createWriters() throws QueryResultsHandlerProcessingException {
 		List<String> tableNames = this.omopDestinationEntity.getTableColumns().stream()
 				.map(OmopDestinationTableColumnEntity::getTableName).distinct()
 				.collect(Collectors.toCollection(ArrayList::new));
+		LOGGER.log(Level.FINE, "Got table names: {0}", StringUtils.join(tableNames, ","));
 		String nullValue = this.omopDestinationEntity.getNullValue();
 		boolean doAppend = this.query.getQueryMode() != QueryMode.REPLACE;
 		if (!doAppend) {
@@ -375,6 +377,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 			String tableName = tableNames.get(i);
 			String inStatement = this.omopTableHandler.getInsertStatement(tableName);
 			this.writers.put(tableName, inStatement);
+			LOGGER.log(Level.FINE, "Got Insert statement: {0}", inStatement);
 		}
 	}
 	
@@ -426,7 +429,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
         try (final Connection conn = openDataDatabaseConnection()) {
             conn.setAutoCommit(true);
             String[] dataschemaTables = {"address_temp", "care_site_temp", "condition_occurrence_temp", "death_temp", "drug_exposure_temp", "email_temp", "location_temp", "measurement_temp", 
-            		"mrn_temp", "name_temp","person_temp", "phone_number_temp", "procedure_occurrence_temp", "provider_temp", "visit_occurrence_temp" };
+            		"mrn_temp", "name_temp","person_temp", "phone_number_temp", "procedure_occurrence_temp", "provider_temp", "visit_occurrence_temp"};
             if(this.queryPropIds!= null) {
             	if(this.queryPropIds.length>1 ) {
             		for (String tableName : dataschemaTables) {
@@ -440,7 +443,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
             			truncateTable(conn, "provider_temp");
             	}
             }
-            LOGGER.info( "Done truncating temp data tables for query {0}", this.query.getName());
+            LOGGER.log(Level.INFO, "Done truncating temp data tables for query:" +  this.query.getName());
         }
     }
 
@@ -449,9 +452,9 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
         String sql = "TRUNCATE TABLE " + tableName;
         try (final Statement st = conn.createStatement()) {
             st.execute(sql);
-            LOGGER.debug("Done executing SQL for query {0}", queryId);
+            LOGGER.log(Level.FINE,"Done executing SQL for query {0}", queryId);
         } catch (SQLException ex) {
-        	LOGGER.debug("An error occurred truncating the tables for query " + queryId, ex);
+        	LOGGER.log(Level.INFO, "An error occurred truncating the tables for query " + queryId, ex);
             throw ex;
         }
     }

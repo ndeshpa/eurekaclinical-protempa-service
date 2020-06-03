@@ -45,8 +45,10 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity_;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -93,6 +95,16 @@ public class JpaDestinationDao extends HistoricalGenericDao<DestinationEntity, L
 	@Override
 	public List<TabularFileDestinationEntity> getCurrentTabularFileDestinations() {
 		return getDatabaseSupport().getCurrent(TabularFileDestinationEntity.class);
+	}
+	
+	@Override
+	public List<OmopDestinationEntity> getCurrentOmopDestinations() {
+		return getDatabaseSupport().getCurrent(OmopDestinationEntity.class);
+	}
+	
+	@Override
+	public List<PhenotypeSearchDestinationEntity> getCurrentPhenotypeSearchDestinations() {
+		return getDatabaseSupport().getCurrent(PhenotypeSearchDestinationEntity.class);
 	}
 
 }

@@ -62,7 +62,14 @@
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetExtractorDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PatientSetSenderDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationEntity</class>
-    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity</class>    
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationTableColumnEntity</class>       
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeDestinationTableColumnEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeDestinationModifierSpecEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeDestinationDataSpecEntity</class>
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeDestinationConceptSpecEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.LiteralEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.NodeEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationConceptSpecEntity</class>
