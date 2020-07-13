@@ -66,6 +66,8 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+
+import org.apache.commons.lang3.StringUtils;
 import org.eurekaclinical.common.comm.clients.ClientException;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
@@ -115,6 +117,7 @@ public class ConceptResource {
 			throw new HttpStatusException(Status.INTERNAL_SERVER_ERROR, "No source configs");
 		}
 		try {
+			LOGGER.info(StringUtils.join(this.etlProperties.getDefaultSystemPropositions(), ","));
 			List<PropositionDefinition> definitions = this.finder.findAll(
 					scps.get(0).getId(),
 					this.etlProperties.getDefaultSystemPropositions(),
