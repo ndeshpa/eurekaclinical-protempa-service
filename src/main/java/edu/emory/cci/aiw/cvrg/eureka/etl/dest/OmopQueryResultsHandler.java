@@ -351,7 +351,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 						org.arp.javautil.collections.Collections.putSet(rowToPropIds, rowRank, propId);
 						sb.append(rowRank).append(":").append(propId).append(";");
 					}
-					 LOGGER.log(Level.INFO, "tablename:{2} :: pid:{0} :: details:{1}", new Object[] {pid, sb.toString(), tableName});
+					 LOGGER.log(Level.FINE, "tablename:{2} :: pid:{0} :: details:{1}", new Object[] {pid, sb.toString(), tableName});
 				}
 				org.arp.javautil.collections.Collections.putList(rowRankToTableColumnSpecs, tableColumn.getRowRank(),
 						tableColumnSpecWrapper);
