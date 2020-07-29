@@ -1529,4 +1529,38 @@
                                  referencedTableName="ID_POOLS"/>
         
     </changeSet>
+    <changeSet author="nita" id="1361552652236-56">
+    	<delete tableName="OMOP_DEST_TABLECOLUMNS"/>
+        <modifyDataType   
+            columnName="ALWAYSQUOTED"  
+            newDataType="BIGINT"  
+            schemaName="EUREKABACKEND"  
+            tableName="OMOP_DESTINATIONS"/> 
+    	<insert tableName="OMOP_DESTINATIONS">
+            <column name="ID" valueComputed="(SELECT ID FROM DESTINATIONS WHERE NAME='Generate OMOP common data model files')"/>
+            <column name="ALWAYSQUOTED" valueNumeric="1"/>
+            <column  name="DATACONNECT" value="jdbc:oracle:thin:@//i2b2dbprod1.cc.emory.edu:1521/I2B2PROD.CC.EMORY.EDU"/> 
+			<column  name="DATAUSER" value="i2b2omop"/> 
+			<column  name="DATAPASSWORD" value="RiWPqN4AuESj"/>
+        </insert>
+			<dropSequence 
+            	schemaName="EUREKABACKEND"
+            	sequenceName="OMOP_DEST_TC_SEQ"/>
+            <createSequence 
+            	incrementBy="1"
+            	minValue="1"
+            	ordered="true"
+            	schemaName="EUREKABACKEND"
+            	sequenceName="OMOP_DEST_TC_SEQ"/>
+    		<sqlFile 
+    			dbms="h2, oracle, postgresql"  
+            	encoding="UTF-8"   
+            	path="/sql/migrate.sql"  
+            	relativeToChangelogFile="true"  
+            	splitStatements="true"  
+            	stripComments="true"/>
+    			<rollback>
+    				<delete tableName="OMOP_DEST_TABLECOLUMNS"/>
+    			</rollback>
+     </changeSet>
 </databaseChangeLog>
