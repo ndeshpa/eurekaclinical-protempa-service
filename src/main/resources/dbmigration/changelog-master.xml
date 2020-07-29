@@ -1530,12 +1530,11 @@
         
     </changeSet>
     <changeSet author="nita" id="1361552652236-56">
-    	<delete tableName="OMOP_DEST_TABLECOLUMNS"/>
-        <modifyDataType   
-            columnName="ALWAYSQUOTED"  
-            newDataType="BIGINT"  
-            schemaName="EUREKABACKEND"  
-            tableName="OMOP_DESTINATIONS"/> 
+    	<delete tableName="OMOP_DESTINATIONS"/>
+    	<dropColumn tableName="OMOP_DESTINATIONS" columnName="ALWAYSQUOTED"/>
+    	<addColumn tableName="OMOP_DESTINATIONS">
+            <column name="ALWAYSQUOTED" type="BIGINT"/>
+        </addColumn>
     	<insert tableName="OMOP_DESTINATIONS">
             <column name="ID" valueComputed="(SELECT ID FROM DESTINATIONS WHERE NAME='Generate OMOP common data model files')"/>
             <column name="ALWAYSQUOTED" valueNumeric="1"/>
@@ -1543,19 +1542,12 @@
 			<column  name="DATAUSER" value="i2b2omop"/> 
 			<column  name="DATAPASSWORD" value="RiWPqN4AuESj"/>
         </insert>
-			<dropSequence 
-            	schemaName="EUREKABACKEND"
-            	sequenceName="OMOP_DEST_TC_SEQ"/>
-            <createSequence 
-            	incrementBy="1"
-            	minValue="1"
-            	ordered="true"
-            	schemaName="EUREKABACKEND"
-            	sequenceName="OMOP_DEST_TC_SEQ"/>
+			<dropSequence sequenceName="OMOP_DEST_TC_SEQ"/>
+            <createSequence sequenceName="OMOP_DEST_TC_SEQ"/>
     		<sqlFile 
     			dbms="h2, oracle, postgresql"  
             	encoding="UTF-8"   
-            	path="/sql/migrate.sql"  
+            	path="migrate.sql"              	
             	relativeToChangelogFile="true"  
             	splitStatements="true"  
             	stripComments="true"/>
