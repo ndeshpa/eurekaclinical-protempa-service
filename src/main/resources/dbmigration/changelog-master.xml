@@ -1118,13 +1118,22 @@
     </changeSet-->
 
     <changeSet author="nita" id="1361552652236-53">
-		<insert tableName="DESTINATIONS">
-			<column name="ID" valueSequenceNext="DEST_SEQ"/>
-			<column name="OWNER_ID" value="1"/>
-			<column name="CREATED_AT" valueDate="2015-05-04T17:27:00"/>
-			<column name="EFFECTIVE_AT" valueDate="2015-05-04T17:27:00"/>
-			<column name="NAME" value="Generate OMOP common data model files"/>
-		</insert>
+    	<insert tableName="USERS">
+            <column name="ID" valueSequenceNext="USER_SEQ"/>
+            <column name="USERNAME" value="allofususer"/>
+        </insert>
+        <insert tableName="USERS_ROLES">
+            <column name="USER_ID" valueComputed="(SELECT ID FROM USERS WHERE USERNAME='allofususer')"/>
+            <column name="ROLE_ID" valueComputed="(SELECT ID FROM ROLES WHERE NAME='admin')"/>
+        </insert>
+                <insert tableName="USERS">
+            <column name="ID" valueSequenceNext="USER_SEQ"/>
+            <column name="USERNAME" value="actuser"/>
+        </insert>
+        <insert tableName="USERS_ROLES">
+            <column name="USER_ID" valueComputed="(SELECT ID FROM USERS WHERE USERNAME='actuser')"/>
+            <column name="ROLE_ID" valueComputed="(SELECT ID FROM ROLES WHERE NAME='admin')"/>
+        </insert>
         <createTable tableName="OMOP_DESTINATIONS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="OMOP_DEST_PK"/>
@@ -1170,13 +1179,6 @@
                                  referencedTableName="ID_POOLS"/>
     </changeSet>
     <changeSet author="nita" id="1361552652236-54">
-		<insert tableName="DESTINATIONS">
-			<column name="ID" valueSequenceNext="DEST_SEQ"/>
-			<column name="OWNER_ID" value="1"/>
-			<column name="CREATED_AT" valueDate="2015-05-04T17:27:00"/>
-			<column name="EFFECTIVE_AT" valueDate="2015-05-04T17:27:00"/>
-			<column name="NAME" value="Generate Phenotype Search Results"/>
-		</insert>
         <createTable tableName="PHENOTYPE_SEARCH_DESTINATIONS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PHEN_DEST_PK"/>
@@ -1223,34 +1225,6 @@
         <addForeignKeyConstraint baseColumnNames="DATAREMOVEMETHOD_ID" baseTableName="PHENOTYPE_SEARCH_DESTINATIONS" constraintName="FK_PHEN_DEST_DATA_RM" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="I2B2_DEST_REMOVE_METHODS" referencesUniqueColumn="true"/>
         <addForeignKeyConstraint baseColumnNames="METAREMOVEMETHOD_ID" baseTableName="PHENOTYPE_SEARCH_DESTINATIONS" constraintName="FK_PHEN_DEST_META_RM" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="I2B2_DEST_REMOVE_METHODS" referencesUniqueColumn="true"/>
         <addForeignKeyConstraint baseColumnNames="ID" baseTableName="PHENOTYPE_SEARCH_DESTINATIONS" constraintName="FK_PHEN_DEST" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="DESTINATIONS" referencesUniqueColumn="false"/>
-        <insert tableName="PHENOTYPE_SEARCH_DESTINATIONS">
-			<column name="ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="ALWAYSQUOTED" valueBoolean="false"/>
-            <column name="DATACONNECT" value="jdbc:postgresql://eurekadevdb.bmi.emory.edu:5432/eurekaclinical?currentSchema=phenotypedata"/>
-            <column name="DATAUSER" value="phenotypedata"/>
-            <column name="DATAPASSWORD" value="iOPe9raukLnM"/>
-			<column name="PROVIDERFULLNAME" value="providerFullName"/>
-			<column name="PROVIDERFIRSTNAME" value="providerFirstName"/>
-			<column name="PROVIDERMIDDLENAME" value="providerMiddleName"/>
-			<column name="PROVIDERLASTNAME" value="providerLastName"/>
-			<column name="VISITDIMENSION" value="Encounter"/>
-			<column name="SKIPPROVIDERHIERARCHY" valueBoolean="false"/>
-			<column name="SKIPDEMOGRAPHICSHIERARCHY" valueBoolean="true"/>
-			<column name="DATAREMOVEMETHOD_ID" valueNumeric="2"/>
-			<column name="METAREMOVEMETHOD_ID" valueNumeric="1"/>
-			<column name="PATIENTDIMENSIONMRN" value="demographics_mrn"/>
-			<column name="PATIENTDIMENSIONRELIGION" value="demographics_religion"/>
-			<column name="PATIENTDIMENSIONLANGUAGE" value="demographics_lang"/>
-			<column name="PATIENTDIMENSIONGENDER" value="demographics_gender"/>
-			<column name="PATIENTDIMENSIONBIRTHDATE" value="demographics_dob"/>
-			<column name="PATIENTDIMENSIONMARITALSTATUS" value="demographics_marital_status"/>
-			<column name="PATIENTDIMENSIONRACE" value="demographics_race"/>	
-			<column name="ROOTNODENAME" value="EK"/>
-			<column name="VISITDIMENSIONID" value="visit_id"/>
-			<column name="AGECONCEPTCODEPREFIX" value="DEM|AGE"/>
-			<column name="METATABLENAME" value="EUREKAPHENOTYPEONTOLOGY"/>
-			<column name="METACONNECT" value="java:/comp/env/jdbc/I2b2KS"/>
-		</insert>		
     	<createTable tableName="PHEN_DEST_CONCEPTSPECS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PHEN_DEST_CONCEPTSPEC_PK"/>
@@ -1312,185 +1286,6 @@
         <createSequence sequenceName="PHEN_MS_SEQ"/>
         <addUniqueConstraint tableName="PHEN_DEST_DATASPECS" columnNames="NAME, PHENDESTINATIONS_ID"/>
         <addUniqueConstraint tableName="PHEN_DEST_CONCEPTSPECS" columnNames="PROPOSITION, PROPERTY, REFERENCE, PHENDESTINATIONS_ID"/>
-		<insert tableName="PHEN_DEST_CONCEPTSPECS">
-			<column name="ID" valueSequenceNext="PHEN_CS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="PROPOSITION" value="ICD9:Diagnoses"/>
-			<column name="PHENDESTVALUETYPECDS_ID" valueNumeric="3"/>
-			<column name="ALREADYLOADED" valueBoolean="true"/>
-		</insert>
-		<insert tableName="PHEN_DEST_MODIFIERSPECS">
-			<column name="ID" valueSequenceNext="PHEN_MS_SEQ"/>
-			<column name="PHENDESTCONCEPTSPECS_ID" valueSequenceCurrent="PHEN_CS_SEQ"/>
-			<column name="NAME" value="Diagnosis Priority"/>
-			<column name="CODEPREFIX" value="DXPRIORITY"/>
-			<column name="PROPERTY" value="DXPRIORITY"/>
-		</insert>
-		<insert tableName="PHEN_DEST_CONCEPTSPECS">
-			<column name="ID" valueSequenceNext="PHEN_CS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="PROPOSITION" value="ICD9:Procedures"/>
-			<column name="PHENDESTVALUETYPECDS_ID" valueNumeric="3"/>
-			<column name="ALREADYLOADED" valueBoolean="true"/>
-		</insert>
-		<insert tableName="PHEN_DEST_CONCEPTSPECS">
-			<column name="ID" valueSequenceNext="PHEN_CS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="PROPOSITION" value="\ACT\Labs\"/>
-			<column name="PHENDESTVALUETYPECDS_ID" valueNumeric="1"/>
-			<column name="ALREADYLOADED" valueBoolean="true"/>
-		</insert>
-		<insert tableName="PHEN_DEST_CONCEPTSPECS">
-			<column name="ID" valueSequenceNext="PHEN_CS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="PROPOSITION" value="\ACT\Medications\"/>
-			<column name="PHENDESTVALUETYPECDS_ID" valueNumeric="3"/>
-			<column name="ALREADYLOADED" valueBoolean="true"/>
-		</insert>
-		<insert tableName="PHEN_DEST_CONCEPTSPECS">
-			<column name="ID" valueSequenceNext="PHEN_CS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="PROPOSITION" value="VitalSign"/>
-			<column name="PHENDESTVALUETYPECDS_ID" valueNumeric="3"/>
-			<column name="ALREADYLOADED" valueBoolean="true"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="icd9d"/>
-			<column name="REFERENCE" value="EK_ICD9D"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="icd9p"/>
-			<column name="REFERENCE" value="EK_ICD9P"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="demographics_religion"/>
-			<column name="PROPERTY" value="religion"/>
-			<column name="REFERENCE" value="patientDetails"/>
-			<column name="CONCEPTCODEPREFIX" value="DEM|RELIGION"/>
-			<column name="START_ID" valueNumeric="1"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="visit_id"/>
-			<column name="PROPERTY" value="encounterId"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="demographics_dob"/>
-			<column name="PROPERTY" value="dateOfBirth"/>
-			<column name="REFERENCE" value="patientDetails"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="demographics_mrn"/>
-			<column name="PROPERTY" value="patientId"/>
-			<column name="REFERENCE" value="patientDetails"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="demographics_lang"/>
-			<column name="PROPERTY" value="language"/>
-			<column name="REFERENCE" value="patientDetails"/>
-			<column name="CONCEPTCODEPREFIX" value="DEM|LANGUAGE"/>
-			<column name="START_ID" valueNumeric="1"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="demographics_marital_status"/>
-			<column name="PROPERTY" value="maritalStatus"/>
-			<column name="REFERENCE" value="patientDetails"/>
-			<column name="CONCEPTCODEPREFIX" value="DEM|MARITAL"/>
-			<column name="START_ID" valueNumeric="1"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="demographics_race"/>
-			<column name="PROPERTY" value="race"/>
-			<column name="REFERENCE" value="patientDetails"/>
-			<column name="CONCEPTCODEPREFIX" value="DEM|RACE"/>
-			<column name="START_ID" valueNumeric="1"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="demographics_ethnicity"/>
-			<column name="PROPERTY" value="ethnicity"/>
-			<column name="REFERENCE" value="patientDetails"/>
-			<column name="START_ID" valueNumeric="1"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="demographics_gender"/>
-			<column name="PROPERTY" value="gender"/>
-			<column name="REFERENCE" value="patientDetails"/>
-			<column name="CONCEPTCODEPREFIX" value="DEM|SEX"/>
-			<column name="START_ID" valueNumeric="1"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="providerLastName"/>
-			<column name="PROPERTY" value="lastName"/>
-			<column name="REFERENCE" value="provider"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="providerMiddleName"/>
-			<column name="PROPERTY" value="middleName"/>
-			<column name="REFERENCE" value="provider"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="providerFirstName"/>
-			<column name="PROPERTY" value="firstName"/>
-			<column name="REFERENCE" value="provider"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="providerFullName"/>
-			<column name="PROPERTY" value="fullName"/>
-			<column name="REFERENCE" value="provider"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="vitals"/>
-			<column name="REFERENCE" value="EK_VITALS"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="labs"/>
-			<column name="REFERENCE" value="EK_LABS"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="medOrders"/>
-			<column name="REFERENCE" value="EK_MED_ORDERS"/>
-		</insert>
-		<insert tableName="PHEN_DEST_DATASPECS">
-			<column name="ID" valueSequenceNext="PHEN_DS_SEQ"/>
-			<column name="PHENDESTINATIONS_ID" valueSequenceCurrent="DEST_SEQ"/>
-			<column name="NAME" value="enctr_type"/>
-			<column name="PROPERTY" value="type"/>
-		</insert>
     </changeSet>
      <changeSet author="nita" id="1361552652236-55">
            <createTable tableName="PHENOTYPE_DEST_TABLECOLUMNS">
@@ -1535,24 +1330,8 @@
     	<addColumn tableName="OMOP_DESTINATIONS">
             <column name="ALWAYSQUOTED" type="BIGINT"/>
         </addColumn>
-    	<insert tableName="OMOP_DESTINATIONS">
-            <column name="ID" valueComputed="(SELECT ID FROM DESTINATIONS WHERE NAME='Generate OMOP common data model files')"/>
-            <column name="ALWAYSQUOTED" valueNumeric="1"/>
-            <column  name="DATACONNECT" value="jdbc:oracle:thin:@//i2b2dbprod1.cc.emory.edu:1521/I2B2PROD.CC.EMORY.EDU"/> 
-			<column  name="DATAUSER" value="i2b2omop"/> 
-			<column  name="DATAPASSWORD" value="RiWPqN4AuESj"/>
-        </insert>
-			<dropSequence sequenceName="OMOP_DEST_TC_SEQ"/>
-            <createSequence sequenceName="OMOP_DEST_TC_SEQ"/>
-    		<sqlFile 
-    			dbms="h2, oracle, postgresql"  
-            	encoding="UTF-8"   
-            	path="migrate.sql"              	
-            	relativeToChangelogFile="true"  
-            	splitStatements="true"  
-            	stripComments="true"/>
-    			<rollback>
-    				<delete tableName="OMOP_DEST_TABLECOLUMNS"/>
-    			</rollback>
+    	<rollback>
+    		<delete tableName="OMOP_DEST_TABLECOLUMNS"/>
+    	</rollback>
      </changeSet>
 </databaseChangeLog>
