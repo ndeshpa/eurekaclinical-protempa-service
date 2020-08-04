@@ -1334,4 +1334,18 @@
     		<delete tableName="OMOP_DEST_TABLECOLUMNS"/>
     	</rollback>
      </changeSet>
+     <changeSet author="nita" id="1361552652236-57">  
+     	<dropColumn tableName="SOURCECONFIGS_GROUPS" columnName="GROUPEXECUTE"/>
+     	<dropColumn tableName="SOURCECONFIGS_GROUPS" columnName="GROUPREAD"/>
+     	<dropColumn tableName="SOURCECONFIGS_GROUPS" columnName="GROUPWRITE"/>
+     	<addColumn tableName="SOURCECONFIGS_GROUPS">
+            <column name="GROUPEXECUTE" type="BIGINT"/>
+       	</addColumn>
+       	<addColumn tableName="SOURCECONFIGS_GROUPS">
+            <column name="GROUPREAD" type="BIGINT"/>
+       	</addColumn>
+       	<addColumn tableName="SOURCECONFIGS_GROUPS">
+            <column name="GROUPWRITE" type="BIGINT"/>
+       	</addColumn>
+     </changeSet>
 </databaseChangeLog>
