@@ -58,6 +58,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.ws.rs.core.MediaType;
 import org.eurekaclinical.standardapis.entity.HistoricalEntity;
+import org.hibernate.annotations.Type;
 
 /**
  *
@@ -79,6 +80,7 @@ public abstract class DestinationEntity implements ConfigEntity, HistoricalEntit
     private String name;
 
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String description;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)

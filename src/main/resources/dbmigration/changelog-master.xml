@@ -1118,22 +1118,6 @@
     </changeSet-->
 
     <changeSet author="nita" id="1361552652236-53">
-    	<insert tableName="USERS">
-            <column name="ID" valueSequenceNext="USER_SEQ"/>
-            <column name="USERNAME" value="allofususer"/>
-        </insert>
-        <insert tableName="USERS_ROLES">
-            <column name="USER_ID" valueComputed="(SELECT ID FROM USERS WHERE USERNAME='allofususer')"/>
-            <column name="ROLE_ID" valueComputed="(SELECT ID FROM ROLES WHERE NAME='admin')"/>
-        </insert>
-                <insert tableName="USERS">
-            <column name="ID" valueSequenceNext="USER_SEQ"/>
-            <column name="USERNAME" value="actuser"/>
-        </insert>
-        <insert tableName="USERS_ROLES">
-            <column name="USER_ID" valueComputed="(SELECT ID FROM USERS WHERE USERNAME='actuser')"/>
-            <column name="ROLE_ID" valueComputed="(SELECT ID FROM ROLES WHERE NAME='admin')"/>
-        </insert>
         <createTable tableName="OMOP_DESTINATIONS">
             <column name="ID" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="OMOP_DEST_PK"/>
@@ -1324,28 +1308,4 @@
                                  referencedTableName="ID_POOLS"/>
         
     </changeSet>
-    <changeSet author="nita" id="1361552652236-56">
-    	<delete tableName="OMOP_DESTINATIONS"/>
-    	<dropColumn tableName="OMOP_DESTINATIONS" columnName="ALWAYSQUOTED"/>
-    	<addColumn tableName="OMOP_DESTINATIONS">
-            <column name="ALWAYSQUOTED" type="BIGINT"/>
-        </addColumn>
-    	<rollback>
-    		<delete tableName="OMOP_DEST_TABLECOLUMNS"/>
-    	</rollback>
-     </changeSet>
-     <changeSet author="nita" id="1361552652236-57">  
-     	<dropColumn tableName="SOURCECONFIGS_GROUPS" columnName="GROUPEXECUTE"/>
-     	<dropColumn tableName="SOURCECONFIGS_GROUPS" columnName="GROUPREAD"/>
-     	<dropColumn tableName="SOURCECONFIGS_GROUPS" columnName="GROUPWRITE"/>
-     	<addColumn tableName="SOURCECONFIGS_GROUPS">
-            <column name="GROUPEXECUTE" type="BIGINT"/>
-       	</addColumn>
-       	<addColumn tableName="SOURCECONFIGS_GROUPS">
-            <column name="GROUPREAD" type="BIGINT"/>
-       	</addColumn>
-       	<addColumn tableName="SOURCECONFIGS_GROUPS">
-            <column name="GROUPWRITE" type="BIGINT"/>
-       	</addColumn>
-     </changeSet>
 </databaseChangeLog>
