@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>4-Alpha-3</version>
+        <version>4-Alpha-4</version>
     </parent>
 	
     <properties>
@@ -25,24 +25,23 @@
         <tomcat.httpsPort>8443</tomcat.httpsPort>        
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <commons-codec-version>1.4</commons-codec-version>
-        <eurekaclinical-ontology-version>2.0.4</eurekaclinical-ontology-version>
-        <eurekaclinical-protempa-client-version>3.1-Alpha-2</eurekaclinical-protempa-client-version>
-        <eurekaclinical-patient-set-client-version>[2.5,)</eurekaclinical-patient-set-client-version>
-        <eurekaclinical-phenotype-client-version>1.1-Alpha-2</eurekaclinical-phenotype-client-version>
-        <eureka-client-version>5.1-Alpha-2</eureka-client-version>
-        <eurekaclinical-standard-apis-version>[4.0,)</eurekaclinical-standard-apis-version>
-        <eurekaclinical-common-version>[5.0,)</eurekaclinical-common-version>
-        <aiw-i2b2-etl-version>4.5</aiw-i2b2-etl-version>
-        <aiw-omop-etl-version>0.0.3</aiw-omop-etl-version>
-        <aiw-neo4j-etl-version>[4.4,)</aiw-neo4j-etl-version>
-        <!-- protempa-version>[5.1,)</protempa-version-->
-        <protempa-version>5.2-Alpha-1</protempa-version>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-        <cas-mock-version>[2.3,)</cas-mock-version>
+        <eurekaclinical-ontology-version>2.0.5</eurekaclinical-ontology-version>
+        <eurekaclinical-protempa-client-version>3.1-Alpha-3</eurekaclinical-protempa-client-version>
+        <eurekaclinical-patient-set-client-version>2.6</eurekaclinical-patient-set-client-version>
+        <eurekaclinical-phenotype-client-version>1.1-Alpha-3</eurekaclinical-phenotype-client-version>
+        <eureka-client-version>5.1-Alpha-3</eureka-client-version>
+        <eurekaclinical-standard-apis-version>4.1-Alpha-1</eurekaclinical-standard-apis-version>
+        <eurekaclinical-common-version>5.1-Alpha-1</eurekaclinical-common-version>
+        <aiw-i2b2-etl-version>4.6</aiw-i2b2-etl-version>
+        <aiw-omop-etl-version>0.0.4</aiw-omop-etl-version>
+        <aiw-neo4j-etl-version>4.5</aiw-neo4j-etl-version>
+        <protempa-version>5.2-Alpha-2</protempa-version>
+        <!-- maven.javadoc.skip>true</maven.javadoc.skip-->
+        <cas-mock-version>2.4</cas-mock-version>
         <poi-version>3.9</poi-version>
-        <javautil-version>[4.4,)</javautil-version>
+        <javautil-version>4.5</javautil-version>
         <tomcat.httpsPort>8443</tomcat.httpsPort>
-        <datastore-version>[3.2,)</datastore-version>
+        <datastore-version>3.3</datastore-version>
     </properties>
 
    <scm>
@@ -73,6 +72,15 @@
     <build>
         <finalName>eurekaclinical-protempa-service</finalName>
         <plugins>
+        	<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                	<additionalOptions>
+                    	<additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.jasig.maven</groupId>
                 <artifactId>maven-notice-plugin</artifactId>

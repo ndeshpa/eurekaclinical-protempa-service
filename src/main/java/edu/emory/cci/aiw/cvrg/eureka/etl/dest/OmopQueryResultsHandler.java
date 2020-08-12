@@ -180,8 +180,12 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 		this.omopFileOutputHandler = new OmopFileOutputHandler();
 		createWriters();
 		createOutputFileWriters();
+		LOGGER.log(Level.INFO,"Before Setting Columns");
+//		this.rdbWriter.setStatements(this.writers);
+//		this.rdbWriter.setColCounts(this.omopTableHandler.getTableColumnCount());
+		LOGGER.log(Level.INFO,"Going to map columnspecs to column names");
 		mapColumnSpecsToColumnNames(cache);
-		LOGGER.log(Level.FINE,"Completed mapping of columnspecs to column names");
+		LOGGER.log(Level.INFO,"Completed mapping of columnspecs to column names");
 		try {
 			this.ksCache = new KnowledgeSourceCacheFactory().getInstance(this.knowledgeSource, cache, true);
 		} catch (KnowledgeSourceReadException ex) {
@@ -362,7 +366,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 		List<String> tableNames = this.omopDestinationEntity.getTableColumns().stream()
 				.map(OmopDestinationTableColumnEntity::getTableName).distinct()
 				.collect(Collectors.toCollection(ArrayList::new));
-		LOGGER.log(Level.FINE, "Got table names: {0}", StringUtils.join(tableNames, ","));
+		LOGGER.log(Level.INFO, "Got table names: {0}", StringUtils.join(tableNames, ","));
 		String nullValue = this.omopDestinationEntity.getNullValue();
 		boolean doAppend = this.query.getQueryMode() != QueryMode.REPLACE;
 		if (!doAppend) {
@@ -377,8 +381,10 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 			String tableName = tableNames.get(i);
 			String inStatement = this.omopTableHandler.getInsertStatement(tableName);
 			this.writers.put(tableName, inStatement);
-			LOGGER.log(Level.FINE, "Got Insert statement: {0}", inStatement);
+			LOGGER.log(Level.INFO, "Got Insert statement: {0}", inStatement);
 		}
+		//this.rdbWriter.setStatements(this.writers);
+		//LOGGER.log(Level.INFO, "Set Writers: {0}", this.rdbWriter.getStatements().size());
 	}
 	
 	private void createOutputFileWriters() throws QueryResultsHandlerProcessingException {
@@ -452,7 +458,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
         String sql = "TRUNCATE TABLE " + tableName;
         try (final Statement st = conn.createStatement()) {
             st.execute(sql);
-            LOGGER.log(Level.FINE,"Done executing SQL for query {0}", queryId);
+            LOGGER.log(Level.INFO,"Done executing SQL for query {0}", queryId);
         } catch (SQLException ex) {
         	LOGGER.log(Level.INFO, "An error occurred truncating the tables for query " + queryId, ex);
             throw ex;
