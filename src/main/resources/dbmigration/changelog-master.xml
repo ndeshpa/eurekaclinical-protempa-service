@@ -1284,10 +1284,7 @@
             </column>
             <column name="COLUMNNAME" type="VARCHAR(255)">
                 <constraints nullable="false"/>
-            </column>          
-            <column name="ENTITYNAME" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            </column> 
             <column name="RANK" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
@@ -1299,13 +1296,6 @@
             <column name="IDPOOL_ID" type="BIGINT"/>
         </createTable>
         <createSequence sequenceName="PHEN_DEST_TC_SEQ"/>
-        <addForeignKeyConstraint baseColumnNames="PHENDESTINATIONS_ID" baseTableName="PHENOTYPE_DEST_TABLECOLUMNS" constraintName="FK_PHEN_DEST_TC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="PHENOTYPE_SEARCH_DESTINATIONS" referencesUniqueColumn="false"/>
-        <addForeignKeyConstraint baseColumnNames="IDPOOL_ID" 
-                                 baseTableName="PHENOTYPE_DEST_TABLECOLUMNS" 
-                                 constraintName="FK_PHENDESTTC_IDPOOL" 
-                                 deferrable="false" initiallyDeferred="false" 
-                                 onDelete="SET NULL" referencedColumnNames="ID" 
-                                 referencedTableName="ID_POOLS"/>
-        
+        <addForeignKeyConstraint baseColumnNames="PHENDESTINATIONS_ID" baseTableName="PHENOTYPE_DEST_TABLECOLUMNS" constraintName="FK_PHEN_DEST_TC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="PHENOTYPE_SEARCH_DESTINATIONS" referencesUniqueColumn="false"/>        
     </changeSet>
 </databaseChangeLog>
