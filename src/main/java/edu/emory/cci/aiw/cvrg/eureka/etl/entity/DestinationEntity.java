@@ -80,7 +80,7 @@ public abstract class DestinationEntity implements ConfigEntity, HistoricalEntit
     private String name;
 
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
+    @Column(name = "description", columnDefinition="clob")
     private String description;
 
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
