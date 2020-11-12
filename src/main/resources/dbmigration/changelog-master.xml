@@ -1284,8 +1284,44 @@
             </column>
             <column name="COLUMNNAME" type="VARCHAR(255)">
                 <constraints nullable="false"/>
-            </column>          
-            <column name="ENTITYNAME" type="VARCHAR(255)">
+            </column> 
+            <column name="RANK" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PATH" type="VARCHAR(255)"/>
+            <column name="FORMAT" type="VARCHAR(255)"/>
+             <column name="ROWRANK" type="BIGINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IDPOOL_ID" type="BIGINT"/>
+        </createTable>
+        <createSequence sequenceName="PHEN_DEST_TC_SEQ"/>
+        <addForeignKeyConstraint baseColumnNames="PHENDESTINATIONS_ID" baseTableName="PHENOTYPE_DEST_TABLECOLUMNS" constraintName="FK_PHEN_DEST_TC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="PHENOTYPE_SEARCH_DESTINATIONS" referencesUniqueColumn="false"/>        
+    </changeSet>
+    <changeSet author="nita" id="1361552652236-56">
+        <createTable tableName="COVID_OMOP_DESTINATIONS">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="COV_OMOP_DEST_PK"/>
+            </column>
+            <column name="ALWAYSQUOTED" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DATACONNECT" type="VARCHAR(255)"/>
+            <column name="DATAUSER" type="VARCHAR(255)"/>
+            <column name="DATAPASSWORD" type="VARCHAR(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="ID" baseTableName="COVID_OMOP_DESTINATIONS" constraintName="FK_COV_OMOP_DEST" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="DESTINATIONS" referencesUniqueColumn="false"/>
+        <createTable tableName="COVID_OMOP_DEST_TABLECOLUMNS">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="COV_OMOP_DEST_TC_PK"/>
+            </column>
+            <column name="OMOPDESTINATIONS_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TABLENAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="COLUMNNAME" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="RANK" type="BIGINT">
@@ -1298,14 +1334,19 @@
             </column>
             <column name="IDPOOL_ID" type="BIGINT"/>
         </createTable>
-        <createSequence sequenceName="PHEN_DEST_TC_SEQ"/>
-        <addForeignKeyConstraint baseColumnNames="PHENDESTINATIONS_ID" baseTableName="PHENOTYPE_DEST_TABLECOLUMNS" constraintName="FK_PHEN_DEST_TC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="PHENOTYPE_SEARCH_DESTINATIONS" referencesUniqueColumn="false"/>
-        <addForeignKeyConstraint baseColumnNames="IDPOOL_ID" 
-                                 baseTableName="PHENOTYPE_DEST_TABLECOLUMNS" 
-                                 constraintName="FK_PHENDESTTC_IDPOOL" 
+        <createSequence sequenceName="COV_OMOP_DEST_TC_SEQ"/>
+        <addForeignKeyConstraint baseColumnNames="OMOPDESTINATIONS_ID" baseTableName="COVID_OMOP_DEST_TABLECOLUMNS" constraintName="FK_COV_OMOP_DEST_TC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="COVID_OMOP_DESTINATIONS" referencesUniqueColumn="false"/>
+		<addForeignKeyConstraint baseColumnNames="IDPOOL_ID" 
+                                 baseTableName="COVID_OMOP_DEST_TABLECOLUMNS" 
+                                 constraintName="FK_COVOMOPDESTTC_IDPOOL" 
                                  deferrable="false" initiallyDeferred="false" 
                                  onDelete="SET NULL" referencedColumnNames="ID" 
                                  referencedTableName="ID_POOLS"/>
-        
-    </changeSet>
+     </changeSet>
+     
+     <changeSet  author="nita" id="1361552652236-57">
+     	<addColumn tableName="PHENOTYPE_DEST_TABLECOLUMNS">
+            <column name="ENTITYNAME" type="VARCHAR(255)"/>
+        </addColumn>
+     </changeSet>
 </databaseChangeLog>

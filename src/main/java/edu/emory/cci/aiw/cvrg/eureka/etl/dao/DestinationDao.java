@@ -41,6 +41,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
  */
 
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CovidOmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity;
@@ -70,4 +71,6 @@ public interface DestinationDao extends HistoricalDaoWithUniqueName<Long, Destin
 	List<OmopDestinationEntity> getCurrentOmopDestinations();
 	
 	List<PhenotypeSearchDestinationEntity> getCurrentPhenotypeSearchDestinations();
+	
+	List<CovidOmopDestinationEntity> getCurrentCovidOmopDestinations();
 }

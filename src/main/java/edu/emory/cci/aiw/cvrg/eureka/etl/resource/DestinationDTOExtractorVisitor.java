@@ -42,6 +42,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
 
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CovidOmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntityVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
@@ -67,6 +68,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 	private final TabularFileDestinationsDTOExtractor tabularFileExtractor;
 	private final OmopDestinationsDTOExtractor omopExtractor;
 	private final PhenotypeSearchDestinationsDTOExtractor phenotypeSearchExtractor;
+	private final CovidOmopDestinationsDTOExtractor covidOmopExtractor;
 	private EtlDestination destDTO;
 
 	public DestinationDTOExtractorVisitor(EtlProperties inEtlProperties, AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
@@ -77,6 +79,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 		this.patientSetSenderExtractor = new PatientSetSenderDestinationsDTOExtractor(user, inGroupDao);
 		this.tabularFileExtractor = new TabularFileDestinationsDTOExtractor(user, inGroupDao);
 		this.omopExtractor = new OmopDestinationsDTOExtractor(user, inGroupDao);
+		this.covidOmopExtractor = new CovidOmopDestinationsDTOExtractor(user, inGroupDao);
 		this.phenotypeSearchExtractor = new PhenotypeSearchDestinationsDTOExtractor(user, inGroupDao);
 	}
 	
@@ -119,6 +122,12 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 	public void visit(PhenotypeSearchDestinationEntity phenotypeSearchDestination) {
 		this.destDTO = this.phenotypeSearchExtractor.extractDTO(phenotypeSearchDestination);
 	}
+	
+	@Override
+	public void visit(CovidOmopDestinationEntity covidOmopDestination) {
+		this.destDTO = this.covidOmopExtractor.extractDTO(covidOmopDestination);
+	}
+	
 	public EtlDestination getEtlDestination() {
 		return this.destDTO;
 	}

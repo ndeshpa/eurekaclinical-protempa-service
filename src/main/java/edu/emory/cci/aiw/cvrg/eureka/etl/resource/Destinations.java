@@ -40,6 +40,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * #L%
  */
 import org.eurekaclinical.protempa.client.comm.EtlCohortDestination;
+import org.eurekaclinical.protempa.client.comm.EtlCovidOmopDestination;
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import org.eurekaclinical.protempa.client.comm.EtlI2B2Destination;
 import org.eurekaclinical.protempa.client.comm.EtlPatientSetExtractorDestination;
@@ -48,6 +49,7 @@ import org.eurekaclinical.protempa.client.comm.EtlPhenotypeSearchDestination;
 import org.eurekaclinical.protempa.client.comm.EtlTabularFileDestination;
 import org.eurekaclinical.protempa.client.comm.EtlOmopDestination;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CovidOmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationGroupMembership;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.EtlGroup;
@@ -227,6 +229,20 @@ public final class Destinations {
 		for (PhenotypeSearchDestinationEntity configEntity
 				: this.destinationDao.getCurrentPhenotypeSearchDestinations()) {
 			EtlPhenotypeSearchDestination dto = extractor.extractDTO(configEntity);
+			if (dto != null) {
+				result.add(dto);
+			}
+		}
+		return result;
+	}
+	
+	public List<EtlCovidOmopDestination> getAllCovidOmopDestinations() {
+		List<EtlCovidOmopDestination> result = new ArrayList<>();
+		CovidOmopDestinationsDTOExtractor extractor
+				= new CovidOmopDestinationsDTOExtractor(this.etlUser, this.groupDao);
+		for (CovidOmopDestinationEntity configEntity
+				: this.destinationDao.getCurrentCovidOmopDestinations()) {
+			EtlCovidOmopDestination dto = extractor.extractDTO(configEntity);
 			if (dto != null) {
 				result.add(dto);
 			}

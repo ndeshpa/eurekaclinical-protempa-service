@@ -54,14 +54,14 @@ import javax.persistence.Table;
  * @author Nita Deshpande
  */
 @Entity
-@Table(name = "phenotype_dest_tablecolumns")
-public class PhenotypeDestinationTableColumnEntity {
+@Table(name = "covid_omop_dest_tablecolumns")
+public class CovidOmopDestinationTableColumnEntity {
 
     @Id
-    @SequenceGenerator(name = "PHEN_DEST_TC_SEQ_GENERATOR",
-            sequenceName = "PHEN_DEST_TC_SEQ", allocationSize = 1, initialValue = 1)
+    @SequenceGenerator(name = "COV_OMOP_DEST_TC_SEQ_GENERATOR",
+            sequenceName = "COV_OMOP_DEST_TC_SEQ", allocationSize = 1, initialValue = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator = "PHEN_DEST_TC_SEQ_GENERATOR")
+            generator = "COV_OMOP_DEST_TC_SEQ_GENERATOR")
     private Long id;
 
     @Column(nullable = false)
@@ -70,9 +70,6 @@ public class PhenotypeDestinationTableColumnEntity {
     @Column(nullable = false)
     private String columnName;
 
-    @Column
-    private String entityName;
-    
     @Column(nullable = false)
     private Long rowRank;
 
@@ -86,8 +83,8 @@ public class PhenotypeDestinationTableColumnEntity {
     private IdPoolEntity idPool;
     
     @ManyToOne
-    @JoinColumn(name = "phendestinations_id", nullable = false)
-    private PhenotypeSearchDestinationEntity destination;
+    @JoinColumn(name = "omopdestinations_id", nullable = false)
+    private CovidOmopDestinationEntity destination;
 
     private String format;
 
@@ -113,14 +110,6 @@ public class PhenotypeDestinationTableColumnEntity {
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
-    }
-    
-    public String getEntityName() {
-        return entityName;
-    }
-
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
     }
 
     public Long getRowRank() {
@@ -155,7 +144,7 @@ public class PhenotypeDestinationTableColumnEntity {
         this.format = format;
     }
 
-    public void setDestination(PhenotypeSearchDestinationEntity inDestination) {
+    public void setDestination(CovidOmopDestinationEntity inDestination) {
         if (this.destination != inDestination) {
             if (this.destination != null) {
                 this.destination.removeTableColumn(this);
@@ -167,7 +156,7 @@ public class PhenotypeDestinationTableColumnEntity {
         }
     }
 
-    public PhenotypeSearchDestinationEntity getDestination() {
+    public CovidOmopDestinationEntity getDestination() {
         return this.destination;
     }
 

@@ -63,6 +63,7 @@ import org.hibernate.annotations.Type;
 /**
  *
  * @author Andrew Post
+ * 
  */
 @Entity
 @Table(name = "destinations")
