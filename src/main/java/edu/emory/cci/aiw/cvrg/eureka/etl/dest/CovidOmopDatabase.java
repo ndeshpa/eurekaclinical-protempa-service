@@ -1,10 +1,10 @@
-package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
+package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
 
 /*
  * #%L
- * Eureka Common
+ * Eureka Protempa ETL
  * %%
- * Copyright (C) 2012 - 2014 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * This program is dual licensed under the Apache 2 and GPLv3 licenses.
  * 
@@ -39,27 +39,39 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.entity;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CovidOmopDestinationEntity;
+import edu.emory.cci.aiw.etl.dest.config.Database;
+import edu.emory.cci.aiw.etl.dest.config.DatabaseSpec;
 
 /**
  *
- * @author Andrew Post
+ * @author Nita Deshpande
  */
-public interface DestinationEntityVisitor {
-	void visit(CohortDestinationEntity cohortDestination);
-	
-	void visit(I2B2DestinationEntity i2b2Destination);
-	
-	void visit(Neo4jDestinationEntity neo4jDestination);
-	
-	void visit(PatientSetExtractorDestinationEntity patientSetExtractorDestination);
-	
-	void visit(PatientSetSenderDestinationEntity patientSetSenderDestination);
-	
-	void visit(TabularFileDestinationEntity tabularFileDestinationEntity);
+class CovidOmopDatabase implements Database {
 
-	void visit(OmopDestinationEntity omopDestinationEntity);
-	
-	void visit(PhenotypeSearchDestinationEntity phenotypeSearchDestinationEntity);
-	
-	void visit(CovidOmopDestinationEntity covidOmopDestinationEntity);
+	private final DatabaseSpec dataSpec;
+
+	CovidOmopDatabase(CovidOmopDestinationEntity entity) {
+		DatabaseSpecFactory databaseSpecFactory = new DatabaseSpecFactory();
+		
+		String dataConnect = entity.getDataConnect();
+		String dataUser = entity.getDataUser();
+		String dataPassword = entity.getDataPassword();
+		if (dataConnect != null) {
+			this.dataSpec = databaseSpecFactory.getInstance(dataConnect, dataUser, dataPassword);
+		} else {
+			this.dataSpec = null;
+		}
+	}
+
+	@Override
+	public DatabaseSpec getMetadataSpec() {
+		return null;
+	}
+
+	@Override
+	public DatabaseSpec getDataSpec() {
+		return this.dataSpec;
+	}
+
 }

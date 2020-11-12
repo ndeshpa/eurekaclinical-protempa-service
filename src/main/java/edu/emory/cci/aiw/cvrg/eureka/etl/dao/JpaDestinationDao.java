@@ -42,6 +42,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dao;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CovidOmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity_;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
@@ -105,6 +106,11 @@ public class JpaDestinationDao extends HistoricalGenericDao<DestinationEntity, L
 	@Override
 	public List<PhenotypeSearchDestinationEntity> getCurrentPhenotypeSearchDestinations() {
 		return getDatabaseSupport().getCurrent(PhenotypeSearchDestinationEntity.class);
+	}
+	
+	@Override
+	public List<CovidOmopDestinationEntity> getCurrentCovidOmopDestinations() {
+		return getDatabaseSupport().getCurrent(CovidOmopDestinationEntity.class);
 	}
 
 }

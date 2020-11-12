@@ -46,6 +46,7 @@ import org.protempa.dest.key.KeyLoaderDestination;
 import org.eurekaclinical.eureka.client.comm.Cohort;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CohortEntity;
+import edu.emory.cci.aiw.cvrg.eureka.etl.entity.CovidOmopDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.I2B2DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.entity.Neo4jDestinationEntity;
@@ -126,6 +127,8 @@ public class ProtempaDestinationFactory {
                 actualDest = new OmopDestination(new EurekaOmopConfiguration((OmopDestinationEntity) dest, this.etlProperties));
             } else if (dest instanceof PhenotypeSearchDestinationEntity) {
                 actualDest = new PhenotypeSearchDestination(new EurekaPhenotypeSearchConfiguration((PhenotypeSearchDestinationEntity)dest, this.etlProperties));
+            } else if (dest instanceof CovidOmopDestinationEntity) {
+                actualDest = new CovidOmopDestination(new CovidOmopConfiguration((CovidOmopDestinationEntity)dest, this.etlProperties));
             } else {
                 throw new AssertionError("Invalid destination entity type " + dest.getClass());
             }

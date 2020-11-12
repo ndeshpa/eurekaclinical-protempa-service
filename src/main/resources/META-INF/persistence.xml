@@ -65,6 +65,7 @@
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.TabularFileDestinationTableColumnEntity</class>    
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.OmopDestinationTableColumnEntity</class>       
+    <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.CovidOmopDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeSearchDestinationEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeDestinationTableColumnEntity</class>
     <class>edu.emory.cci.aiw.cvrg.eureka.etl.entity.PhenotypeDestinationModifierSpecEntity</class>

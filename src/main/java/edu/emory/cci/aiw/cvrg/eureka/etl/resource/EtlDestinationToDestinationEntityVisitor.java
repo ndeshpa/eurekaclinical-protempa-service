@@ -40,6 +40,7 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * #L%
  */
 import org.eurekaclinical.protempa.client.comm.EtlCohortDestination;
+import org.eurekaclinical.protempa.client.comm.EtlCovidOmopDestination;
 import org.eurekaclinical.protempa.client.comm.EtlDestination;
 import org.eurekaclinical.protempa.client.comm.EtlDestinationVisitor;
 import org.eurekaclinical.protempa.client.comm.EtlI2B2Destination;
@@ -161,6 +162,11 @@ public class EtlDestinationToDestinationEntityVisitor implements EtlDestinationV
 	
 	@Override
 	public void visit(EtlPhenotypeSearchDestination etlPhenotypeSearchDestination) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+	
+	@Override
+	public void visit(EtlCovidOmopDestination etlCovidOmopDestination) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
