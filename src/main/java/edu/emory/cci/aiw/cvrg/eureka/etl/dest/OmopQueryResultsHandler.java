@@ -368,15 +368,16 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
 				.collect(Collectors.toCollection(ArrayList::new));
 		LOGGER.log(Level.INFO, "Got table names: {0}", StringUtils.join(tableNames, ","));
 		String nullValue = this.omopDestinationEntity.getNullValue();
-		boolean doAppend = this.query.getQueryMode() != QueryMode.REPLACE;
-		if (!doAppend) {
-			// truncate all tables
+		//we want to truncate the temp tables always. Its the final tables that need to be in refresh mode		
+//		boolean doAppend = this.query.getQueryMode() != QueryMode.REPLACE;
+//		if (!doAppend) {
+//			// truncate all tables
 			try {
 				truncateTables();
 			} catch (SQLException e) {
 				throw new QueryResultsHandlerProcessingException(e);
 			}
-		}
+//		}
 		for (int i = 0, n = tableNames.size(); i < n; i++) {
 			String tableName = tableNames.get(i);
 			String inStatement = this.omopTableHandler.getInsertStatement(tableName);
@@ -435,7 +436,7 @@ public class OmopQueryResultsHandler extends AbstractQueryResultsHandler {
         try (final Connection conn = openDataDatabaseConnection()) {
             conn.setAutoCommit(true);
             String[] dataschemaTables = {"address_temp", "care_site_temp", "condition_occurrence_temp", "death_temp", "drug_exposure_temp", "email_temp", "location_temp", "measurement_temp", 
-            		"mrn_temp", "name_temp","person_temp", "phone_number_temp", "procedure_occurrence_temp", "provider_temp", "visit_occurrence_temp"};
+            		"mrn_temp", "name_temp","person_temp", "phone_number_temp", "procedure_occurrence_temp", "provider_temp", "visit_occurrence_temp", "observation_temp"};
             if(this.queryPropIds!= null) {
             	if(this.queryPropIds.length>1 ) {
             		for (String tableName : dataschemaTables) {

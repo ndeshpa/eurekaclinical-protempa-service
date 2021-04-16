@@ -33,7 +33,7 @@
         <eurekaclinical-standard-apis-version>4.1-Alpha-1</eurekaclinical-standard-apis-version>
         <eurekaclinical-common-version>5.1-Alpha-1</eurekaclinical-common-version>
         <aiw-i2b2-etl-version>4.7</aiw-i2b2-etl-version>
-        <aiw-omop-etl-version>0.0.4</aiw-omop-etl-version>
+        <aiw-omop-etl-version>0.0.5</aiw-omop-etl-version>
         <aiw-neo4j-etl-version>4.5</aiw-neo4j-etl-version>
         <protempa-version>5.2-Alpha-2</protempa-version>
         <!-- maven.javadoc.skip>true</maven.javadoc.skip-->
